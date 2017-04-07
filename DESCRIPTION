@@ -1,0 +1,18 @@
+Package: PPandora
+Type: Package
+Title: Microbial Pan-Genomics in R
+Version: 0.1
+Date: 2017-02-16
+Author: Ignacio Ferres and Gregorio Iraola
+Maintainer: <iferres@pasteur.edu.uy>
+Imports:
+  foreach,
+  doParallel,
+  parallel,
+  ape,
+  seqinr,
+  phangorn
+Description: Describir
+License: What license is it under?
+LazyData: TRUE
+RoxygenNote: 6.0.1
