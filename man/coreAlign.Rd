@@ -4,7 +4,7 @@
 \alias{coreAlign}
 \title{Align Core-Genes}
 \usage{
-coreAlign(x, ffns = character(), level = 1, n_threads = 1L,
+coreAlign(x, ffns = character(), level = 1, accu = TRUE, n_threads = 1L,
   file.out = "")
 }
 \arguments{
@@ -13,6 +13,8 @@ coreAlign(x, ffns = character(), level = 1, n_threads = 1L,
 \item{ffns}{A vector of nucleotide fasta files.}
 
 \item{level}{\code{numeric} between 1 and 0.9.}
+
+\item{accu}{\code{logical}. Accurate alignment?}
 
 \item{n_threads}{\code{integer}. The number of threads to use.}
 

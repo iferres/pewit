@@ -315,6 +315,7 @@ writeFastaClusters <- function(x,
 #' @param x A \code{pangenome} object.
 #' @param ffns A vector of nucleotide fasta files.
 #' @param level \code{numeric} between 1 and 0.9.
+#' @param accu \code{logical}. Accurate alignment?
 #' @param n_threads \code{integer}. The number of threads to use.
 #' @param file.out \code{character}. The name of the output file.
 #' @details This function performs an alignment of each orthologous group and
