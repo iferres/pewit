@@ -382,7 +382,7 @@ print.pangenome <- function(x, ...){
   txt <- paste('Pangenome of',
                attr(x,'norgs'),
                'organisms with',
-               attr(x,'ngenes'),
+               attr(x,'ncds'),
                'genes.\n There are a total of',
                attr(x,'nclust'),
                'gene clusters identified.')
