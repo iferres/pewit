@@ -322,106 +322,9 @@ writeFastaClusters <- function(x,
 #' subsecuent phylogenetic analysis.
 #' @return A fasta file with the concatenated core-genes alignment.
 #' @author Ignacio Ferres
-#' @importFrom seqinr write.fasta read.fasta
+#' @importFrom seqinr write.fasta read.fasta read.alignment as.alignment
 #' @export
 coreAlign <- function(x,
-                      ffns=character(),
-                      level=1,
-                      n_threads=1L,
-                      file.out=''){
-
-  if(class(x)!='pangenome'){
-    stop('"x" must be an object of class "pangenome".')
-  }
-  if(file.out==''){
-    stop('You must provide a output file name.')
-  }
-
-  if(length(which(rowSums(x$panmatrix)>=round(level * ncol(x$panmatrix))))==0){
-    stop('No core-genes for the pangenome at the specified level.')
-  }
-
-  cat('Getting core-genes.\n')
-  getCoreClusters(x,level=level) -> clusters
-  x$clusters[clusters] -> sid
-
-
-  mclapply(ffns,function(x){
-    read.fasta(x,seqtype = 'DNA',as.string = T)
-  },mc.cores = n_threads) -> seqs
-  unlist(seqs,recursive = F) -> seqs
-
-  lapply(sid,function(y){seqs[y]}) -> sqs
-
-  colnames(x$panmatrix) -> orgs
-
-  #Align.
-  #Save in list the alignments as matrices.
-  cat('Aligning.\n')
-  al <- list()
-  pb<- txtProgressBar(min = 0,max = length(sqs),style = 3)
-  for (i in 1:length(sqs)){
-    align(rf = sqs[[i]],n_threads = n_threads,mxit1000 = TRUE) -> a
-
-    #If some organism/s doesn't have a core gene...
-    if(nrow(a)!=length(orgs)){
-      orgs[which(!orgs%in%do.call(rbind,strsplit(rownames(a),';'))[,1])] -> nw
-      matrix('-',nrow = length(nw),ncol = ncol(a)) -> nwm
-      rownames(nwm) <- nw
-      rbind(a,nwm) -> a
-    }
-
-    al[[i]] <- a
-    setTxtProgressBar(pb,i)
-  }
-  close(pb)
-
-  #Make sure alignment are concatenated in the correct order.
-  cat('Concatenating.\n')
-  lapply(orgs,function(y){
-    sapply(al,function(z){z[grep(paste0(y,';'),rownames(z),fixed=T),]})
-  }) -> coral
-  names(coral) <- orgs
-
-  #Concatenate
-  lapply(coral,function(y){unlist(y,use.names = F)}) -> o
-
-  #Write output
-  paste('Writing output at',file.out,'..') -> p
-  cat(p)
-  write.fasta(o,names = names(o),file.out = file.out)
-  cat(' DONE!\n')
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-#' @name coreAlign2
-#' @title Align Core-Genes
-#' @description Align core-genes and outputs a concatenation of the aligned
-#' genes. Core-genes are specified at a certain level of permissiveness.
-#' @param x A \code{pangenome} object.
-#' @param ffns A vector of nucleotide fasta files.
-#' @param level \code{numeric} between 1 and 0.9.
-#' @param n_threads \code{integer}. The number of threads to use.
-#' @param file.out \code{character}. The name of the output file.
-#' @details This function performs an alignment of each orthologous group and
-#' concatenates them into a "super-gene". This is specially suitable to perform
-#' subsecuent phylogenetic analysis.
-#' @return A fasta file with the concatenated core-genes alignment.
-#' @author Ignacio Ferres
-#' @importFrom seqinr write.fasta read.fasta
-#' @export
-coreAlign2 <- function(x,
                       ffns=character(),
                       level=1,
                       n_threads=1L,
@@ -456,7 +359,7 @@ coreAlign2 <- function(x,
   #Save in list the alignments as matrices.
   cat('Aligning.\n')
   al <- list()
-  pb<- txtProgressBar(min = 0,max = length(sqs),style = 3)
+  pb<- txtProgressBar(min = 0,max = length(seqs),style = 3)
   for (i in 1:length(seqs)){
     align(rf = seqs[[i]],n_threads = n_threads,mxit1000 = TRUE) -> a
 
@@ -481,6 +384,8 @@ coreAlign2 <- function(x,
 
   unlist(al) -> al
 
+
+  #Concatenate (horizontal)
   mclapply(orgs,function(x){
 
     li <- list()
@@ -488,19 +393,29 @@ coreAlign2 <- function(x,
       read.alignment(al[i],format = 'fasta') -> ral
       ral$seq[[grep(paste0(x,';'),ral$nam)]] -> li[[i]]
     }
-    he <- paste0('>',x,'\n')
-    writeLines(c(he,paste0(unlist(li),collapse = '')))
+    he <- paste0('>',x)
+    tmp <- tempfile(fileext = '.supergene')
+    writeLines(c(he,paste0(unlist(li),collapse = '')),
+               con = tmp,
+               sep = '\n')
+    tmp
 
-  })
+  },mc.cores = n_threads) -> supergenes
+  unlist(supergenes) -> supergenes
+  file.remove(al)
 
-
-  #Concatenate
-
-  #Write output
+  #Concatenate (vertical). Output.
   paste('Writing output at',file.out,'..') -> p
   cat(p)
-  write.fasta(o,names = names(o),file.out = file.out)
+  for (i in 1:length(supergenes)){
+    cat(readLines(supergenes[i]),
+        file = file.out,
+        sep = '\n',
+        append = T)
+  }
   cat(' DONE!\n')
+  file.remove(supergenes)
+
 }
 
 
