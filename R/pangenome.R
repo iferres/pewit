@@ -35,6 +35,9 @@
 #' paralogues included).
 #' @param alignCore \code{logical}. Align core genes and concatenate them into
 #' a "super-gene" alignment? Suitable for phylogenetic analysis.
+#' @param accu_ali \code{logical}. Perform an accurate alignment? If \code{TRUE}
+#' the alignment stage could take a while depending both on the number of
+#' genomes and on the core size.
 #' @param coreLevel \code{numeric}. A number between 1-0.9 which determines at
 #' what proportion of presence should clusters be considered as part of the
 #' core-genome.
@@ -91,6 +94,7 @@ pangenome<-function(gffs=c(),
                     writeFastas=F,
                     pmOutFileType='representative',
                     alignCore=TRUE,
+                    accu_ali=FALSE,
                     coreLevel=1){
 
   if (Sys.which("hmmscan")==""){
@@ -123,7 +127,6 @@ pangenome<-function(gffs=c(),
                             'allgenes',
                             'none'))
 
-  # sayHi()
 
   #Create output directory
   dir.create(dir.out)
@@ -170,7 +173,7 @@ pangenome<-function(gffs=c(),
   # cat(' DONE!\n')
 
   #Run hmmsearch (HMMER)
-  cat('Running HMMSCAN against Pfam-A database (this can take a while)..')
+  cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
   mclapply(temps, function(x){
 
     runHmmsearch(fasta = x,
@@ -351,6 +354,7 @@ pangenome<-function(gffs=c(),
       coreAlign(x = out,
                 ffns = ffns,
                 level = coreLevel,
+                accu = accu_ali,
                 n_threads = n_threads,
                 file.out = paste0(outdir,'coreAlignment_',coreLevel,'.fasta'))
     }else{

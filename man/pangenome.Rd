@@ -7,7 +7,7 @@
 pangenome(gffs = c(), pathToPfam_A_hmm = character(),
   pathToPfam_A_Dat = character(), n_threads = 1L, dir.out = "out",
   writeFastas = F, pmOutFileType = "representative", alignCore = TRUE,
-  coreLevel = 1)
+  accu_ali = FALSE, coreLevel = 1)
 }
 \arguments{
 \item{gffs}{A \code{vector} of fasta formated-containing files with the
@@ -33,6 +33,10 @@ paralogues included).}
 
 \item{alignCore}{\code{logical}. Align core genes and concatenate them into
 a "super-gene" alignment? Suitable for phylogenetic analysis.}
+
+\item{accu_ali}{\code{logical}. Perform an accurate alignment? If \code{TRUE}
+the alignment stage could take a while depending both on the number of
+genomes and on the core size.}
 
 \item{coreLevel}{\code{numeric}. A number between 1-0.9 which determines at
 what proportion of presence should clusters be considered as part of the
