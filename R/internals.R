@@ -199,40 +199,6 @@ getSeqOfType <- function(seqs,type='AA'){
   lap
 }
 
-#deprecated
-# #' @name formatFastaHeaders
-# #' @title Format sequence names
-# #' @description Format sequence names in a way that doesn't conflit with
-# #' sucesive steps (no regex special characters). Also loads sequences to R to
-# #' further steps
-# #' @param prots A \code{vector} of input files, should be aminoacid fasta
-# #' files.
-# #' @param n_threads \code{integer} The number of threads to use.
-# #' @return A list of aminoacid sequences in class SeqFastaAA.
-# #' @author Ignacio Ferres
-# #' @importFrom doParallel registerDoParallel
-# #' @importFrom foreach foreach '%dopar%'
-# #' @importFrom seqinr read.fasta getSequence
-# formatFastaHeaders<-function(prots,n_threads){
-#   np<-nchar(as.character(length(prots)))
-#   np<-paste("%0",np,"d",sep="")
-#   npnam<-paste("proteome",sprintf(np,1:length(prots)),sep="")
-#   registerDoParallel(cores = n_threads)
-#   fastas<-foreach(y=seq_along(prots))%dopar%{
-#     read.fasta(prots[y],seqtype = "AA")->rf
-#     #Check if AA sequence..
-#     if (all(unique(unlist(getSequence(rf)))%in%c('A','T','C','G','a','t','c','g'))){
-#       stop("\tAt least one input file seems to be a DNA fasta sequence.\n\tAA fasta sequences are required.\n\n")
-#     }
-#     nc<-nchar(as.character(length(rf)))
-#     nc<-paste("%0",nc,"d",sep = "")
-#     nnm<-paste(npnam[y],"_","gene",sprintf(nc,1:length(rf)),sep="")
-#     names(rf)<-nnm
-#     list(rf,nnm)
-#   }
-#   return(fastas)
-# }
-
 #Distributes all proteins in many files as n_threads set in order to optimize
 # the computing power in the following step (hmmscan).
 #' @name splitAndWriteFastas
@@ -1272,19 +1238,3 @@ writeParalogues <- function(outdir,final.clusters){
   }
   sink()
 }
-
-
-#' #' @name sayHi
-#' #' @title Hi!
-#' #' @description Print fancy wellcome message
-#' #' @return Prints fancy wellcome message.
-#' #' @author Ignacio Ferres
-#' sayHi <- function () {
-#'   c('   ',rep('#',5),' P','P','A','N','D','O','R','A ',rep('#',5),'   ','\n',
-#'     '    P','a','n','g','e','n','o','m','e ','a','n','a','l','y','s','i','s',
-#'     '\n','   ',rep('#',20)) -> pp
-#'   for (i in 1:length(pp)){
-#'     cat(pp[i])
-#'     Sys.sleep(0.01)
-#'   }
-#' }
