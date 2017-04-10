@@ -327,6 +327,7 @@ writeFastaClusters <- function(x,
 coreAlign <- function(x,
                       ffns=character(),
                       level=1,
+                      accu=TRUE,
                       n_threads=1L,
                       file.out=''){
 
@@ -361,7 +362,17 @@ coreAlign <- function(x,
   al <- list()
   pb<- txtProgressBar(min = 0,max = length(seqs),style = 3)
   for (i in 1:length(seqs)){
-    align(rf = seqs[[i]],n_threads = n_threads,mxit1000 = TRUE) -> a
+    if(accu){
+      align(rf = seqs[[i]],
+            n_threads = n_threads,
+            accu = TRUE,
+            mxit1000 = TRUE) -> a
+    }else{
+      align(rf = seqs[[i]],
+            n_threads = n_threads,
+            accu=FALSE) -> a
+    }
+
 
     #If some organism/s doesn't have a core gene...
     if(nrow(a)!=length(orgs)){
