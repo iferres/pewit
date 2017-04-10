@@ -392,3 +392,117 @@ coreAlign <- function(x,
   write.fasta(o,names = names(o),file.out = file.out)
   cat(' DONE!\n')
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' @name coreAlign2
+#' @title Align Core-Genes
+#' @description Align core-genes and outputs a concatenation of the aligned
+#' genes. Core-genes are specified at a certain level of permissiveness.
+#' @param x A \code{pangenome} object.
+#' @param ffns A vector of nucleotide fasta files.
+#' @param level \code{numeric} between 1 and 0.9.
+#' @param n_threads \code{integer}. The number of threads to use.
+#' @param file.out \code{character}. The name of the output file.
+#' @details This function performs an alignment of each orthologous group and
+#' concatenates them into a "super-gene". This is specially suitable to perform
+#' subsecuent phylogenetic analysis.
+#' @return A fasta file with the concatenated core-genes alignment.
+#' @author Ignacio Ferres
+#' @importFrom seqinr write.fasta read.fasta
+#' @export
+coreAlign2 <- function(x,
+                      ffns=character(),
+                      level=1,
+                      n_threads=1L,
+                      file.out=''){
+
+  if(class(x)!='pangenome'){
+    stop('"x" must be an object of class "pangenome".')
+  }
+  if(file.out==''){
+    stop('You must provide a output file name.')
+  }
+
+  if(length(which(rowSums(x$panmatrix)>=round(level * ncol(x$panmatrix))))==0){
+    stop('No core-genes for the pangenome at the specified level.')
+  }
+
+  cat('Getting core-genes.\n')
+  getCoreClusters(x,level=level) -> clusters
+  x$clusters[clusters] -> sid
+
+
+  mclapply(ffns,function(x){
+    read.fasta(x,seqtype = 'DNA',as.string = T)
+  },mc.cores = n_threads) -> seqs
+  unlist(seqs,recursive = F) -> seqs
+
+  lapply(sid,function(y){seqs[y]}) -> seqs
+
+  colnames(x$panmatrix) -> orgs
+
+  #Align.
+  #Save in list the alignments as matrices.
+  cat('Aligning.\n')
+  al <- list()
+  pb<- txtProgressBar(min = 0,max = length(sqs),style = 3)
+  for (i in 1:length(seqs)){
+    align(rf = seqs[[i]],n_threads = n_threads,mxit1000 = TRUE) -> a
+
+    #If some organism/s doesn't have a core gene...
+    if(nrow(a)!=length(orgs)){
+      orgs[which(!orgs%in%do.call(rbind,strsplit(rownames(a),';'))[,1])] -> nw
+      matrix('-',nrow = length(nw),ncol = ncol(a)) -> nwm
+      rownames(nwm) <- paste0(nw,';')
+      rbind(a,nwm) -> a
+    }
+
+
+    a[sapply(paste0(orgs,';'),grep,rownames(a)),] -> a
+    tmp <- tempfile(fileext = '.ali')
+    as.alignment(a) -> a
+    write.fasta(sequences = as.list(a$seq),names = a$nam,file.out = tmp)
+    al[[i]] <- tmp
+    setTxtProgressBar(pb,i)
+  }
+  close(pb)
+
+
+  unlist(al) -> al
+
+  mclapply(orgs,function(x){
+
+    li <- list()
+    for (i in 1:length(al)){
+      read.alignment(al[i],format = 'fasta') -> ral
+      ral$seq[[grep(paste0(x,';'),ral$nam)]] -> li[[i]]
+    }
+    he <- paste0('>',x,'\n')
+    writeLines(c(he,paste0(unlist(li),collapse = '')))
+
+  })
+
+
+  #Concatenate
+
+  #Write output
+  paste('Writing output at',file.out,'..') -> p
+  cat(p)
+  write.fasta(o,names = names(o),file.out = file.out)
+  cat(' DONE!\n')
+}
+
+
+
+
