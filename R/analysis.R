@@ -415,7 +415,7 @@ coreAlign <- function(x,
 
   },mc.cores = n_threads) -> supergenes
   unlist(supergenes) -> supergenes
-  # file.remove(al)
+  file.remove(al)
 
   #Concatenate (vertical). Output.
   paste('Writing output at',file.out,'..') -> p
@@ -427,7 +427,7 @@ coreAlign <- function(x,
         append = T)
   }
   cat(' DONE!\n')
-  # file.remove(supergenes)
+  file.remove(supergenes)
 
 }
 
