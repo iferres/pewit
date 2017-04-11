@@ -383,11 +383,12 @@ coreAlign <- function(x,
       rbind(a,nwm) -> a
     }
 
-
+    #Order
     a[sapply(paste0(orgs,';'),grep,rownames(a)),] -> a
+    #Write
     tmp <- tempfile(fileext = '.ali')
-    as.alignment(a) -> a
-    write.fasta(sequences = as.list(a$seq),names = a$nam,file.out = tmp)
+    seqinr::as.alignment(a) -> a
+    seqinr::write.fasta(sequences = as.list(a$seq),names = a$nam,file.out = tmp)
     al[[i]] <- tmp
     setTxtProgressBar(pb,i)
   }
@@ -402,7 +403,7 @@ coreAlign <- function(x,
 
     li <- list()
     for (i in 1:length(al)){
-      read.alignment(al[i],format = 'fasta') -> ral
+      seqinr::read.alignment(al[i],format = 'fasta') -> ral
       ral$seq[[grep(paste0(x,';'),ral$nam)]] -> li[[i]]
     }
     he <- paste0('>',x)
@@ -414,7 +415,7 @@ coreAlign <- function(x,
 
   },mc.cores = n_threads) -> supergenes
   unlist(supergenes) -> supergenes
-  file.remove(al)
+  # file.remove(al)
 
   #Concatenate (vertical). Output.
   paste('Writing output at',file.out,'..') -> p
@@ -426,7 +427,7 @@ coreAlign <- function(x,
         append = T)
   }
   cat(' DONE!\n')
-  file.remove(supergenes)
+  # file.remove(supergenes)
 
 }
 
