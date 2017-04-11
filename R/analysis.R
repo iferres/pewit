@@ -323,7 +323,8 @@ writeFastaClusters <- function(x,
 #' subsecuent phylogenetic analysis.
 #' @return A fasta file with the concatenated core-genes alignment.
 #' @author Ignacio Ferres
-#' @importFrom seqinr write.fasta read.fasta read.alignment as.alignment
+#' @importFrom seqinr write.fasta read.fasta read.alignment
+#' @importFrom ape as.alignment
 #' @export
 coreAlign <- function(x,
                       ffns=character(),
@@ -349,7 +350,7 @@ coreAlign <- function(x,
 
 
   mclapply(ffns,function(x){
-    read.fasta(x,seqtype = 'DNA',as.string = T)
+    seqinr::read.fasta(x,seqtype = 'DNA',as.string = T)
   },mc.cores = n_threads) -> seqs
   unlist(seqs,recursive = F) -> seqs
 
@@ -358,7 +359,6 @@ coreAlign <- function(x,
   colnames(x$panmatrix) -> orgs
 
   #Align.
-  #Save in list the alignments as matrices.
   cat('Aligning.\n')
   al <- list()
   pb<- txtProgressBar(min = 0,max = length(seqs),style = 3)
@@ -387,7 +387,7 @@ coreAlign <- function(x,
     a[sapply(paste0(orgs,';'),grep,rownames(a)),] -> a
     #Write
     tmp <- tempfile(fileext = '.ali')
-    seqinr::as.alignment(a) -> a
+    ape::as.alignment(a) -> a
     seqinr::write.fasta(sequences = as.list(a$seq),names = a$nam,file.out = tmp)
     al[[i]] <- tmp
     setTxtProgressBar(pb,i)
