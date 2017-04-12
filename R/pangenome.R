@@ -182,6 +182,7 @@ pangenome<-function(gffs=c(),
 
   }, mc.cores = n_threads) -> hmm.temps
   cat(' DONE!\n')
+  file.remove(temps)
 
   #Load hmmscan output and process
   cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
@@ -192,6 +193,7 @@ pangenome<-function(gffs=c(),
     processHmmscan(pout=pout[i],ref=ref)
   }
   cat(' DONE!\n')
+  file.remove(pout)
 
   #Clustering by domain structure only
   cat('Clustering sequences per domain structure..')

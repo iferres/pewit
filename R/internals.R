@@ -728,6 +728,7 @@ align<-function(rf,type='AA',n_threads=1L,accu=TRUE,mxit1000=TRUE){
     paste0('mafft ',paste0(args,collapse = ' '),' > ',tmpo) -> run
     system(run)
     readLines(tmpo) -> rl
+    file.remove(tmpo)
 
   }
 
@@ -739,6 +740,7 @@ align<-function(rf,type='AA',n_threads=1L,accu=TRUE,mxit1000=TRUE){
   }),split = '')->sqs
   names(sqs)<-sub(">","",rl[gp])
   do.call(rbind,sqs)->m
+  file.remove(tmp)
   #apply(m,1:2,charToRaw)->m
   return(m)
 }
@@ -900,6 +902,7 @@ runMCL<-function(abc,neg.log10=TRUE,infl=6){
                 ' -q x -o ',
                 tmpmcl))
   readLines(tmpmcl) -> rl
+  file.remove(tmpmcl)
   rl
 }
 
