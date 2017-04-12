@@ -182,7 +182,7 @@ pangenome<-function(gffs=c(),
 
   }, mc.cores = n_threads) -> hmm.temps
   cat(' DONE!\n')
-  file.remove(temps)
+  # file.remove(temps)
 
   #Load hmmscan output and process
   cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
