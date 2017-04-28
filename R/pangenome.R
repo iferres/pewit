@@ -6,8 +6,8 @@
 #' @author Ignacio Ferres and Gregorio Iraola
 #'
 #' @description Computes the pangenome of a set of related organisms. Takes a
-#' list of fasta files with the translated gene sequences, a path to Pfam HMM
-#' models and data associated to those models.
+#' list of gff3 files, a path to Pfam HMM models and data associated to those
+#' models.
 #'
 #' It first uses hmmscan (HMMER 3) to look for Pfam domains in the aminoacid
 #' sequences and, where it finds them, creates a domain profile. Then clusterize
@@ -19,8 +19,8 @@
 #' Protein families obtained from both two previous steps are then splited into
 #' true orthologues by a gene tree-prunning algorithm, creating a pangenome
 #' profile of the group of organisms.
-#' @param gffs A \code{vector} of fasta formated-containing files with the
-#' translated sequences of the genes of each organism.
+#' @param gffs A \code{vector} of gff3 files as retrieved by prokka (Seeman,
+#' 2014).
 #' @param pathToPfam_A_hmm \code{character} with the path to Pfam-A.hmm file.
 #' @param pathToPfam_A_Dat \code{character} with the path to Pfam-A.hmm.dat file.
 #' @param n_threads \code{integer}. The number of threads to use.
@@ -97,8 +97,8 @@ pangenome<-function(gffs=c(),
                     accu_ali=FALSE,
                     coreLevel=1){
 
-  if (Sys.which("hmmscan")==""){
-    stop("\n\tHMMER (v.3) is not installed. (Couldn't find 'hmmscan' in $PATH)
+  if (Sys.which("hmmsearch")==""){
+    stop("\n\tHMMER (v.3) is not installed. (Couldn't find 'hmmsearch' in $PATH)
          \tPlease install it before re-running pangenome().\n\n")
   }
 
