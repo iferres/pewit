@@ -637,8 +637,8 @@ processHmmsearch <- function(pout,ref){
   tfam<-t[which(t$Type=="Family"),]
   tmot<-t[which(t$Type=="Motif"),]
   trep<-t[which(t$Type=="Repeat"),]
-  tdis<-t[which(t$Type=="Disordered")]
-  tcoi<-t[which(t$Type=="Coiled-coil")]
+  tdis<-t[which(t$Type=="Disordered"),]
+  tcoi<-t[which(t$Type=="Coiled-coil"),]
 
   #Dom
   do.call(rbind,lapply(unique(t$Query),function(x){
