@@ -96,7 +96,7 @@ extractSeqsFromGff3 <- function(infile,
                 names = names(faa),
                 file.out = paste0(in.path,sub('.gff','.faa',infile),collapse = '/'))
     if (keep.aa){
-      lapply(faa,function(x){memCompress(paste0(x,collapse = ''),type = 'gzip')}) -> faa
+      lapply(faa,function(x){paste0(x,collapse = '')}) -> faa
       faa
     }
   }
