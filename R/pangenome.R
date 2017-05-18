@@ -313,6 +313,7 @@ pangenome<-function(gffs=c(),
 
   class(out) <- c('pangenome')
 
+  saveRDS(out,file = paste0(outdir,'pangenome.rds'))
 
   ## OTHER OPTIONS
 
@@ -332,7 +333,7 @@ pangenome<-function(gffs=c(),
         cludir,'\n')
   }
 
-  #Type of pan-matrix
+  #Type of pan-matrix to be written on out directory (not in pangenome object)
   if (pmOutFileType!='none'){
     if(pmOutFileType=='binary'){
       write.table(panm,
