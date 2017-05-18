@@ -178,6 +178,7 @@ pangenome<-function(gffs=c(),
 
   #Index hmm if not yet
   if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
+    cat('Preparing Pfam-A.hmm files for hmmscan search.\n')
     paste0('hmmpress ',hmmPfam) -> hmmpress
     system(hmmpress)
   }
