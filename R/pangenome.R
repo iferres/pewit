@@ -21,13 +21,13 @@
 #' profile of the group of organisms.
 #' @param gffs A \code{vector} of gff3 files as retrieved by prokka (Seeman,
 #' 2014).
-#' @param pathToPfam_A_hmm \code{character} with the path to Pfam-A.hmm file.
-#' @param pathToPfam_A_Dat \code{character} with the path to Pfam-A.hmm.dat file.
+#' @param hmmPfam \code{character} with the path to Pfam-A.hmm file.
+#' @param datPfam \code{character} with the path to Pfam-A.hmm.dat file.
 #' @param n_threads \code{integer}. The number of threads to use.
-#' @param dir.out Name of output directory to be created.
+#' @param dir_out Name of output directory to be created.
 #' @param writeFastas \code{logical}. Write fasta files with gene sequences for
 #' each cluster?
-#' @param pmOutFileType The type of pan-matrix you want to be written in
+#' @param pmOutfileType The type of pan-matrix you want to be written in
 #' \code{out.dir} folder. One of: "none" (no panmatrix), "binary" (presence/
 #' absence matrix) (DEFAULT), "nparalog" (number of paralogues for each organism
 #' and orthologous group), "representative" (just one sequence of each organism,
@@ -35,7 +35,7 @@
 #' paralogues included).
 #' @param alignCore \code{logical}. Align core genes and concatenate them into
 #' a "super-gene" alignment? Suitable for phylogenetic analysis.
-#' @param accu_ali \code{logical}. Perform an accurate alignment? If \code{TRUE}
+#' @param accuAli \code{logical}. Perform an accurate alignment? If \code{TRUE}
 #' the alignment stage could take a while depending both on the number of
 #' genomes and on the core size.
 #' @param coreLevel \code{numeric}. A number between 1-0.9 which determines at
@@ -87,14 +87,14 @@
 #' @importFrom foreach foreach '%dopar%'
 #' @export
 pangenome<-function(gffs=c(),
-                    pathToPfam_A_hmm=character(),
-                    pathToPfam_A_Dat=character(),
+                    hmmPfam=character(),
+                    datPfam=character(),
                     n_threads=1L,
-                    dir.out='out',
+                    dir_out='out',
                     writeFastas=F,
-                    pmOutFileType='representative',
+                    pmOutfileType='representative',
                     alignCore=TRUE,
-                    accu_ali=FALSE,
+                    accuAli=FALSE,
                     coreLevel=1){
 
   if (Sys.which("hmmsearch")==""){
@@ -116,20 +116,20 @@ pangenome<-function(gffs=c(),
     stop("Files ('gffs') must have '.gff' extension.")
   }
 
-  if(dir.exists(dir.out)){
-    stop(paste0('Directory ',dir.out,'/ already exists.'))
+  if(dir.exists(dir_out)){
+    stop(paste0('Directory ',dir_out,'/ already exists.'))
   }
 
 
   #Create output directory
-  dir.create(dir.out)
-  paste0(normalizePath(dir.out),'/') -> outdir
+  dir.create(dir_out)
+  paste0(normalizePath(dir_out),'/') -> outdir
 
   #Run on exit
   on.exit(runOnExit(outdir))
 
   #Type of panmatrix arg
-  pmOutFileType <- match.arg(pmOutFileType,
+  pmOutfileType <- match.arg(pmOutfileType,
                              c('binary',
                                'nparalog',
                                'representative',
@@ -138,7 +138,7 @@ pangenome<-function(gffs=c(),
 
   #Process Pfam-A.dat
   cat('\n\nProcessing 1Pfam-A.hmm.dat..')
-  ref<-processPfam_A_Dat(pathToPfam_A_Dat = pathToPfam_A_Dat,
+  ref<-processPfam_A_Dat(datPfam = datPfam,
                          n_threads = n_threads)
   cat(' DONE!\n')
 
@@ -170,7 +170,7 @@ pangenome<-function(gffs=c(),
   #   tempfile(pattern = "tmpo",tmpdir = tempdir(),fileext = ".tab")->dmblout
   #   paste("hmmscan -o /dev/null --domtblout ",dmblout,
   #         " --noali --cut_ga --cpu 0 ",
-  #         pathToPfam_A_hmm," ",temps[i],sep = "")->pfm
+  #         hmmPfam," ",temps[i],sep = "")->pfm
   #   system(pfm)
   #   dmblout
   # }
@@ -181,7 +181,7 @@ pangenome<-function(gffs=c(),
   mclapply(temps, function(x){
 
     runHmmsearch(fasta = x,
-                 pfam = pathToPfam_A_hmm,
+                 pfam = hmmPfam,
                  n_threads = 0L)
 
   }, mc.cores = n_threads) -> hmm.temps
@@ -335,18 +335,18 @@ pangenome<-function(gffs=c(),
   }
 
   #Type of pan-matrix to be written on out directory (not in pangenome object)
-  if (pmOutFileType!='none'){
-    if(pmOutFileType=='binary'){
+  if (pmOutfileType!='none'){
+    if(pmOutfileType=='binary'){
       write.table(panm,
                   file = paste0(outdir,'panmatrix.tab'),
                   quote = F,
                   na = '-',
                   sep = '\t')
-    }else if(pmOutFileType%in%c('nparalog',
+    }else if(pmOutfileType%in%c('nparalog',
                                 'representative',
                                 'allgenes')){
 
-      buildPanMatrix(out,type=pmOutFileType) -> panm
+      buildPanMatrix(out,type=pmOutfileType) -> panm
       write.table(panm,
         file = paste0(outdir,'panmatrix.tab'),
         quote = F,
@@ -362,7 +362,7 @@ pangenome<-function(gffs=c(),
       coreAlign(x = out,
                 ffns = ffns,
                 level = coreLevel,
-                accu = accu_ali,
+                accu = accuAli,
                 n_threads = n_threads,
                 file.out = paste0(outdir,'coreAlignment_',coreLevel,'.fasta'))
     }else{

@@ -324,13 +324,13 @@ outhmmsearch<-function(pouti,ref){
 #' @name processPfam_A_Dat
 #' @title Process Pfam-A.dat file
 #' @description Process Pfam-A.dat file.
-#' @param pathToPfam_A_Dat \code{character}. The path to Pfam-A.dat file.
+#' @param datPfam \code{character}. The path to Pfam-A.dat file.
 #' @param n_threads \code{integer}. The number of threads to use.
 #' @return A \code{data.frame} with information of each Pfam entry.
 #' @author Ignacio Ferres
 #' @importFrom parallel mclapply
-processPfam_A_Dat<-function(pathToPfam_A_Dat,n_threads){
-  readLines(pathToPfam_A_Dat,skipNul = T)->rl
+processPfam_A_Dat<-function(datPfam,n_threads){
+  readLines(datPfam,skipNul = T)->rl
   grep("STOCKHOLM 1.0",rl)+1 -> pr
   grep("//",rl)-1 -> fn
   cbind(pr,fn)->pa
