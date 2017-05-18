@@ -537,8 +537,8 @@ grouping<-function(t,singlehit=FALSE,type="Domain"){
 }
 
 
-#' @name processHmmscan
-#' @title Main hmmscan output processing function
+#' @name processHmmsearch
+#' @title Main hmmsearch output processing function
 #' @description Outputs a data.frame with the domain structure of each sequence
 #' (rows). It has 6 columns, each one with the semi-colon separated found
 #' sequences of Pfam (PF) entries of the following 6 categories: 'Domain',
@@ -547,7 +547,7 @@ grouping<-function(t,singlehit=FALSE,type="Domain"){
 #' @param ref \code{data.frame}. Information about each Pfam-A entry.
 #' @return A \code{data.frame} with the domain structure of each sequence.
 #' @author Ignacio Ferres
-processHmmscan<-function(pout,ref){
+processHmmsearch <- function(pout,ref){
   writeLines('Loading hmmscan output..')
   # outhmmscan(pouti = pout,ref = ref)->t
   outhmmsearch(pout,ref) -> t

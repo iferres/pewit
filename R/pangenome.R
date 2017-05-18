@@ -200,7 +200,7 @@ pangenome<-function(gffs=c(),
 
   registerDoParallel(cores = n_threads)
   tout<-foreach(i=seq_along(pout),.combine =rbind,.inorder = T)%dopar%{
-    processHmmscan(pout=pout[i],ref=ref)
+    processHmmsearch(pout=pout[i],ref=ref)
   }
   cat(' DONE!\n')
   file.remove(pout)
