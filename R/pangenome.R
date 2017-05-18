@@ -176,6 +176,12 @@ pangenome<-function(gffs=c(),
   # }
   # cat(' DONE!\n')
 
+  #Index hmm if not yet
+  if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
+    paste0('hmmpress ',hmmPfam) -> hmmpress
+    system(hmmpress)
+  }
+
   #Run hmmsearch (HMMER)
   cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
   mclapply(temps, function(x){
