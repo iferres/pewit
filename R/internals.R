@@ -238,15 +238,19 @@ splitAndWriteFastas<-function(fastas,n_threads){
   registerDoParallel(cores = n_threads)
   temps<-foreach(i=seq_along(spi))%dopar%{
     tpo<-tempfile(pattern = "tmpo",tmpdir = tdir,fileext = ".fasta")
-    lapply(fastas[spi[[i]]],function(x){
-      memDecompress(x,type = 'gzip',asChar = T)
-      }) -> sq
-    names(sq) -> nsq
-    write.fasta(sq,
-                names = nsq,
+    # lapply(fastas[spi[[i]]],function(x){
+    #   memDecompress(x,type = 'gzip',asChar = T)
+    #   }) -> sq
+    # names(sq) -> nsq
+    # write.fasta(sq,
+    #             names = nsq,
+    #             file.out = tpo)
+    write.fasta(fastas[spi[[i]]],
+                names=names(fastas[spi[[i]]]),
                 file.out = tpo)
     tpo
   }
+
   temps<-unlist(temps)
   return(temps)
 }
@@ -823,14 +827,20 @@ clusterOrphans <- function(tout,fastas,n_threads){
     splitIndices(length(fi),parts) -> spin
     unlist(lapply(spin,function(x){
       tmp1<-tempfile()
-      write.fasta(lapply(fastas[fi[x]],memDecompress,'gzip',TRUE),
+      # write.fasta(lapply(fastas[fi[x]],memDecompress,'gzip',TRUE),
+      #             names = fi[x],
+      #             file.out = tmp1)
+      write.fasta(fastas[fi[x]],
                   names = fi[x],
                   file.out = tmp1)
       tmp1
     })) -> temps
 
     tmp2 <- tempfile()
-    write.fasta(lapply(fastas[orps],memDecompress,'gzip',TRUE),
+    # write.fasta(lapply(fastas[orps],memDecompress,'gzip',TRUE),
+    #             names = orps,
+    #             file.out = tmp2)
+    write.fasta(fastas[orps],
                 names = orps,
                 file.out = tmp2)
 
