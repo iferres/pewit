@@ -548,7 +548,7 @@ grouping<-function(t,singlehit=FALSE,type="Domain"){
 #' @return A \code{data.frame} with the domain structure of each sequence.
 #' @author Ignacio Ferres
 processHmmsearch <- function(pout,ref){
-  writeLines('Loading hmmscan output..')
+  writeLines('Loading hmmsearch output..')
   # outhmmscan(pouti = pout,ref = ref)->t
   outhmmsearch(pout,ref) -> t
 
