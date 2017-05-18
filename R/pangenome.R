@@ -121,20 +121,20 @@ pangenome<-function(gffs=c(),
   }
 
 
-  pmOutFileType <- match.arg(pmOutFileType,
-                             c('binary',
-                            'nparalog',
-                            'representative',
-                            'allgenes',
-                            'none'))
-
-
   #Create output directory
   dir.create(dir.out)
   paste0(normalizePath(dir.out),'/') -> outdir
 
   #Run on exit
   on.exit(runOnExit(outdir))
+
+  #Type of panmatrix arg
+  pmOutFileType <- match.arg(pmOutFileType,
+                             c('binary',
+                               'nparalog',
+                               'representative',
+                               'allgenes',
+                               'none'))
 
   #Process Pfam-A.dat
   cat('\n\nProcessing 1Pfam-A.hmm.dat..')
