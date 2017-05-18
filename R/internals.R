@@ -1,5 +1,20 @@
 #Internal functions.
 
+#' @name runOnExit
+#' @title Removes everything if an error occur
+#' @description Removes the output folder if an error occurs after finnishing.
+#' @param outdir The normalized path of the output directory
+#' @return Warning message if exits before finnishing all the process.
+#' @author Ignacio Ferres
+runOnExit <- function(outdir){
+  paste0(outdir,'pangenome.rds') -> fi
+  if (!file.exists(fi)){
+    warning('Something gone wrong: removing output directory.')
+    unlink(outdir,recursive = TRUE)
+  }
+}
+
+
 #' @name extractSeqsFromGff3
 #' @title Extract Sequences from Gff3 file
 #' @description Extract Sequences from Gff3 file and outputs a list of element,

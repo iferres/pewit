@@ -120,6 +120,7 @@ pangenome<-function(gffs=c(),
     stop(paste0('Directory ',dir.out,'/ already exists.'))
   }
 
+
   pmOutFileType <- match.arg(pmOutFileType,
                              c('binary',
                             'nparalog',
@@ -132,8 +133,11 @@ pangenome<-function(gffs=c(),
   dir.create(dir.out)
   paste0(normalizePath(dir.out),'/') -> outdir
 
+  #Run on exit
+  on.exit(runOnExit(outdir))
+
   #Process Pfam-A.dat
-  cat('\n\nProcessing Pfam-A.hmm.dat..')
+  cat('\n\nProcessing 1Pfam-A.hmm.dat..')
   ref<-processPfam_A_Dat(pathToPfam_A_Dat = pathToPfam_A_Dat,
                          n_threads = n_threads)
   cat(' DONE!\n')
