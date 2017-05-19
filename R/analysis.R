@@ -325,6 +325,7 @@ writeFastaClusters <- function(x,
 #' @author Ignacio Ferres
 #' @importFrom seqinr write.fasta read.fasta read.alignment
 #' @importFrom ape as.alignment
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @export
 coreAlign <- function(x,
                       ffns=character(),

@@ -4,27 +4,27 @@
 \alias{pangenome}
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
-pangenome(gffs = c(), pathToPfam_A_hmm = character(),
-  pathToPfam_A_Dat = character(), n_threads = 1L, dir.out = "out",
-  writeFastas = F, pmOutFileType = "representative", alignCore = TRUE,
-  accu_ali = FALSE, coreLevel = 1)
+pangenome(gffs = c(), hmmPfam = character(), datPfam = character(),
+  n_threads = 1L, dir_out = "out", writeFastas = F,
+  pmOutfileType = "representative", alignCore = TRUE, accuAli = FALSE,
+  coreLevel = 1)
 }
 \arguments{
-\item{gffs}{A \code{vector} of fasta formated-containing files with the
-translated sequences of the genes of each organism.}
+\item{gffs}{A \code{vector} of gff3 files as retrieved by prokka (Seeman,
+2014).}
 
-\item{pathToPfam_A_hmm}{\code{character} with the path to Pfam-A.hmm file.}
+\item{hmmPfam}{\code{character} with the path to Pfam-A.hmm file.}
 
-\item{pathToPfam_A_Dat}{\code{character} with the path to Pfam-A.hmm.dat file.}
+\item{datPfam}{\code{character} with the path to Pfam-A.hmm.dat file.}
 
 \item{n_threads}{\code{integer}. The number of threads to use.}
 
-\item{dir.out}{Name of output directory to be created.}
+\item{dir_out}{Name of output directory to be created.}
 
 \item{writeFastas}{\code{logical}. Write fasta files with gene sequences for
 each cluster?}
 
-\item{pmOutFileType}{The type of pan-matrix you want to be written in
+\item{pmOutfileType}{The type of pan-matrix you want to be written in
 \code{out.dir} folder. One of: "none" (no panmatrix), "binary" (presence/
 absence matrix) (DEFAULT), "nparalog" (number of paralogues for each organism
 and orthologous group), "representative" (just one sequence of each organism,
@@ -34,7 +34,7 @@ paralogues included).}
 \item{alignCore}{\code{logical}. Align core genes and concatenate them into
 a "super-gene" alignment? Suitable for phylogenetic analysis.}
 
-\item{accu_ali}{\code{logical}. Perform an accurate alignment? If \code{TRUE}
+\item{accuAli}{\code{logical}. Perform an accurate alignment? If \code{TRUE}
 the alignment stage could take a while depending both on the number of
 genomes and on the core size.}
 
@@ -52,8 +52,8 @@ sequences loaded as a list of objects of class \code{SeqFastaAA} from the
 }
 \description{
 Computes the pangenome of a set of related organisms. Takes a
-list of fasta files with the translated gene sequences, a path to Pfam HMM
-models and data associated to those models.
+list of gff3 files, a path to Pfam HMM models and data associated to those
+models.
 
 It first uses hmmscan (HMMER 3) to look for Pfam domains in the aminoacid
 sequences and, where it finds them, creates a domain profile. Then clusterize

@@ -85,6 +85,7 @@
 #' @importFrom parallel mclapply splitIndices
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach foreach '%dopar%'
+#' @importFrom utils write.table
 #' @export
 pangenome<-function(gffs=c(),
                     hmmPfam=character(),
@@ -473,6 +474,7 @@ summary.pangenome <- function(object, ...){
 #' singletons.
 #' @return a \code{martrix} with the count of softcore, accessory and singleton
 #' genes for each organism used to draw the barplot.
+#' @importFrom graphics barplot par
 #' @export
 plot.pangenome <- function(x,
                            horiz=T,

@@ -4,10 +4,10 @@
 \alias{processPfam_A_Dat}
 \title{Process Pfam-A.dat file}
 \usage{
-processPfam_A_Dat(pathToPfam_A_Dat, n_threads)
+processPfam_A_Dat(datPfam, n_threads)
 }
 \arguments{
-\item{pathToPfam_A_Dat}{\code{character}. The path to Pfam-A.dat file.}
+\item{datPfam}{\code{character}. The path to Pfam-A.dat file.}
 
 \item{n_threads}{\code{integer}. The number of threads to use.}
 }

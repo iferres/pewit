@@ -71,7 +71,7 @@ outhmmsearch<-function(pouti,ref){
 #' (rows). It has 6 columns, each one with the semi-colon separated found
 #' sequences of Pfam (PF) entries of the following 6 categories: 'Domain',
 #' 'Family', 'Motif', 'Repeat','Disordered' or 'Coiled-coil'.
-#' @param pout \code{character}. Temporary file name (hmmscan output).
+#' @param pout \code{character}. Temporary file name (hmmsearch output).
 #' @param ref \code{data.frame}. Information about each Pfam-A entry.
 #' @return A \code{data.frame} with the domain structure of each sequence.
 #' @author Ignacio Ferres
@@ -202,7 +202,7 @@ processHmmsearch <- function(pout,ref){
 #' @name grouping
 #' @title Split hmmscan output by query.
 #' @description Split hmmscan output by query.
-#' @param t \code{data.frame}. hmmscan output passed by \link{outhmmscan}.
+#' @param t \code{data.frame}. hmmscan output passed by \link{outhmmsearch}.
 #' @param singlehit \code{logical}. Has this query just one hit?
 #' @param type \code{character}. One of 'Domain', 'Family', 'Motif', 'Repeat',
 #' 'Disordered' or 'Coiled-coil'.

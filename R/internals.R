@@ -81,17 +81,17 @@ processPfam_A_Dat<-function(datPfam,n_threads){
   return(ref)
 }
 
-# Deprecated
-#' @name outhmmscan
-#' @title Process hmmscan output to make it 'R'eadable.
-#' @description Process hmmscan output to make it readable by R.
-#' @param pouti \code{character}. hmmscan output temporary file.
-#' @param ref \code{data.frame}. Information about each Pfam-A entry.
-#' @return A \code{data.frame} with the hmmscan output plus information about
+#' # Deprecated
+#' #@name outhmmscan
+#' #@title Process hmmscan output to make it 'R'eadable.
+#' #@description Process hmmscan output to make it readable by R.
+#' #@param pouti \code{character}. hmmscan output temporary file.
+#' #@param ref \code{data.frame}. Information about each Pfam-A entry.
+#' #@return A \code{data.frame} with the hmmscan output plus information about
 #' Pfam-A hits.
-#' @note Taken and adapted from \code{micropan} package (Lars Snipen and
+#' #@note Taken and adapted from \code{micropan} package (Lars Snipen and
 #' Kristian Hovde Liland).
-#' @author Ignacio Ferres
+#' #@author Ignacio Ferres
 # outhmmscan<-function(pouti,ref){
 #   readLines(pouti)->rl
 #   rl[which(!grepl("^\\#",rl))]->rl

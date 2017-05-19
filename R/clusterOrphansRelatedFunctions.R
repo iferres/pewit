@@ -17,7 +17,7 @@
 #' all the saved phmmer output tables and performs the final MCL clustering
 #' over it.
 #' @param tout A \code{data.frame} with non overlapping domain hmmscan output
-#' as passed by \link{processHmmscan}.
+#' as passed by \link{processHmmsearch}.
 #' @param fastas A \code{list} of protein sequeces as \code{SeqFastaAA} objects
 #' @param n_threads \code{integer} Number of threads to use.
 #' @return A \code{list} of protein clusters.
@@ -26,6 +26,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach foreach '%dopar%'
 #' @importFrom seqinr write.fasta
+#' @importFrom utils write.table
 clusterOrphans <- function(tout,fastas,n_threads){
 
   #Retrieve all orphan sequences from previous steps.
