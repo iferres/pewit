@@ -1,0 +1,198 @@
+#' @name extractSeqsFromGff3
+#' @title Extract Sequences from Gff3 file
+#' @description Extract Sequences from Gff3 file and outputs a list of element,
+#' one per each CDS. Each element contain the DNA gene sequence and the AA
+#' protein sequence.
+#' @param infile \code{character}. The gff3 filename.
+#' @param in.path Where the output (fasta files) will be written.
+#' @param keep.aa \code{logical}. Should AA sequences be kept in memory?
+#' @return A \code{list} with CDS gene and protein sequences.
+#' @author Gregorio Iraola and Ignacio Ferres.
+#' @importFrom seqinr as.SeqFastadna s2c
+extractSeqsFromGff3 <- function(infile,
+                                in.path=NULL,
+                                keep.aa=T){
+
+  if(!dir.exists(in.path)){
+    stop('Directory does not exist.')
+  }
+
+  readLines(infile) -> rl
+  if(rl[1]!="##gff-version 3"){
+    stop('One or more gff files seems not to be gff3 (version 3).')
+  }
+
+  if(grepl('#',infile)){
+    warning('Conflictive character "#", will be substituted by "_".')
+    gsub('#','_',infile) -> infile
+  }
+
+  #Save sequence in SeqFastadna object
+  if(!any(grepl("##FASTA",rl))){
+    stop("One or more gff files do(es) not contain the fasta genome sequences.")
+  }
+  grep("##FASTA",rl) + 1 -> fasta.ini
+  length(rl) -> fasta.end
+  rl[fasta.ini:fasta.end] -> fasta
+  grep('>',fasta,fixed = T) -> fheaders
+  matrix(nrow = length(fheaders),ncol = 2) -> t
+  fheaders + 1 -> t[,1]
+  c((fheaders - 1)[-1],length(fasta)) -> t[,2]
+  apply(t,1,function(x){
+    paste(fasta[x[1]:x[2]],collapse = '')
+  }) -> ap
+  names(ap) <- gsub('>','',fasta[fheaders])
+  lapply(ap,function(x){
+    as.SeqFastadna(s2c(x),name = names(x))
+  }) -> fnas
+
+  extractGffTable(rl = rl) -> gfftable
+
+  gfftable[which(gfftable$Type=='CDS'),] -> cds
+
+  apply(cds,1,function(x){
+    getFfnFaa(fnas=fnas,
+              contig = x[1],
+              strand = x[9],
+              from = as.numeric(x[7]),
+              to = as.numeric(x[8]),id = x[2],
+              product = x[5])
+  }) -> fin
+  nam <- sapply(fin,function(x){attr(x[[1]],'name')})
+  if(any(grepl('#',nam))){
+    warning('Conflictive character "#", will be substituted by "_".')
+    gsub('#','_',nam) -> nam
+  }
+  names(fin) <- nam
+
+  if(is.null(in.path)){
+    fin
+  }else{
+    sapply(fin,function(x){x[[1]]}) -> ffn
+    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
+    write.fasta(ffn,
+                names = names(ffn),
+                file.out = paste0(in.path,sub('.gff','.ffn',infile),collapse = '/'))
+    sapply(fin,function(x){x[[2]]}) -> faa
+    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
+    write.fasta(faa,
+                names = names(faa),
+                file.out = paste0(in.path,sub('.gff','.faa',infile),collapse = '/'))
+    if (keep.aa){
+      lapply(faa,function(x){paste0(x,collapse = '')}) -> faa
+      faa
+    }
+  }
+
+}
+
+#' @name getFfnFaa
+#' @title Extract CDS gene (DNA) and protein (AA) sequences
+#' @description Extract CDS gene (DNA) and protein (AA) sequences from both a
+#' gff3 table and the fasta sequence.
+#' @param fnas A \code{list} of \code{SeqFastadna} genome sequences.
+#' @param contig \code{character}. The name of the contig.
+#' @param strand \code{character}. Either "+" or "-".
+#' @param from \code{numeric}. The coordinate "from".
+#' @param to \code{numeric}. The coordinate "to".
+#' @param id \code{character}. The ID of the CDS.
+#' @param product \code{character}. The gene product.
+#' @return A \code{list} with two entries. The first is the CDS's DNA sequence,
+#' and the last is the protein sequence. Object classes are \code{SeqFastadna}
+#' and \code{SeqFastaAA}, respectively.
+#' @author Ignacio Ferres
+#' @importFrom seqinr getFrag.SeqFrag comp as.SeqFastadna as.SeqFastaAA translate
+getFfnFaa <- function(fnas,contig,strand,from,to,id,product){
+  seqinr::getFrag.SeqFrag(fnas[contig][[1]],begin = from,end = to) -> ffn
+  attr(ffn,'begin') <- NULL
+  attr(ffn,'end') <- NULL
+  if(strand=='-'){
+    rev(seqinr::comp(ffn)) -> ffn
+  }
+  seqinr::as.SeqFastadna(toupper(ffn),
+                         name = id,
+                         Annot = product) -> ffn
+  seqinr::as.SeqFastaAA(toupper(seqinr::translate(ffn,numcode = 11)),
+                        name = id,
+                        Annot = product) -> faa
+
+  list(ffn,faa) -> out
+  out
+}
+
+#' @name extractGffTable
+#' @title Extract the gff3 table and make it 'R'eadable.
+#' @description Read a gff3 file and transforms the table in a \code{data.frame}.
+#' @param rl \code{character}. A vector of character strings as passed by
+#' \code{readLines()}, reading the gff3 file.
+#' @return A \code{data.frame}.
+#' @author Ignacio Ferres
+extractGffTable <- function(rl){
+  which(grepl('^\\#\\#',rl)) -> w
+  rev(w)[1] - 1 -> upto
+  rev(w)[2] + 1 -> from
+  rl[from:upto] -> o
+
+  strsplit(o,'\t') -> lst
+
+  contig <- sapply(lst,function(x){x[1]})
+  type <- sapply(lst,function(x){x[3]})
+  from <- sapply(lst,function(x){x[4]})
+  to <- sapply(lst,function(x){x[5]})
+  strand <- sapply(lst,function(x){x[7]})
+  phase <- sapply(lst,function(x){x[8]})
+  attrib <- sapply(lst,function(x){x[9]})
+
+  metadata <- strsplit(attrib,';')
+
+  id <- sapply(metadata,function(x){
+    gp<-grep('ID=',x,value = T)
+    if(length(gp)>0){sub('ID=','',gp)}else{''}
+  })
+  locustag <- sapply(metadata,function(x){
+    gp<-grep('locus_tag=',x,value = T)
+    if(length(gp)>0){sub('locus_tag=','',gp)}else{''}
+  })
+  gene <- sapply(metadata,function(x){
+    gp<-grep('gene=',x,value = T)
+    if(length(gp)>0){sub('gene=','',gp)}else{''}
+  })
+  product <- sapply(metadata,function(x){
+    gp<-grep('product=',x,value = T)
+    if(length(gp)>0){sub('product=','',gp)}else{''}
+  })
+
+  out <- data.frame(Contig=contig,
+                    ID=id,
+                    LocusTag=locustag,
+                    Gene=gene,
+                    Product=product,
+                    Type=type,
+                    From=from,
+                    To=to,
+                    Strand=strand,
+                    Phase=phase,
+                    stringsAsFactors = F)
+  out
+}
+
+
+#' @name getSeqOfType
+#' @title Get sequences (nucleotidic or aminoacidic)
+#' @description Extract cds either nucleotidic (gene) or aminoacidic (protein).
+#' @param seqs \code{list} of sequences as passed by \link{extractSeqsFromGff3}.
+#' @param type \code{character}. Either 'AA' or 'DNA'.
+#' @return A \code{list} of sequences.
+#' @author Ignacio Ferres
+getSeqOfType <- function(seqs,type='AA'){
+  names(seqs) -> n
+
+  unlist(seqs,recursive = F) -> un
+  if (type=='AA'){
+    lapply(un,function(x){x[[2]]}) -> lap
+  }else{
+    lapply(un,function(x){x[[1]]}) -> lap
+  }
+  names(lap) <- sub('.gff.',';',names(lap))
+  lap
+}
