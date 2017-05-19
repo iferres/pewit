@@ -291,8 +291,9 @@ pangenome<-function(gffs=c(),
   cat('          ..computing binary pan-matrix:')
   buildPanMatrix(pangenome = final.clusters,
                  type='binary') -> panm
-  write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
-  cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
+  cat(' DONE!\n')
+  #write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
+  #cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
 
   #clusters.txt
   cat('          ..writing clusters:')
