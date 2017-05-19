@@ -1013,7 +1013,7 @@ pdist.aa <- function (x, scaled = TRUE) {
 #' @importFrom ape njs subtrees
 splitClusters <- function(clstr){
   #Build gene nj tree
-  if (length(clstr)>600){
+  if (length(clstr)>400){
     accu <- FALSE
   }else{
     accu <- TRUE
