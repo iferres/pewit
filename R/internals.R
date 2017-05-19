@@ -15,7 +15,6 @@ runOnExit <- function(outdir){
 }
 
 
-
 #Distributes all proteins in many files as n_threads set in order to optimize
 # the computing power in the following step (hmmscan).
 #' @name splitAndWriteFastas
@@ -120,11 +119,6 @@ processPfam_A_Dat<-function(datPfam,n_threads){
 #   return(hmmer.table)
 # }
 
-
-
-
-
-
 #' @name checkIfParalogues
 #' @title Check if cluster contains paralogues
 #' @description Check if a cluster contains paralogues.
@@ -145,8 +139,6 @@ checkIfParalogues<-function(p){
     FALSE
   }
 }
-
-
 
 
 #' @name setClusterNames
