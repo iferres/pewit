@@ -345,6 +345,7 @@ processPfam_A_Dat<-function(datPfam,n_threads){
   return(ref)
 }
 
+# Deprecated
 #' @name outhmmscan
 #' @title Process hmmscan output to make it 'R'eadable.
 #' @description Process hmmscan output to make it readable by R.
@@ -355,32 +356,32 @@ processPfam_A_Dat<-function(datPfam,n_threads){
 #' @note Taken and adapted from \code{micropan} package (Lars Snipen and
 #' Kristian Hovde Liland).
 #' @author Ignacio Ferres
-outhmmscan<-function(pouti,ref){
-  readLines(pouti)->rl
-  rl[which(!grepl("^\\#",rl))]->rl
-  gsub("[ ]+"," ",rl)->rl
-  strsplit(rl," ")->lst
-
-  hit<-sapply(lst,function(x){x[1]})
-  pfmID<-sapply(lst,function(x){x[2]})
-  query<-sapply(lst,function(x){x[4]})
-  eval<-as.numeric(sapply(lst,function(x){x[13]}))
-  score<-as.numeric(sapply(lst,function(x){x[14]}))
-  st<-as.numeric(sapply(lst, function(x){x[18]}))
-  en<-as.numeric(sapply(lst,function(x){x[19]}))
-  desc<-sapply(lst,function(x){paste(x[23:length(x)],collapse = " ")})
-
-  hmmer.table<-data.frame(Query=query,Hit=hit,PfamID=pfmID,Evalue=eval,Score=score,
-                          Start=st,End=en,Description=desc,stringsAsFactors = F)
-  hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
-
-  sub("\\.\\d+","",ref$ID) -> codpf
-  sub("\\.\\d+","",hmmer.table$PfamID) -> codhit
-  sapply(codhit,function(x){which(codpf==x)})->ind
-  ref$TP[ind]->hmmer.table$Type
-  ref$CL[ind]->hmmer.table$Clan
-  return(hmmer.table)
-}
+# outhmmscan<-function(pouti,ref){
+#   readLines(pouti)->rl
+#   rl[which(!grepl("^\\#",rl))]->rl
+#   gsub("[ ]+"," ",rl)->rl
+#   strsplit(rl," ")->lst
+#
+#   hit<-sapply(lst,function(x){x[1]})
+#   pfmID<-sapply(lst,function(x){x[2]})
+#   query<-sapply(lst,function(x){x[4]})
+#   eval<-as.numeric(sapply(lst,function(x){x[13]}))
+#   score<-as.numeric(sapply(lst,function(x){x[14]}))
+#   st<-as.numeric(sapply(lst, function(x){x[18]}))
+#   en<-as.numeric(sapply(lst,function(x){x[19]}))
+#   desc<-sapply(lst,function(x){paste(x[23:length(x)],collapse = " ")})
+#
+#   hmmer.table<-data.frame(Query=query,Hit=hit,PfamID=pfmID,Evalue=eval,Score=score,
+#                           Start=st,End=en,Description=desc,stringsAsFactors = F)
+#   hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
+#
+#   sub("\\.\\d+","",ref$ID) -> codpf
+#   sub("\\.\\d+","",hmmer.table$PfamID) -> codhit
+#   sapply(codhit,function(x){which(codpf==x)})->ind
+#   ref$TP[ind]->hmmer.table$Type
+#   ref$CL[ind]->hmmer.table$Clan
+#   return(hmmer.table)
+# }
 
 #' @name outphmmer
 #' @title Process phmmer output to make ir 'R'eadable.
