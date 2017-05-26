@@ -72,12 +72,16 @@ extractSeqsFromGff3 <- function(infile,
     names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
     write.fasta(ffn,
                 names = names(ffn),
-                file.out = paste0(in.path,sub('.gff','.ffn',infile),collapse = '/'))
+                file.out = paste0(in.path,
+                                  sub('.gff','.ffn',rev(strsplit(infile,'/')[[1]])[1]),
+                                  collapse = '/'))
     sapply(fin,function(x){x[[2]]}) -> faa
     names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
     write.fasta(faa,
                 names = names(faa),
-                file.out = paste0(in.path,sub('.gff','.faa',infile),collapse = '/'))
+                file.out = paste0(in.path,
+                                  sub('.gff','.faa',rev(strsplit(infile,'/')[[1]])[1]),
+                                  collapse = '/'))
     if (keep.aa){
       lapply(faa,function(x){paste0(x,collapse = '')}) -> faa
       faa
