@@ -138,7 +138,7 @@ pangenome<-function(gffs=c(),
                                'none'))
 
   #Process Pfam-A.dat
-  cat('\n\nProcessing 1Pfam-A.hmm.dat..')
+  cat('\n\nProcessing Pfam-A.hmm.dat..')
   ref<-processPfam_A_Dat(datPfam = datPfam,
                          n_threads = n_threads)
   cat(' DONE!\n')
