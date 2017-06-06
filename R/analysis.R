@@ -260,51 +260,80 @@ getCoreClusters <- function(x,level=1L){
 #' @description Write cluster's cds in fasta format.
 #' @param x A \code{pangenome} object.
 #' @param clustNames The names of the clusters (OGXXXX...) to be written.
-#' @param ffns The path to 'all.ffn'.
+#' @param ffns The fasta files (as a vector of paths, as returned by
+#' \code{list.files} with options \code{pattern = 'ffn$'} and
+#' \code{full.names = TRUE}).
 #' @param outdir Where to output the files.
-#' @param paralogues \code{logical}. If paralogues should be also written (if
-#' present).
-#' @details One file per cluster is written. In each file, one sequence from
-#' each organism is written at the top. If \code{paralogues=TRUE}, and some of
-#' the sequences do contain paralogues, those sequences are written at the end
+#' @param type \code{character}. One of "\code{default}" (one sequence per
+#' genome on each fasta file), "\code{all}" (including paralogues), or
+#' "\code{representative}" (one sequence per fasta file, a representative of
+#' the cluster).
+#' @param n_threads The number of cpus to use. Used when reading fasta files.
+# #' @details One file per cluster is written. In each file, one sequence from
+# #' each organism is written at the top. If \code{paralogues=TRUE}, and some of
+# #' the sequences do contain paralogues, those sequences are written at the end
 #' of the file.
 #' @return Fasta formated files.
 #' @author Ignacio Ferres
 #' @importFrom seqinr read.fasta write.fasta
+#' @importFrom parallel mclapply
 #' @export
 writeFastaClusters <- function(x,
                                clustNames=c(),
-                               ffns='',
+                               ffns=c(),
                                outdir='',
-                               paralogues=T){
+                               type='default',
+                               # paralogues=T,
+                               n_threads=1){
 
   if(class(x)!='pangenome') {
     stop('x must be an object of class "pangenome" (PANDORA package).')
   }
+
+  type <- match.arg(type, c('default','all','representative'))
 
   if(is.null(clustNames)){
     clustNames <- names(x$clusters)
   }
 
   normalizePath(ffns) -> ffndir
-  seqinr::read.fasta(paste0(ffndir,'all.ffn'),
-                     seqtype = 'DNA',
-                     as.string = T) -> seqs
+  # seqinr::read.fasta(paste0(ffndir,'all.ffn'),
+  #                    seqtype = 'DNA',
+  #                    as.string = T) -> seqs
+  cat('Reading fasta files..')
+  parallel::mclapply(ffndir,function(x){
+    seqinr::read.fasta(x,seqtype = 'DNA',as.string = T)
+  },mc.cores = n_threads) -> seqs
+  unlist(seqs,recursive = F) -> seqs
+  cat(' DONE!\n')
 
   paste0(normalizePath(outdir),'/') -> outdir
 
+  cat('Writing..')
   for (i in clustNames){
-    x$clusters[clustNames[i]] -> a
+    x$clusters[[clustNames[i]]] -> a
 
-    if(paralogues){
-      c(a,attr(x$clusters[clustNames[i]],'paralogues')) -> a
+    # if(paralogues){
+    #   c(a,attr(x$clusters[clustNames[i]],'paralogues')) -> a
+    # }
+
+    if (type=='default'){
+      seqinr::write.fasta(seqs[a],
+                          names = a,
+                          file.out = paste0(outdir,clustNames[i],'.fasta'))
+    }else if(type=='all'){
+      c(a,attr(x$clusters[clustNames[i]],'paraligues')) -> a
+      seqinr::write.fasta(seqs[a],
+                          names = a,
+                          file.out = paste0(outdir,clustNames[i],'.fasta'))
+    }else if(type=='representative'){
+      a[1] -> a
+      seqinr::write.fasta(seqs[a],
+                          names = a,
+                          file.out = paste0(outdir,clustNames[i],'.fasta'))
     }
-
-    seqinr::write.fasta(seqs[a],
-                        names = a,
-                        file.out = paste0(outdir,clustNames[i],'.fasta'))
-
   }
+  cat(' DONE!\n')
 }
 
 
