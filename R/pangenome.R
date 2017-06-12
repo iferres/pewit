@@ -381,7 +381,7 @@ number of "soft" core genes lowering the level through "getCoreClusters()" funct
 
   }
 
-  cat('\nFINNISH!\n\nThanks for using NOMBREDELPAQUETE.\n')
+  cat('\nFINNISH!\n\nThanks for using PEWIT.\n')
   out
 
 }
@@ -450,7 +450,7 @@ summary.pangenome <- function(object, ...){
 
   as.table(out, ...) -> out
 
-  attr(out,'package') <- 'PPANDORA'
+  attr(out,'package') <- 'pewit'
   out
 }
 

@@ -115,7 +115,7 @@ buildPanMatrix <- function(pangenome, type='binary'){
 #' @export
 getClusterGenes <- function(x,clustNames=c(),annot=F){
   if(class(x)!='pangenome') {
-    stop('x must be an object of class "pangenome" (PANDORA package).')
+    stop('x must be an object of class "pangenome" (pewit package).')
   }
 
   if(is.null(clustNames)){
@@ -163,7 +163,7 @@ getClusterGenes <- function(x,clustNames=c(),annot=F){
 #' @export
 getCoreClusters <- function(x,level=1L){
   if(class(x)!='pangenome') {
-    stop('x must be an object of class "pangenome" (PANDORA package).')
+    stop('x must be an object of class "pangenome" (pewit package).')
   }
   if(level>1|level<0.9){
     stop('level must be a number between 0.9 and 1. Recomended: >=0.95 .')
@@ -186,7 +186,7 @@ getCoreClusters <- function(x,level=1L){
 # #' @export
 # getPanMatrix <- function(x){
 #   if(class(x)!='pangenome') {
-#     stop('x must be an object of class "pangenome" (PANDORA package).')
+#     stop('x must be an object of class "pangenome" (pewit package).')
 #   }
 #   x$panmatrix
 # }
@@ -287,7 +287,7 @@ writeFastaClusters <- function(x,
                                n_threads=1){
 
   if(class(x)!='pangenome') {
-    stop('x must be an object of class "pangenome" (PANDORA package).')
+    stop('x must be an object of class "pangenome" (pewit package).')
   }
 
   type <- match.arg(type, c('default','all','representative'))
