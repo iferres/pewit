@@ -107,8 +107,8 @@ buildPanMatrix <- function(pangenome, type='binary'){
 #' @param clustNames A \code{vector} of cluster names.
 #' @param annot \code{logical} Should original gene annotation be retrieved?
 # #' @param sequence \code{logical} Should sequences as \code{SeqFastaAA} objects
-#' of \link{seqinr} package be retrieved?
-#' @details Something
+# #' of \link{seqinr} package be retrieved?
+# #' @details Something
 #' @return A \code{list} of ethier internal gene names, original annotation
 #' names, or the sequences as class \code{SeqFastaAA} from the clusters names
 #' passed in \code{clustNames} argument.
@@ -272,7 +272,7 @@ getCoreClusters <- function(x,level=1L){
 # #' @details One file per cluster is written. In each file, one sequence from
 # #' each organism is written at the top. If \code{paralogues=TRUE}, and some of
 # #' the sequences do contain paralogues, those sequences are written at the end
-#' of the file.
+# #' of the file.
 #' @return Fasta formated files.
 #' @author Ignacio Ferres
 #' @importFrom seqinr read.fasta write.fasta

@@ -46,16 +46,14 @@ core-genome.}
 An object of class \code{pangenome} which basically consist on a
 \code{list} with the first element being the list of clusters, the second
 element the pan-matrix as a binary \code{data.frame} with columns being the
-organisms and rows the cluster names, the third element the protein
-sequences loaded as a list of objects of class \code{SeqFastaAA} from the
-\pkg{seqinr} package, and a series of attributes.
+organisms and rows the cluster names, and a series of attributes.
 }
 \description{
 Computes the pangenome of a set of related organisms. Takes a
 list of gff3 files, a path to Pfam HMM models and data associated to those
 models.
 
-It first uses hmmscan (HMMER 3) to look for Pfam domains in the aminoacid
+It first uses hmmsearch (HMMER 3) to look for Pfam domains in the aminoacid
 sequences and, where it finds them, creates a domain profile. Then clusterize
 sequences with the same domain structure in protein families.
 

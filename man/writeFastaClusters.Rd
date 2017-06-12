@@ -4,20 +4,26 @@
 \alias{writeFastaClusters}
 \title{Write Cluster Sequences in Fasta Format}
 \usage{
-writeFastaClusters(x, clustNames = c(), ffns = "", outdir = "",
-  paralogues = T)
+writeFastaClusters(x, clustNames = c(), ffns = c(), outdir = "",
+  type = "default", n_threads = 1)
 }
 \arguments{
 \item{x}{A \code{pangenome} object.}
 
 \item{clustNames}{The names of the clusters (OGXXXX...) to be written.}
 
-\item{ffns}{The path to 'all.ffn'.}
+\item{ffns}{The fasta files (as a vector of paths, as returned by
+\code{list.files} with options \code{pattern = 'ffn$'} and
+\code{full.names = TRUE}).}
 
 \item{outdir}{Where to output the files.}
 
-\item{paralogues}{\code{logical}. If paralogues should be also written (if
-present).}
+\item{type}{\code{character}. One of "\code{default}" (one sequence per
+genome on each fasta file), "\code{all}" (including paralogues), or
+"\code{representative}" (one sequence per fasta file, a representative of
+the cluster).}
+
+\item{n_threads}{The number of cpus to use. Used when reading fasta files.}
 }
 \value{
 Fasta formated files.
@@ -87,11 +93,6 @@ ggplot(data=dat,aes(x=Var2,y=value,color=set)) +
 
 invisible(list(corev,panev))
 }
-
-One file per cluster is written. In each file, one sequence from
-each organism is written at the top. If \code{paralogues=TRUE}, and some of
-the sequences do contain paralogues, those sequences are written at the end
-of the file.
 }
 \author{
 Ignacio Ferres

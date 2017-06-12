@@ -11,8 +11,7 @@ getClusterGenes(x, clustNames = c(), annot = F)
 
 \item{clustNames}{A \code{vector} of cluster names.}
 
-\item{annot}{\code{logical} Should original gene annotation be retrieved?
-of \link{seqinr} package be retrieved?}
+\item{annot}{\code{logical} Should original gene annotation be retrieved?}
 }
 \value{
 A \code{list} of ethier internal gene names, original annotation
@@ -22,9 +21,6 @@ passed in \code{clustNames} argument.
 \description{
 Extract a list of genes from a set of clusters in the
 \code{pangenome} object.
-}
-\details{
-Something
 }
 \author{
 Ignacio Ferres

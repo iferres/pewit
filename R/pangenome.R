@@ -334,7 +334,8 @@ pangenome<-function(gffs=c(),
                        clustNames = c(),
                        ffns = paste0(outdir,'all.ffn'),
                        outdir=cludir,
-                       paralogues = TRUE)
+                       type = 'all',
+                       n_threads = n_threads)
     cat(paste0(' DONE!'),
         attr(out,'nclust'),
         'clusters written at',
