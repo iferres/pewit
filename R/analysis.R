@@ -357,7 +357,7 @@ writeFastaClusters <- function(x,
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @export
 coreAlign <- function(x,
-                      ffns=character(),
+                      ffns=c(),
                       level=1,
                       accu=TRUE,
                       n_threads=1L,
