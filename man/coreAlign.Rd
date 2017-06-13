@@ -4,7 +4,7 @@
 \alias{coreAlign}
 \title{Align Core-Genes}
 \usage{
-coreAlign(x, ffns = character(), level = 1, accu = TRUE, n_threads = 1L,
+coreAlign(x, ffns = c(), level = 1, accu = TRUE, n_threads = 1L,
   file.out = "")
 }
 \arguments{
