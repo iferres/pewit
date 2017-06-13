@@ -317,7 +317,7 @@ pangenome<-function(gffs=c(),
   attr(out,'norgs') <- norgs
   attr(out,'nclust') <- nclust
   attr(out,'output') <- outdir
-  attr(out,'package') <- 'NOMBRE'
+  attr(out,'package') <- 'pewit'
 
   class(out) <- c('pangenome')
 
@@ -332,7 +332,9 @@ pangenome<-function(gffs=c(),
     dir.create(cludir)
     writeFastaClusters(x=out,
                        clustNames = c(),
-                       ffns = paste0(outdir,'all.ffn'),
+                       ffns = list.files(path = outdir,
+                                         pattern = 'ffn$',
+                                         full.names = T),
                        outdir=cludir,
                        type = 'all',
                        n_threads = n_threads)
