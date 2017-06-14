@@ -156,7 +156,7 @@ pangenome<-function(gffs=c(),
   fastas <- unlist(fastas,recursive = F)
   cat(' DONE!\n')
 
-  cat('Preparing HMMSCAN.\n')
+  cat('Preparing HMMSEARCH.\n')
   # Split indices and write fastas to distribute among threads with hmmscan
   temps<-splitAndWriteFastas(fastas = fastas,
                              n_threads = n_threads)
