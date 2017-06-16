@@ -4,12 +4,14 @@
 \alias{writeClusters}
 \title{Write Clusters}
 \usage{
-writeClusters(outdir, final.clusters)
+writeClusters(outdir, final.clusters, filename)
 }
 \arguments{
 \item{outdir}{Output directory}
 
 \item{final.clusters}{A list of clusters}
+
+\item{filename}{File name.}
 }
 \value{
 A file 'clusters.txt' in \code{outdir}.

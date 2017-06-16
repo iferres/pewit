@@ -160,10 +160,11 @@ setClusterNames<-function(final.clusters){
 #' @description Write clusters in a fasta-like format.
 #' @param outdir Output directory
 #' @param final.clusters A list of clusters
+#' @param filename File name.
 #' @return A file 'clusters.txt' in \code{outdir}.
 #' @author Ignacio Ferres
-writeClusters <- function(outdir,final.clusters){
-  sink(paste0(outdir,'clusters.txt'))
+writeClusters <- function(outdir,final.clusters,filename){
+  sink(paste0(outdir,filename))
   for(i in 1:length(final.clusters)){
     attr(final.clusters[[i]],'pfamStr') -> pfm
     if(length(pfm)>0){

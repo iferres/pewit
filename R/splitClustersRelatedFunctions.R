@@ -106,32 +106,32 @@ align<-function(rf,type='AA',n_threads=1L,accu=TRUE,mxit1000=TRUE){
   if(type=='AA'){
 
     if(accu){
-      args <- c("--quiet --bl 30","--globalpair")
+      args <- c("--quiet --amino --bl 30","--globalpair")
       if(mxit1000){
         args <- c(args,"--maxiterate 1000")
       }
 
     }else{
       if(length(rf)<2000){
-        args <- c("--quiet --bl 30")
+        args <- c("--quiet --amino --bl 30")
       }else{
-        args <- c('--quiet --bl 30 --retree 1 --maxiterate 0')
+        args <- c('--quiet --amino --bl 30 --retree 1 --maxiterate 0')
       }
 
     }
 
   }else{
     if(accu){
-      args <- c("--quiet","--globalpair")
+      args <- c("--quiet --nuc","--globalpair")
       if(mxit1000){
         args <- c(args,"--maxiterate 1000")
       }
 
     }else{
       if(length(rf)<2000){
-        args <- c("--quiet")
+        args <- c("--quiet --nuc")
       }else{
-        args <- c('--quiet --retree 1 --maxiterate 0')
+        args <- c('--quiet --nuc --retree 1 --maxiterate 0')
       }
     }
   }

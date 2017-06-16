@@ -244,13 +244,28 @@ pangenome<-function(gffs=c(),
   #                            splitClusters(clstr = fastas[pre.clusters[[i]]])
   #                          }
 
+  # A patch for avoiding cds prediction errors in gff (strange 'proteins' that
+  #  gives errors when are aligned with mafft).
+  # which(sapply(splitedClusters,class)!='list') -> errors
+  # if (length(errors)>0){
+  #   pre.clusters[ind.withparalogues[errors]] -> werr
+  #   names(werr) <- paste0('cluster_with_error(s)_',seq_len(length(werr)))
+  #   writeClusters(outdir = outdir,
+  #                 final.clusters = werr,
+  #                 filename='err.txt')
+  #   splitedClusters[-errors] -> splitedClusters
+  #   pre.clusters[-ind.withparalogues[errors]] -> pre.clusters
+  #   ind.withparalogues[-errors] -> ind.withparalogues
+  #   fastas[-sapply(unlist(werr),function(x){which(names(fastas)==x)})] -> fastas
+  # }
+
   cat(' DONE!\n')
 
   cat('Preparing output..\n')
 
   #Merge clusters (Clusters splited in previous step with clusters which
   # doesn't contained paralogues')
-  cat('          ..merging clusters..\n')
+  cat('          ..merging clusters.. ')
   c(unlist(splitedClusters,recursive = F),
     pre.clusters[-ind.withparalogues]) -> final.clusters
 
@@ -295,7 +310,9 @@ pangenome<-function(gffs=c(),
 
   #clusters.txt
   cat('          ..writing clusters:')
-  writeClusters(outdir=outdir,final.clusters=final.clusters)
+  writeClusters(outdir=outdir,
+                final.clusters=final.clusters,
+                filename='clusters.txt')
   cat(paste0(' DONE, saved at ',outdir,'clusters.txt\n'))
 
   #paralogues.txt
