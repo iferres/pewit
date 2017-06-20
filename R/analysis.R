@@ -384,7 +384,9 @@ coreAlign <- function(x,
   },mc.cores = n_threads) -> seqs
   unlist(seqs,recursive = F) -> seqs
 
-  lapply(sid,function(y){seqs[y]}) -> seqs
+  mclapply(sid,function(y){
+    seqs[y]
+  },mc.cores = n_threads) -> seqs
 
   colnames(x$panmatrix) -> orgs
 
@@ -395,11 +397,13 @@ coreAlign <- function(x,
   for (i in 1:length(seqs)){
     if(accu){
       align(rf = seqs[[i]],
+            type = 'DNA',
             n_threads = n_threads,
             accu = TRUE,
             mxit1000 = TRUE) -> a
     }else{
       align(rf = seqs[[i]],
+            type = 'DNA',
             n_threads = n_threads,
             accu=FALSE) -> a
     }
@@ -414,7 +418,7 @@ coreAlign <- function(x,
     }
 
     #Order
-    a[sapply(paste0(orgs,';'),grep,rownames(a)),] -> a
+    a[sapply(paste0('^',orgs,';'),grep,rownames(a)),] -> a
     #Write
     tmp <- tempfile(fileext = '.ali')
     ape::as.alignment(a) -> a
@@ -429,12 +433,13 @@ coreAlign <- function(x,
 
 
   #Concatenate (horizontal)
+  cat('Merging..')
   mclapply(orgs,function(x){
 
     li <- list()
     for (i in 1:length(al)){
       seqinr::read.alignment(al[i],format = 'fasta') -> ral
-      ral$seq[[grep(paste0(x,';'),ral$nam)]] -> li[[i]]
+      ral$seq[[grep(paste0('^',x,';'),ral$nam)]] -> li[[i]]
     }
     he <- paste0('>',x)
     tmp <- tempfile(fileext = '.supergene')
@@ -445,6 +450,7 @@ coreAlign <- function(x,
 
   },mc.cores = n_threads) -> supergenes
   unlist(supergenes) -> supergenes
+  cat(' DONE!\n')
   file.remove(al)
 
   #Concatenate (vertical). Output.
