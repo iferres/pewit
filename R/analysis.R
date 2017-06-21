@@ -192,68 +192,85 @@ getCoreClusters <- function(x,level=1L){
 # }
 
 
-#' #' @name plotRarefaction
-#' #' @title Plot pangenome rarefaction curves
-#' #' @author Ignacio Ferres
-#' #' @description Plot core-genome and pan-genome rarefaction curves.
-#' #' @param x A \code{pangenome} object.
-#' #' @param nsamp \code{integer} The number of random samples with no replace of
-#' #' the lallaa...
-#' #' @details Both the number of shared genes and the total number of genes as
-#' #' a function of the number of organisms sequencially added are plotted. For
-#' #' each new genome added, a sample of \code{nsamp} (\code{default} 10) genomes
-#' #' are evaluated with no replace.
-#' #'
-#' #' A nice \code{ggplot2} plot is drawn. A smooth shadow representing the mean
-#' #' plus or minus a constant times the standard deviation is also ploted.
-#' #' Future versions will allow more customization.
-#' #'
-#' #' Also 2 matrices are invisibly returned, the first for the core rarefaction
-#' #' curve, and the second for the pangenome rarefaction curve. Each cell is the
-#' #' count of either core or pan genes for the ith sample (rows) of jth organism
-#' #' (columns) added.
-#' #' @return A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
-#' #' returned.
-#' #' @importFrom ggplot2 ggplot aes xlab ylab geom_point stat_summary
-#' #' @importFrom reshape2 melt
-#' #' @export
-#' plotRarefaction <- function(x,nsamp=10){
+#' @name plotRarefaction
+#' @title Plot pangenome rarefaction curves
+#' @author Ignacio Ferres
+#' @description Plot core-genome and pan-genome rarefaction curves.
+#' @param x A \code{pangenome} object.
+#' @param nsamp \code{integer} The number of random samples with no replace of
+#' the lallaa...
+#' @details Both the number of shared genes and the total number of genes as
+#' a function of the number of organisms sequencially added are plotted. For
+#' each new genome added, a sample of \code{nsamp} (\code{default} 10) genomes
+#' are evaluated with no replace.
 #'
-#'   seq(1,ncol(x$panmatrix),1)->br
+#' A boxplot is drawn.
+#' Future versions will allow more customization.
 #'
-#'   corev<-matrix(nrow = nsamp,ncol = length(br))->panev
-#'   rownames(corev)<-paste("sample",1:nsamp,sep = "")
-#'   colnames(corev)<-br
-#'   rownames(panev)<-paste("sample",1:nsamp,sep = "")
-#'   colnames(panev)<-br
-#'
-#'   for (b in 1:length(br)){
-#'     for (i in 1:nsamp){
-#'
-#'       x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F]->mu
-#'       if(length(which(rowSums(mu)==0))>0){
-#'         mu[-which(rowSums(mu)==0),,drop=F]->mu
-#'       }
-#'       nrow(mu)->panev[i,b]
-#'       length(which(apply(mu,1,function(x){all(x>0)})))->corev[i,b]
-#'     }
-#'   }
-#'   #require(reshape2)
-#'   melt(corev)->mcorev
-#'   "Core-genome"->mcorev$set
-#'   melt(panev)->mpanev
-#'   "Pan-genome"->mpanev$set
-#'   rbind(mcorev,mpanev)->dat
-#'
-#'   ggplot(data=dat,aes(x=Var2,y=value,color=set)) +
-#'     xlab("# of genomes") + ylab("# of genes") +
-#'     geom_point(alpha=0.5) +
-#'     stat_summary(fun.data="mean_sdl",geom="smooth",
-#'                  alpha=0.25)
-#'
-#'   invisible(list(corev,panev))
-#' }
-#'
+#' Also 2 matrices are invisibly returned, the first for the core rarefaction
+#' curve, and the second for the pangenome rarefaction curve. Each cell is the
+#' count of either core or pan genes for the ith sample (rows) of jth organism
+#' (columns) added.
+#' @return A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
+#' returned.
+# #' @importFrom ggplot2 ggplot aes xlab ylab geom_point stat_summary
+# #' @importFrom reshape2 melt
+#' @importFrom grDevices adjustcolor
+#' @importFrom graphics par boxplot plot axis legend
+#' @export
+plotRarefaction <- function(x,nsamp=10){
+
+  seq(1,ncol(x$panmatrix),1)->br
+
+  corev<-matrix(nrow = nsamp,ncol = length(br))->panev
+  rownames(corev)<-paste("sample",1:nsamp,sep = "")
+  colnames(corev)<-br
+  rownames(panev)<-paste("sample",1:nsamp,sep = "")
+  colnames(panev)<-br
+
+  for (b in 1:length(br)){
+    for (i in 1:nsamp){
+
+      x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F]->mu
+      if(length(which(rowSums(mu)==0))>0){
+        mu[-which(rowSums(mu)==0),,drop=F]->mu
+      }
+      nrow(mu)->panev[i,b]
+      length(which(apply(mu,1,function(x){all(x>0)})))->corev[i,b]
+    }
+  }
+
+  unlist(c(corev,panev)) -> vl
+  ymar <- c(min(vl)*0.85,max(vl)*1.15)
+  xmar <- c(1,length(br))
+
+
+  plot(rep(NA,length(br)+1),
+       ylim = ymar,
+       xaxt='n',
+       # yaxt='n',
+       ylab = '# of genes',
+       xlab = '# of genomes',
+       las=1, mgp=c(3,1,0))
+  axis(1,at = br+.5,labels = br,las=1)
+  par(new=TRUE)
+  boxplot(panev,
+          ylim=ymar,
+          axes=F,
+          border = adjustcolor('#00BFC4',alpha.f = 0.75))
+  par(new=TRUE)
+  boxplot(corev,
+          ylim=ymar,
+          axes=F,
+          border = adjustcolor('#F8766D',alpha.f = 0.75))
+
+  legend(x = 'topleft',
+         legend = c('Pangenome','Coregenome'),
+         fill = c('#00BFC4','#F8766D'), ncol = 2,bty = 'n')
+
+  invisible(list(corev,panev))
+}
+
 
 #' @name writeFastaClusters
 #' @title Write Cluster Sequences in Fasta Format
