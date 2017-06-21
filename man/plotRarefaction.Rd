@@ -9,8 +9,7 @@ plotRarefaction(x, nsamp = 10)
 \arguments{
 \item{x}{A \code{pangenome} object.}
 
-\item{nsamp}{\code{integer} The number of random samples with no replace of
-the lallaa...}
+\item{nsamp}{\code{integer} The number of genomes to sample on each stage.}
 }
 \value{
 A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
