@@ -197,8 +197,7 @@ getCoreClusters <- function(x,level=1L){
 #' @author Ignacio Ferres
 #' @description Plot core-genome and pan-genome rarefaction curves.
 #' @param x A \code{pangenome} object.
-#' @param nsamp \code{integer} The number of random samples with no replace of
-#' the lallaa...
+#' @param nsamp \code{integer} The number of genomes to sample on each stage.
 #' @details Both the number of shared genes and the total number of genes as
 #' a function of the number of organisms sequencially added are plotted. For
 #' each new genome added, a sample of \code{nsamp} (\code{default} 10) genomes
@@ -213,8 +212,6 @@ getCoreClusters <- function(x,level=1L){
 #' (columns) added.
 #' @return A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
 #' returned.
-# #' @importFrom ggplot2 ggplot aes xlab ylab geom_point stat_summary
-# #' @importFrom reshape2 melt
 #' @importFrom grDevices adjustcolor
 #' @importFrom graphics par boxplot plot axis legend
 #' @export

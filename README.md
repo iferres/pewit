@@ -14,7 +14,7 @@ To work, it is required to have installed on your $PATH variable the following s
  * [HMMER 3.1b2](http://hmmer.org/download.html)
  * [MCL](https://www.micans.org/mcl/index.html?sec_software)
 
-The PEWIT package has been designed and tested in UNIX-like platforms.
+The PEWIT package has been designed and tested in UNIX-like platforms only.
 
 ## Citation
 	"Pewit: Pangenome Estimation - Walks Inside Taxonomy"; Ignacio Ferrés, 
