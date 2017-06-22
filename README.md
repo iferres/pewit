@@ -16,7 +16,7 @@ To work, it is required to have installed on your $PATH variable the following s
 
 ### Other external dependencies
 
- * [Pfam-A](ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/) database. The required files are: `Pfam-A.hmm.gz` and `Pfam-A.hmm.dat.gz`. Remember to decompress (gunzip) those files before runing the pipeline.
+ * [Pfam-A](http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/) database. The required files are: `Pfam-A.hmm.gz` and `Pfam-A.hmm.dat.gz`. Remember to decompress (gunzip) those files before runing the pipeline.
 
 ### R packages required
 
