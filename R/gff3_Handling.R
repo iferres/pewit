@@ -50,6 +50,18 @@ extractSeqsFromGff3 <- function(infile,
 
   gfftable[which(gfftable$Type=='CDS'),] -> cds
 
+  #Patch to avoid wrong formatted cds in gff3 file (predictions with artemis
+  # return a different format than Prodigal or Aragorn, so they are discarded.
+  # Usually there are very few (if any) proteins predicted with this method,
+  # nothing to worry about).
+  rl[which(grepl('^\\#\\#sequence-region',rl))] -> sqreg
+  do.call(rbind,strsplit(sqreg,' '))[,2] -> contigs
+  which(!cds$Contig%in%contigs) -> bad
+  if (length(bad)>0){
+    cds[-bad,] -> cds
+  }
+
+
   apply(cds,1,function(x){
     getFfnFaa(fnas=fnas,
               contig = x[1],
