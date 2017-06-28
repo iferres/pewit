@@ -198,6 +198,14 @@ getCoreClusters <- function(x,level=1L){
 #' @description Plot core-genome and pan-genome rarefaction curves.
 #' @param x A \code{pangenome} object.
 #' @param nsamp \code{integer} The number of genomes to sample on each stage.
+#' @param p.col \code{character}. The color of pangenome boxplots borders.
+#' @param c.col \code{character}. The color of coregenome boxplots borders.
+#' @param alpha Factor modifying the opacity alpha. See
+#' \link[grDevices]{adjustcolor}.
+#' @param leg.pos The position of the legend. See \link[graphics]{legend}.
+#' @param y.mar A \code{vector} of factor specifying the margins under and
+#' above the minimum and maximum values in the boxplot.
+#' @param ... Further parameters passed to \link[graphics]{boxplot}.
 #' @details Both the number of shared genes and the total number of genes as
 #' a function of the number of organisms sequencially added are plotted. For
 #' each new genome added, a sample of \code{nsamp} (\code{default} 10) genomes
@@ -215,7 +223,14 @@ getCoreClusters <- function(x,level=1L){
 #' @importFrom grDevices adjustcolor
 #' @importFrom graphics par boxplot plot axis legend
 #' @export
-plotRarefaction <- function(x,nsamp=10){
+plotRarefaction <- function(x,
+                            nsamp = 10,
+                            p.col = '#00BFC4',
+                            c.col = '#F8766D',
+                            alpha = 0.75,
+                            leg.pos = 'topleft',
+                            y.mar = c(0.85, 1.15),
+                            ...){
 
   seq(1,ncol(x$panmatrix),1)->br
 
@@ -238,32 +253,37 @@ plotRarefaction <- function(x,nsamp=10){
   }
 
   unlist(c(corev,panev)) -> vl
-  ymar <- c(min(vl)*0.85,max(vl)*1.15)
-  xmar <- c(1,length(br))
+  ymar <- c(min(vl)*y.mar[1], max(vl)*y.mar[2])
+  # xmar <- c(1,length(br))
 
 
-  plot(rep(NA,length(br)+1),
-       ylim = ymar,
-       xaxt='n',
-       # yaxt='n',
-       ylab = '# of genes',
-       xlab = '# of genomes',
-       las=1, mgp=c(3,1,0))
-  axis(1,at = br+.5,labels = br,las=1)
-  par(new=TRUE)
+  # plot(rep(NA,length(br)+1),
+  #      ylim = ymar,
+  #      xaxt='n',
+  #      # yaxt='n',
+  #      ylab = '# of genes',
+  #      xlab = '# of genomes',
+  #      las=1, mgp=c(3,1,0))
+  # axis(1,at = br+.5,labels = br,las=1)
+  # par(new=TRUE)
   boxplot(panev,
           ylim=ymar,
-          axes=F,
-          border = adjustcolor('#00BFC4',alpha.f = 0.75))
-  par(new=TRUE)
+          ylab='# of genes',xlab='# of genomes',
+          # axes=F,
+          border = adjustcolor(p.col,alpha.f = alpha),
+          ...)
+  # par(new=TRUE)
   boxplot(corev,
-          ylim=ymar,
+          add=TRUE,
+          # ylim=ymar,
           axes=F,
-          border = adjustcolor('#F8766D',alpha.f = 0.75))
+          border = adjustcolor(c.col,alpha.f = alpha))
 
-  legend(x = 'topleft',
+  legend(x = leg.pos,
          legend = c('Pangenome','Coregenome'),
-         fill = c('#00BFC4','#F8766D'), ncol = 2,bty = 'n')
+         fill = c(p.col,c.col),
+         ncol = 2,
+         bty = 'n')
 
   invisible(list(corev,panev))
 }

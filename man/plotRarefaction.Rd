@@ -4,12 +4,27 @@
 \alias{plotRarefaction}
 \title{Plot pangenome rarefaction curves}
 \usage{
-plotRarefaction(x, nsamp = 10)
+plotRarefaction(x, nsamp = 10, p.col = "#00BFC4", c.col = "#F8766D",
+  alpha = 0.75, leg.pos = "topleft", y.mar = c(0.85, 1.15), ...)
 }
 \arguments{
 \item{x}{A \code{pangenome} object.}
 
 \item{nsamp}{\code{integer} The number of genomes to sample on each stage.}
+
+\item{p.col}{\code{character}. The color of pangenome boxplots borders.}
+
+\item{c.col}{\code{character}. The color of coregenome boxplots borders.}
+
+\item{alpha}{Factor modifying the opacity alpha. See
+\link[grDevices]{adjustcolor}.}
+
+\item{leg.pos}{The position of the legend. See \link[graphics]{legend}.}
+
+\item{y.mar}{A \code{vector} of factor specifying the margins under and
+above the minimum and maximum values in the boxplot.}
+
+\item{...}{Further parameters passed to \link[graphics]{boxplot}.}
 }
 \value{
 A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
