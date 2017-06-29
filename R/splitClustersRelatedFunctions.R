@@ -4,6 +4,8 @@
 #' structure or by phmmer comparison plus MCL, and split them in true
 #' orthologues groups.
 #' @param clstr A \code{list} of \code{SeqFastaAA} objects.
+#' @param accuAli \code{logical}. Perform accurate alignment? If number of
+#' sequences is grater than 400, it is set to FALSE.
 #' @details A multiple alignment is performed by mafft aligner. The alignment
 #' is trimmed and a p-distance matrix is calculated. A neighbour joining (NJ)
 #' tree is inferred, and midpoint rooted.
@@ -18,14 +20,13 @@
 #' @author Ignacio Ferres
 #' @importFrom phangorn midpoint
 #' @importFrom ape njs subtrees
-splitClusters <- function(clstr){
-  #Build gene nj tree
+splitClusters <- function(clstr,
+                          accuAli = FALSE){
+  #Align
   if (length(clstr)>400){
-    accu <- FALSE
-  }else{
-    accu <- TRUE
+    accuAli <- FALSE
   }
-  align(rf = clstr,type = 'AA',accu = accu) -> al
+  align(rf = clstr,type = 'AA',accu = accuAli) -> al
   #Trim alignment
   round(nrow(al)*0.8) -> trtr
   which(apply(al,2,function(x){length(which(x=='-'))})>=trtr) -> trimal

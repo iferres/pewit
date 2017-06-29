@@ -4,10 +4,13 @@
 \alias{splitClusters}
 \title{Split clusters}
 \usage{
-splitClusters(clstr)
+splitClusters(clstr, accuAli = FALSE)
 }
 \arguments{
 \item{clstr}{A \code{list} of \code{SeqFastaAA} objects.}
+
+\item{accuAli}{\code{logical}. Perform accurate alignment? If number of
+sequences is grater than 400, it is set to FALSE.}
 }
 \value{
 A \code{list} of true orthologues protein clusters.

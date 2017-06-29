@@ -234,7 +234,7 @@ pangenome<-function(gffs=c(),
   cat('Splitting pre-clusters..')
   mclapply(ind.withparalogues,function(x){
     # splitClusters(clstr = lapply(fastas[pre.clusters[[x]]],memDecompress,'gzip',TRUE))
-    splitClusters(clstr = fastas[pre.clusters[[x]]])
+    splitClusters(clstr = fastas[pre.clusters[[x]]], accuAli = accuAli)
   },mc.cores=n_threads,mc.preschedule = FALSE) -> splitedClusters
 
   # registerDoParallel(cores = n_threads)
