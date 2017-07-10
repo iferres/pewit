@@ -13,6 +13,6 @@ Imports:
   seqinr,
   phangorn
 Description: Describir
-License: What license is it under?
+License: GPL-3 | file LICENSE
 LazyData: TRUE
 RoxygenNote: 6.0.1

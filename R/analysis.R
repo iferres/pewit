@@ -193,25 +193,42 @@ getCoreClusters <- function(x,level=1L){
 
 
 #' @name plotRarefaction
-#' @title Plot pangenome rarefaction curves
-#' @author Ignacio Ferres
-#' @description Plot core-genome and pan-genome rarefaction curves.
-#' @param x A \code{pangenome} object.
+#' @title Plot Pangenome Rarefaction Curves
+#' @description Plot tipical pangenome and coregenome curves.
+#' @param x An object of class \code{pangenome}.
 #' @param nsamp \code{integer} The number of genomes to sample on each stage.
-#' @param p.col \code{character}. The color of pangenome boxplots borders.
-#' @param c.col \code{character}. The color of coregenome boxplots borders.
-#' @param alpha Factor modifying the opacity alpha. See
-#' \link[grDevices]{adjustcolor}.
-#' @param leg.pos The position of the legend. See \link[graphics]{legend}.
-#' @param y.mar A \code{vector} of factor specifying the margins under and
-#' above the minimum and maximum values in the boxplot.
-#' @param ... Further parameters passed to \link[graphics]{boxplot}.
+#' @param plot \code{logical} If \code{TRUE}, then a plot is produced. If not,
+#' just the result matrices are returned invisibly.
+#' @param xlab \code{character} X axis label.
+#' @param ylab \code{character} Y axis label.
+#' @param y.mar A \code{vector} of length 2, indicating a proportion of the
+#' minimum and maximum values to take as bottom and top margins, respectively.
+#' @param las \code{numeric} Style of axis labels. See \code{?par}.
+#' @param pg.col Pangenome points and curve color.
+#' @param cg.col Coregenome points and curve color.
+#' @param pt.pch An \code{integer} specifying a symbol. See \code{?par}.
+#' @param pt.cex \code{numeric} The point size.
+#' @param pt.alpha A factor modifying the opacity alpha of the points.
+#' @param li.lwd \code{integer} The line width.
+#' @param shadow \code{logical} Plot a ribbon showing a function of points
+#' quantiles (quantiles to plot specifyied by \code{shadow.quant}).
+#' @param shadow.quant A \code{vector} of length 2 in {0, 1, 2, 3, 4, 5},
+#' specifying the quantiles to plot.
+#' @param shadow.col The ribbon color.
+#' @param leg \code{logical} Plot a legend?
+#' @param legend A \code{vector} of length 2 with the legend names to plot.
+#' @param leg.pos The position of the legend.
+#' @param leg.cex \code{numeric} The legend size.
+#' @param leg.pt.cex \code{numeric} The legend point size.
+#' @param leg.pch An \code{integer} specifying the legend symbols.
+#' @param leg.bty The legend box type. See \code{?legend}.
+#' @param ... Arguments to be passed to \code{plot()}
 #' @details Both the number of shared genes and the total number of genes as
 #' a function of the number of organisms sequencially added are plotted. For
 #' each new genome added, a sample of \code{nsamp} (\code{default} 10) genomes
 #' are evaluated with no replace.
 #'
-#' A boxplot is drawn.
+#' A scatter plot is drawn.
 #' Future versions will allow more customization.
 #'
 #' Also 2 matrices are invisibly returned, the first for the core rarefaction
@@ -220,72 +237,139 @@ getCoreClusters <- function(x,level=1L){
 #' (columns) added.
 #' @return A \code{list} of 2 \code{nsamp}*# of organisms \code{matrix} is
 #' returned.
+#' @importFrom graphics par plot box axis polygon points lines
+#' @importFrom stats quantile predict loess
 #' @importFrom grDevices adjustcolor
-#' @importFrom graphics par boxplot plot axis legend
-#' @export
 plotRarefaction <- function(x,
                             nsamp = 10,
-                            p.col = '#00BFC4',
-                            c.col = '#F8766D',
-                            alpha = 0.75,
-                            leg.pos = 'topleft',
+                            plot = TRUE,
+                            xlab = "# of genomes",
+                            ylab = "# of genes",
                             y.mar = c(0.85, 1.15),
+                            las = 0,
+                            pg.col = "#E64B35FF",
+                            cg.col = "#4DBBD5FF",
+                            pt.pch = 20,
+                            pt.cex = 1,
+                            pt.alpha = 0.4,
+                            li.lwd = 3,
+                            shadow = TRUE,
+                            shadow.quant=c(2,4),
+                            shadow.col = "grey",
+                            leg = TRUE,
+                            legend = c("Pangenome", "Coregenome"),
+                            leg.pos = "topleft",
+                            leg.cex = par("cex"),
+                            leg.pt.cex = par("cex"),
+                            leg.pch = 22,
+                            leg.bty = 'n',
                             ...){
 
-  seq(1,ncol(x$panmatrix),1)->br
+  if (class(x) != "pangenome")
 
-  corev<-matrix(nrow = nsamp,ncol = length(br))->panev
-  rownames(corev)<-paste("sample",1:nsamp,sep = "")
-  colnames(corev)<-br
-  rownames(panev)<-paste("sample",1:nsamp,sep = "")
-  colnames(panev)<-br
+    ncol(x$panmatrix) -> n
+  seq(1, n, 1) -> br
 
-  for (b in 1:length(br)){
+  corev <- matrix(nrow = nsamp, ncol = n) -> panev
+  rownames(corev) <- paste("sample", 1:nsamp, sep = "")
+  colnames(corev) <- br
+  rownames(panev) <- paste("sample",1:nsamp,sep = "")
+  colnames(panev) <- br
+
+  for (b in 1:n){
     for (i in 1:nsamp){
 
-      x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F]->mu
+      x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F] -> mu
       if(length(which(rowSums(mu)==0))>0){
-        mu[-which(rowSums(mu)==0),,drop=F]->mu
+        mu[-which(rowSums(mu)==0),,drop=F] -> mu
       }
-      nrow(mu)->panev[i,b]
-      length(which(apply(mu,1,function(x){all(x>0)})))->corev[i,b]
+      nrow(mu) -> panev[i,b]
+      length(which(apply(mu,1,function(x){all(x>0)}))) -> corev[i,b]
     }
   }
 
   unlist(c(corev,panev)) -> vl
   ymar <- c(min(vl)*y.mar[1], max(vl)*y.mar[2])
-  # xmar <- c(1,length(br))
+
+  if(plot){
+
+    op <- par(no.readonly = TRUE)
+    on.exit(op)
+
+    plot(NA,
+         type='n',
+         xlim = c(1, ncol(x$panmatrix)),
+         ylim = ymar,
+         axes = FALSE,
+         xlab = xlab,
+         ylab = ylab,
+         ...)
+
+    box()
+    axis(1,at = 1:n, las = las)
+    axis(2, las = las)
+
+    if (shadow){
+
+      apply(panev, 2, quantile) -> pg.quant
+      predict(loess(pg.quant[shadow.quant[1],] ~ c(1:n))) -> pg.mi
+      predict(loess(pg.quant[shadow.quant[2],] ~ c(1:n))) -> pg.ma
+      # pg.mi[n] <- pg.quant[1,n]
+
+      apply(corev, 2, quantile) -> cg.quant
+      predict(loess(cg.quant[shadow.quant[1],] ~ c(1:n))) -> cg.mi
+      predict(loess(cg.quant[shadow.quant[2],] ~ c(1:n))) -> cg.ma
+      # cg.mi[n] <- cg.quant[1,n]
+
+      polygon(x = c(1:n, (n-1):1),
+              y = c(pg.mi[-1], rev(pg.ma)),
+              col = adjustcolor(shadow.col, alpha.f = 0.3),
+              border = F)
+      polygon(x = c(1:n, (n-1):1),
+              y = c(cg.mi, rev(cg.ma)[-1]),
+              col = adjustcolor(shadow.col, alpha.f = 0.3),
+              border = F)
+    }
 
 
-  # plot(rep(NA,length(br)+1),
-  #      ylim = ymar,
-  #      xaxt='n',
-  #      # yaxt='n',
-  #      ylab = '# of genes',
-  #      xlab = '# of genomes',
-  #      las=1, mgp=c(3,1,0))
-  # axis(1,at = br+.5,labels = br,las=1)
-  # par(new=TRUE)
-  boxplot(panev,
-          ylim=ymar,
-          ylab='# of genes',xlab='# of genomes',
-          # axes=F,
-          border = adjustcolor(p.col,alpha.f = alpha),
-          ...)
-  # par(new=TRUE)
-  boxplot(corev,
-          add=TRUE,
-          # ylim=ymar,
-          axes=F,
-          border = adjustcolor(c.col,alpha.f = alpha))
+    apply(panev,
+          1,
+          points,
+          pch = pt.pch,
+          col = adjustcolor(pg.col, alpha.f = pt.alpha),
+          cex = pt.cex)
 
-  legend(x = leg.pos,
-         legend = c('Pangenome','Coregenome'),
-         fill = c(p.col,c.col),
-         ncol = 2,
-         bty = 'n')
+    apply(corev,
+          1,
+          points,
+          pch = pt.pch,
+          col = adjustcolor(cg.col, alpha.f = pt.alpha),
+          cex = pt.cex)
 
-  invisible(list(corev,panev))
+    loess(apply(panev, 2, mean) ~ c(1:n)) -> p.me
+    loess(apply(corev, 2, mean) ~ c(1:n)) -> c.me
+
+    lines(predict(p.me), col = pg.col, lwd = li.lwd)
+    lines(predict(c.me), col = cg.col, lwd = li.lwd)
+
+    if (leg){
+      legend(x = leg.pos,
+             legend = legend,
+             cex = leg.cex,
+             pch = leg.pch,
+             pt.cex = leg.pt.cex,
+             pt.bg = c(pg.col, cg.col),
+             bty = leg.bty,
+             x.intersp = 0.7,
+             y.intersp = 0.7)
+    }
+
+  }
+
+  o <- list(corev, panev)
+  # class(o) <- "Rarefaction"
+
+  invisible(o)
 }
 
 
