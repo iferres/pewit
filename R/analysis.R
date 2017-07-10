@@ -240,6 +240,7 @@ getCoreClusters <- function(x,level=1L){
 #' @importFrom graphics par plot box axis polygon points lines
 #' @importFrom stats quantile predict loess
 #' @importFrom grDevices adjustcolor
+#' @export
 plotRarefaction <- function(x,
                             nsamp = 10,
                             plot = TRUE,
