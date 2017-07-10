@@ -266,9 +266,11 @@ plotRarefaction <- function(x,
                             leg.bty = 'n',
                             ...){
 
-  if (class(x) != "pangenome")
+  if (class(x) != "pangenome"){
+    stop('Object is not of class "pangenome" (pewit).')
+  }
 
-    ncol(x$panmatrix) -> n
+  ncol(x$panmatrix) -> n
   seq(1, n, 1) -> br
 
   corev <- matrix(nrow = nsamp, ncol = n) -> panev
@@ -297,6 +299,7 @@ plotRarefaction <- function(x,
     op <- par(no.readonly = TRUE)
     on.exit(op)
 
+    dev.hold()
     plot(NA,
          type='n',
          xlim = c(1, ncol(x$panmatrix)),
@@ -365,6 +368,7 @@ plotRarefaction <- function(x,
              y.intersp = 0.7)
     }
 
+    dev.flush()
   }
 
   o <- list(corev, panev)

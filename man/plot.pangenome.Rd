@@ -4,42 +4,63 @@
 \alias{plot.pangenome}
 \title{Plot a \code{pangenome} object.}
 \usage{
-\method{plot}{pangenome}(x, horiz = T, border = T, las = 2, xlim = c(0,
-  pretty(max(colSums(x$panmatrix)))[2]), legend.text = T,
-  args.legend = list(x = "topright", bg = NULL, cex = 0.5), mar = c(4, 7, 3,
-  2), plot = T, ...)
+\method{plot}{pangenome}(x, hclustfun = hclust, distfun = dist,
+  edgePar = list(lwd = 1.5), margins = c(5, 7), col = c("white",
+  "#E64B35FF"), raster = TRUE, labRow = NULL, cexRow = 0.5,
+  colSideColors = c("#4DBBD5FF", "#00A087FF", "#3C5488FF"),
+  colSideLabels = c("Singletones", "Accessory", "Soft-Core Genome"),
+  cexKey = 1, ...)
 }
 \arguments{
 \item{x}{\code{pangenome} object.}
 
-\item{horiz}{\code{logical}. Should barplot be drawn horizontal?}
+\item{hclustfun}{Function used to compute the hierarchical clustering.}
 
-\item{border}{\code{logical}. Should borders be drawn?}
+\item{distfun}{Function used to compute the distance (dissimilarity).}
 
-\item{las}{\code{numeric}. see \code{\link[graphics]{par}}.}
+\item{edgePar}{A list of parameters to be passed to plot.dendrogram().}
 
-\item{xlim}{\code{vector}. limits for the x axis.}
+\item{margins}{A \code{numeric} vector of length 2 containing the margins
+for column and row names, repectively.}
 
-\item{legend.text}{\code{logical}. see \code{\link[graphics]{barplot}}.}
+\item{col}{A \code{character} vector with the colors of the presence/absence
+plot. The first color indicate absence, and the second indicates presence.}
 
-\item{args.legend}{\code{list} of additional arguments to pass to
-\code{\link[graphics]{legend}}.}
+\item{raster}{\code{logical} See \code{useRaster} parameter in \code{?image}.}
 
-\item{mar}{\code{vector}. see \code{\link[graphics]{par}}.}
+\item{labRow}{A \code{character} vector of length equal to the number of
+organisms in the pangenome object. By default it uses the original file
+names without the extension (.gff).}
 
-\item{plot}{\code{logical} If FALSE, nothing is plotted.}
+\item{cexRow}{\code{numeric} The size of row labels.}
 
-\item{...}{arguments to be passed to \code{\link[graphics]{barplot}}.}
-}
-\value{
-a \code{martrix} with the count of softcore, accessory and singleton
-genes for each organism used to draw the barplot.
+\item{colSideColors}{A \code{character} vector of length 3 specifying the
+colors to use on the column bar. The colors correspond, in order, to
+singletons, accessory and soft-core clusters.}
+
+\item{colSideLabels}{A \code{character} vector of length 3 to specify the
+labels to use to indicate Singletons, Accessory genes, and Soft-core genes.}
+
+\item{cexKey}{\code{numeric} The size of the key labels.}
+
+\item{...}{Unused}
 }
 \description{
 Generic function to plot a \code{pangenome} object.
 }
 \details{
-A stacked barplot is generated. Each bar corresponds to each
-organisms, and the bars show the proportion of soft-core, accessory and
-singletons.
+A heatmap-like image is plotted attached with a dendrogram. The
+grid shows the presence or absence of a gene (column), for each
+organism (rows). The columns are ordered so the core genes appear at the
+left, the accessory genes at the middle, and the singletones at the right
+of the grid.
+
+The left dendrogram is computed based on a dissimilarity measure between
+the vectors of presence/absence of 2 genomes at a time.
+
+The top bar indicates the genes (columns) assigned as a part of the soft-
+core genome, the accessory genome, and the singletones.
+}
+\author{
+Ignacio Ferres
 }

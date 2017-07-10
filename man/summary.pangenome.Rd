@@ -12,11 +12,8 @@
 \item{...}{Unused}
 }
 \value{
-A \code{table} with: Number of organisms, Number of genes, Number of
-clusters, Number of core-genes present at 100% of organisms, Number of soft-
-core genes present in at least 95% of organisms, Number of accessory genes
-present at less than 95% of organisms but that there are not singletones,
-and Number of singletones.
+A \code{matrix} with softcore, accessory and singletons numbers for
+each genome.
 }
 \description{
 Summary method for class \code{pangenome}
