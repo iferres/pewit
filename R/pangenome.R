@@ -544,7 +544,7 @@ plot.pangenome <- function(x,
                            labRow = NULL,
                            cexRow = 0.5,
                            colSideColors = c('#4DBBD5FF','#00A087FF','#3C5488FF'),
-                           colSideLabels = c('Singletones','Accessory','Soft-Core Genome'),
+                           colSideLabels = c('Softcore genome','Accessory','Singletones'),
                            cexKey = 1,
                            ...){
 
@@ -626,9 +626,9 @@ plot.pangenome <- function(x,
   k2 <- c(ncore95/nr, 0, (ncore95+naccs)/nr, 0.5)
   k3 <- c(0, 0, ncore95/nr, 0.5)
   #draw
-  rect(k1, col = colSideColors[1], border = NA)
-  rect(k2, col = colSideColors[2], border = NA)
-  rect(k3, col = colSideColors[3], border = NA)
+  rect(k1[1],k1[2],k1[3],k1[4], col = colSideColors[1], border = NA)
+  rect(k2[1],k2[2],k2[3],k2[4], col = colSideColors[2], border = NA)
+  rect(k3[1],k3[2],k3[3],k3[4], col = colSideColors[3], border = NA)
 
   ### Key ###
   par(mar=c(1,0,2,7))

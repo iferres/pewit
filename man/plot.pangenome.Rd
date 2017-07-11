@@ -8,7 +8,7 @@
   edgePar = list(lwd = 1.5), margins = c(5, 7), col = c("white",
   "#E64B35FF"), raster = TRUE, labRow = NULL, cexRow = 0.5,
   colSideColors = c("#4DBBD5FF", "#00A087FF", "#3C5488FF"),
-  colSideLabels = c("Singletones", "Accessory", "Soft-Core Genome"),
+  colSideLabels = c("Softcore genome", "Accessory", "Singletones"),
   cexKey = 1, ...)
 }
 \arguments{
