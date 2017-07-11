@@ -17,6 +17,10 @@ extractSeqsFromGff3 <- function(infile,
                                 keep = 'aa',
                                 write.in.path='dna'){
 
+  if (is.null(in.path)){
+    in.path <- '.'
+  }
+
   if(!dir.exists(in.path)){
     stop('Directory does not exist.')
   }
@@ -86,10 +90,6 @@ extractSeqsFromGff3 <- function(infile,
   }
   names(fin) <- nam
 
-  if (is.null(in.path)){
-    in.path <- '.'
-  }
-
   if (write.in.path == 'dna'){
 
     ffn <- sapply(fin,function(x){x[[1]]})
@@ -130,16 +130,26 @@ extractSeqsFromGff3 <- function(infile,
 
   }else if(write.in.path == 'none'){
     ffn <- sapply(fin,function(x){x[[1]]})
+    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
     faa <- sapply(fin,function(x){x[[2]]})
+    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
   }
 
   if (keep == 'dna'){
 
+    if(!exists('ffn')){
+      ffn <- sapply(fin,function(x){x[[1]]})
+      names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
+    }
     ffn <- lapply(ffn, function(x){paste0(x, collapse = '')})
     ffn
 
   }else if(keep == 'aa'){
 
+    if (!exists('faa')){
+      faa <-  sapply(fin,function(x){x[[2]]})
+      names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
+    }
     faa <- lapply(faa, function(x){paste0(x, collapse = '')})
     faa
 
@@ -150,6 +160,7 @@ extractSeqsFromGff3 <- function(infile,
         paste0(y, collapse = '')
       })
     })
+    names(fin) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(fin))
     fin
 
   }else if (keep == 'none'){
