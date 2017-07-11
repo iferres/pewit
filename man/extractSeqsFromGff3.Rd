@@ -4,17 +4,22 @@
 \alias{extractSeqsFromGff3}
 \title{Extract Sequences from Gff3 file}
 \usage{
-extractSeqsFromGff3(infile, in.path = NULL, keep.aa = T)
+extractSeqsFromGff3(infile, in.path = NULL, keep = "aa",
+  write.in.path = "dna")
 }
 \arguments{
 \item{infile}{\code{character}. The gff3 filename.}
 
 \item{in.path}{Where the output (fasta files) will be written.}
 
-\item{keep.aa}{\code{logical}. Should AA sequences be kept in memory?}
+\item{keep}{\code{character}. What to keep in memory. One of "aa", "dna",
+"both" or "none".}
+
+\item{write.in.path}{\code{character}. What to write \code{in.path}. One of
+"aa", "dna", "both" or "none".}
 }
 \value{
-A \code{list} with CDS gene and protein sequences.
+A \code{list} with CDS gene and/or protein sequences, if specifyied.
 }
 \description{
 Extract Sequences from Gff3 file and outputs a list of element,

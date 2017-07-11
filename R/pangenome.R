@@ -25,6 +25,8 @@
 #' @param datPfam \code{character} with the path to Pfam-A.hmm.dat file.
 #' @param n_threads \code{integer}. The number of threads to use.
 #' @param dir_out Name of output directory to be created.
+#' @param writeFfns \code{logical}. If should write ffn sequences. If \code{alignCore}
+#' is set to \code{TRUE} (see below), this option is set to TRUE.
 #' @param writeFastas \code{logical}. Write fasta files with gene sequences for
 #' each cluster?
 #' @param pmOutfileType The type of pan-matrix you want to be written in
@@ -90,7 +92,8 @@ pangenome<-function(gffs=c(),
                     datPfam=character(),
                     n_threads=1L,
                     dir_out='out',
-                    writeFastas=F,
+                    writeFfns=FALSE,
+                    writeFastas=FALSE,
                     pmOutfileType='representative',
                     alignCore=TRUE,
                     accuAli=FALSE,
@@ -147,11 +150,13 @@ pangenome<-function(gffs=c(),
 #   fastas<-unlist(lapply(fastas,function(x){x[[1]]}),recursive = F)
   cat('Extracting and translating gene sequences from gff files..')
 
-  mclapply(gffs,function(x){
+  wffns <- ifelse(writeFfns,'dna','none')
+  fastas <- mclapply(gffs,function(x){
     extractSeqsFromGff3(infile = x,
                         in.path = outdir,
-                        keep.aa = T)
-  },mc.cores = n_threads,mc.preschedule = FALSE) -> fastas
+                        keep = 'aa',
+                        write.in.path = ifelse(alignCore, 'dna', wffns))
+  }, mc.cores = n_threads, mc.preschedule = FALSE)
 
   fastas <- unlist(fastas,recursive = F)
   cat(' DONE!\n')

@@ -5,9 +5,9 @@
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
 pangenome(gffs = c(), hmmPfam = character(), datPfam = character(),
-  n_threads = 1L, dir_out = "out", writeFastas = F,
-  pmOutfileType = "representative", alignCore = TRUE, accuAli = FALSE,
-  coreLevel = 1)
+  n_threads = 1L, dir_out = "out", writeFfns = FALSE,
+  writeFastas = FALSE, pmOutfileType = "representative", alignCore = TRUE,
+  accuAli = FALSE, coreLevel = 1)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 files as retrieved by prokka (Seeman,
@@ -20,6 +20,9 @@ pangenome(gffs = c(), hmmPfam = character(), datPfam = character(),
 \item{n_threads}{\code{integer}. The number of threads to use.}
 
 \item{dir_out}{Name of output directory to be created.}
+
+\item{writeFfns}{\code{logical}. If should write ffn sequences. If \code{alignCore}
+is set to \code{TRUE} (see below), this option is set to TRUE.}
 
 \item{writeFastas}{\code{logical}. Write fasta files with gene sequences for
 each cluster?}

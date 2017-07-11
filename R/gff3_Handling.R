@@ -5,17 +5,25 @@
 #' protein sequence.
 #' @param infile \code{character}. The gff3 filename.
 #' @param in.path Where the output (fasta files) will be written.
-#' @param keep.aa \code{logical}. Should AA sequences be kept in memory?
-#' @return A \code{list} with CDS gene and protein sequences.
+#' @param keep \code{character}. What to keep in memory. One of "aa", "dna",
+#' "both" or "none".
+#' @param write.in.path \code{character}. What to write \code{in.path}. One of
+#' "aa", "dna", "both" or "none".
+#' @return A \code{list} with CDS gene and/or protein sequences, if specifyied.
 #' @author Gregorio Iraola and Ignacio Ferres.
 #' @importFrom seqinr as.SeqFastadna s2c
 extractSeqsFromGff3 <- function(infile,
                                 in.path=NULL,
-                                keep.aa=T){
+                                keep = 'aa',
+                                write.in.path='dna'){
 
   if(!dir.exists(in.path)){
     stop('Directory does not exist.')
   }
+
+  write.in.path <- match.arg(write.in.path, c('aa','dna','both','none'))
+
+  keep <- match.arg(keep, c('aa', 'dna', 'both', 'none'))
 
   readLines(infile) -> rl
   if(rl[1]!="##gff-version 3"){
@@ -71,33 +79,83 @@ extractSeqsFromGff3 <- function(infile,
               product = x[5])
   }) -> fin
   nam <- sapply(fin,function(x){attr(x[[1]],'name')})
+
   if(any(grepl('#',nam))){
     warning('Conflictive character "#", will be substituted by "_".')
     gsub('#','_',nam) -> nam
   }
   names(fin) <- nam
 
-  if(is.null(in.path)){
-    fin
-  }else{
-    sapply(fin,function(x){x[[1]]}) -> ffn
+  if (is.null(in.path)){
+    in.path <- '.'
+  }
+
+  if (write.in.path == 'dna'){
+
+    ffn <- sapply(fin,function(x){x[[1]]})
     names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
     write.fasta(ffn,
                 names = names(ffn),
                 file.out = paste0(in.path,
                                   sub('.gff','.ffn',rev(strsplit(infile,'/')[[1]])[1]),
                                   collapse = '/'))
-    sapply(fin,function(x){x[[2]]}) -> faa
+
+  }else if(write.in.path == 'aa'){
+
+    faa <- sapply(fin,function(x){x[[2]]})
     names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
     write.fasta(faa,
                 names = names(faa),
                 file.out = paste0(in.path,
                                   sub('.gff','.faa',rev(strsplit(infile,'/')[[1]])[1]),
                                   collapse = '/'))
-    if (keep.aa){
-      lapply(faa,function(x){paste0(x,collapse = '')}) -> faa
-      faa
-    }
+
+  }else if(write.in.path == 'both'){
+
+    ffn <- sapply(fin,function(x){x[[1]]})
+    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
+    write.fasta(ffn,
+                names = names(ffn),
+                file.out = paste0(in.path,
+                                  sub('.gff','.ffn',rev(strsplit(infile,'/')[[1]])[1]),
+                                  collapse = '/'))
+
+    faa <- sapply(fin,function(x){x[[2]]})
+    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
+    write.fasta(faa,
+                names = names(faa),
+                file.out = paste0(in.path,
+                                  sub('.gff','.faa',rev(strsplit(infile,'/')[[1]])[1]),
+                                  collapse = '/'))
+
+  }else if(write.in.path == 'none'){
+    ffn <- sapply(fin,function(x){x[[1]]})
+    faa <- sapply(fin,function(x){x[[2]]})
+  }
+
+  if (keep == 'dna'){
+
+    ffn <- lapply(ffn, function(x){paste0(x, collapse = '')})
+    ffn
+
+  }else if(keep == 'aa'){
+
+    faa <- lapply(faa, function(x){paste0(x, collapse = '')})
+    faa
+
+  }else if (keep == 'both'){
+
+    fin <- lapply(fin,function(x){
+      lapply(x, function(y){
+        paste0(y, collapse = '')
+      })
+    })
+    fin
+
+  }else if (keep == 'none'){
+
+    cat('Nothing to return.\n')
+
   }
 
 }
