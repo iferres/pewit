@@ -303,13 +303,16 @@ pangenome<-function(gffs=c(),
     as.list(hu)
   ) -> final.clusters
 
-  strsplit(names(final.clusters),';') -> pfamstr
+  if(!is.null(names(final.clusters))){
+    strsplit(names(final.clusters),';') -> pfamstr
+
+    for (i in 1:length(final.clusters)){
+      attr(final.clusters[[i]],'pfamStr') <- pfamstr[[i]]
+    }
+  }
 
   #Set cluster names
   names(final.clusters) <- setClusterNames(final.clusters = final.clusters)
-  for (i in 1:length(final.clusters)){
-    attr(final.clusters[[i]],'pfamStr') <- pfamstr[[i]]
-  }
 
   #Clusters with recent paralogues:
   which(sapply(final.clusters,function(x){
