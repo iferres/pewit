@@ -235,6 +235,8 @@ pangenome<-function(gffs=c(),
 
   }else{
     cat('Either hmmPfam or/and datPfam arguments were left NULL. Pfam search will be skipped.\n')
+    clu_dom <- NULL
+    clu_fam <- NULL
   }
 
 
