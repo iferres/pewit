@@ -21,8 +21,12 @@
 #' profile of the group of organisms.
 #' @param gffs A \code{vector} of gff3 files as retrieved by prokka (Seeman,
 #' 2014).
-#' @param hmmPfam \code{character} with the path to Pfam-A.hmm file.
-#' @param datPfam \code{character} with the path to Pfam-A.hmm.dat file.
+#' @param hmmPfam \code{character} with the path to Pfam-A.hmm file. If any of
+#' \code{hmmPfam} or \code{datPfam} is left \code{NULL}, then the pfam step is
+#' skipped.
+#' @param datPfam \code{character} with the path to Pfam-A.hmm.dat file. If any
+#'  of \code{hmmPfam} or \code{datPfam} is left \code{NULL}, then the pfam step
+#'  is skipped.
 #' @param n_threads \code{integer}. The number of threads to use.
 #' @param dir_out Name of output directory to be created.
 #' @param writeFfns \code{logical}. If should write ffn sequences. If \code{alignCore}
@@ -88,8 +92,8 @@
 #' @importFrom utils write.table
 #' @export
 pangenome<-function(gffs=c(),
-                    hmmPfam=character(),
-                    datPfam=character(),
+                    hmmPfam=NULL,
+                    datPfam=NULL,
                     n_threads=1L,
                     dir_out='out',
                     writeFfns=FALSE,
@@ -138,11 +142,6 @@ pangenome<-function(gffs=c(),
                                'allgenes',
                                'none'))
 
-  #Process Pfam-A.dat
-  cat('\n\nProcessing Pfam-A.hmm.dat..')
-  ref<-processPfam_A_Dat(datPfam = datPfam,
-                         n_threads = n_threads)
-  cat(' DONE!\n')
 
   #deprecated:
 #   #Format fasta headers
@@ -161,66 +160,83 @@ pangenome<-function(gffs=c(),
   fastas <- unlist(fastas,recursive = F)
   cat(' DONE!\n')
 
-  cat('Preparing HMMSEARCH.\n')
-  # Split indices and write fastas to distribute among threads with hmmscan
-  temps<-splitAndWriteFastas(fastas = fastas,
-                             n_threads = n_threads)
 
-  #Deprecated:
-  # #Run hmmscan (HMMER)
-  # cat('Running HMMSCAN against Pfam-A database (this can take a while)..')
-  # registerDoParallel(cores = n_threads)
-  # hmm.temps<-foreach(i=seq_along(temps),.inorder = F) %dopar% {
-  #   tempfile(pattern = "tmpo",tmpdir = tempdir(),fileext = ".tab")->dmblout
-  #   paste("hmmscan -o /dev/null --domtblout ",dmblout,
-  #         " --noali --cut_ga --cpu 0 ",
-  #         hmmPfam," ",temps[i],sep = "")->pfm
-  #   system(pfm)
-  #   dmblout
-  # }
-  # cat(' DONE!\n')
 
-  #Index hmm if not yet
-  if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
-    cat('Preparing Pfam-A.hmm files for hmmscan search.\n')
-    paste0('hmmpress ',hmmPfam) -> hmmpress
-    system(hmmpress)
+  if (!any(sapply(list(hmmPfam,datPfam), is.null))){
+
+
+    #Process Pfam-A.dat
+    cat('\n\nProcessing Pfam-A.hmm.dat..')
+    ref<-processPfam_A_Dat(datPfam = datPfam,
+                           n_threads = n_threads)
+    cat(' DONE!\n')
+
+    cat('Preparing HMMSEARCH.\n')
+    # Split indices and write fastas to distribute among threads with hmmscan
+    temps<-splitAndWriteFastas(fastas = fastas,
+                               n_threads = n_threads)
+
+    #Deprecated:
+    # #Run hmmscan (HMMER)
+    # cat('Running HMMSCAN against Pfam-A database (this can take a while)..')
+    # registerDoParallel(cores = n_threads)
+    # hmm.temps<-foreach(i=seq_along(temps),.inorder = F) %dopar% {
+    #   tempfile(pattern = "tmpo",tmpdir = tempdir(),fileext = ".tab")->dmblout
+    #   paste("hmmscan -o /dev/null --domtblout ",dmblout,
+    #         " --noali --cut_ga --cpu 0 ",
+    #         hmmPfam," ",temps[i],sep = "")->pfm
+    #   system(pfm)
+    #   dmblout
+    # }
+    # cat(' DONE!\n')
+
+    #Index hmm if not yet
+    if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
+      cat('Preparing Pfam-A.hmm files for hmmscan search.\n')
+      paste0('hmmpress ',hmmPfam) -> hmmpress
+      system(hmmpress)
+    }
+
+    #Run hmmsearch (HMMER)
+    cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
+    mclapply(temps, function(x){
+
+      runHmmsearch(fasta = x,
+                   pfam = hmmPfam,
+                   n_threads = 0L)
+
+    }, mc.cores = n_threads) -> hmm.temps
+    cat(' DONE!\n')
+    # file.remove(temps)
+
+    #Load hmmscan output and process
+    cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
+    unlist(hmm.temps)->pout
+
+    registerDoParallel(cores = n_threads)
+    tout<-foreach(i=seq_along(pout),.combine =rbind,.inorder = T)%dopar%{
+      processHmmsearch(pout=pout[i],ref=ref)
+    }
+    cat(' DONE!\n')
+    file.remove(pout)
+
+    #Clustering by domain structure only
+    cat('Clustering sequences per domain structure..')
+    split(x = rownames(tout),
+          f = tout$Domain)[-1]->clu_dom
+    cat(' DONE!\n')
+
+    #Cluster sequences without domains asigned, by family
+    cat('Clustering sequences per family..')
+    split(x = rownames(tout[which(tout$Domain==''),]),
+          f = tout$Family[which(tout$Domain=='')])[-1]->clu_fam
+    cat(' DONE!\n')
+
+
+  }else{
+    cat('Either hmmPfam or/and datPfam arguments were left NULL. Pfam search will be skipped.\n')
   }
 
-  #Run hmmsearch (HMMER)
-  cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
-  mclapply(temps, function(x){
-
-    runHmmsearch(fasta = x,
-                 pfam = hmmPfam,
-                 n_threads = 0L)
-
-  }, mc.cores = n_threads) -> hmm.temps
-  cat(' DONE!\n')
-  # file.remove(temps)
-
-  #Load hmmscan output and process
-  cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
-  unlist(hmm.temps)->pout
-
-  registerDoParallel(cores = n_threads)
-  tout<-foreach(i=seq_along(pout),.combine =rbind,.inorder = T)%dopar%{
-    processHmmsearch(pout=pout[i],ref=ref)
-  }
-  cat(' DONE!\n')
-  file.remove(pout)
-
-  #Clustering by domain structure only
-  cat('Clustering sequences per domain structure..')
-  split(x = rownames(tout),
-        f = tout$Domain)[-1]->clu_dom
-  cat(' DONE!\n')
-
-  #Cluster sequences without domains asigned, by family
-  cat('Clustering sequences per family..')
-  split(x = rownames(tout[which(tout$Domain==''),]),
-        f = tout$Family[which(tout$Domain=='')])[-1]->clu_fam
-  cat(' DONE!\n')
 
   # PHMMER + MCL
   cat('Clustering orphan sequences (phmmer + mcl) ..')

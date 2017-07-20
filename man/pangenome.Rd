@@ -4,18 +4,22 @@
 \alias{pangenome}
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
-pangenome(gffs = c(), hmmPfam = character(), datPfam = character(),
-  n_threads = 1L, dir_out = "out", writeFfns = FALSE,
-  writeFastas = FALSE, pmOutfileType = "representative", alignCore = TRUE,
-  accuAli = FALSE, coreLevel = 1)
+pangenome(gffs = c(), hmmPfam = NULL, datPfam = NULL, n_threads = 1L,
+  dir_out = "out", writeFfns = FALSE, writeFastas = FALSE,
+  pmOutfileType = "representative", alignCore = TRUE, accuAli = FALSE,
+  coreLevel = 1)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 files as retrieved by prokka (Seeman,
 2014).}
 
-\item{hmmPfam}{\code{character} with the path to Pfam-A.hmm file.}
+\item{hmmPfam}{\code{character} with the path to Pfam-A.hmm file. If any of
+\code{hmmPfam} or \code{datPfam} is left \code{NULL}, then the pfam step is
+skipped.}
 
-\item{datPfam}{\code{character} with the path to Pfam-A.hmm.dat file.}
+\item{datPfam}{\code{character} with the path to Pfam-A.hmm.dat file. If any
+of \code{hmmPfam} or \code{datPfam} is left \code{NULL}, then the pfam step
+is skipped.}
 
 \item{n_threads}{\code{integer}. The number of threads to use.}
 
