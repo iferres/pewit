@@ -17,7 +17,7 @@ runHmmsearch <- function(fasta,
   tempfile(pattern = 'tmpo',fileext = '.tab') -> domtblout
   paste0('hmmsearch -o /dev/null --domtblout ',
          domtblout,
-         ' --noali --cut_ga --cpu ',
+         ifelse(pfam, ' --noali --cut_ga --cpu ', ' --noali --cpu'),
          as.character(n_threads),
          ' ',
          pfam,
