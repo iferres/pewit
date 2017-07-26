@@ -50,7 +50,7 @@ realocateSingletons <- function(final.clusters,
   ct <- paste0('cat ', paste0(mn, collapse = ' '), ' > ', mdls)
   system(ct)
   file.remove(mn)
-  hmmPress(model = mdls)
+  press <- hmmPress(model = mdls)
 
   sqs <- unlist(final.clusters[sog])
   sing <- tempfile()
@@ -60,7 +60,8 @@ realocateSingletons <- function(final.clusters,
                          hmm = mdls,
                          pfam = FALSE,
                          n_threads = n_threads)
-  file.remove(sing)
+  file.remove(press)
+
 
 
 
@@ -101,4 +102,5 @@ hmmBuild <- function(ali, name){
 hmmPress <- function(model){
   hmmpress <- paste('hmmpress', models)
   system(hmmpress)
+  paste0(model, c('','.h3f', '.h3i', '.h3m', '.h3p'))
 }
