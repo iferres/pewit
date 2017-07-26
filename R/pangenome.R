@@ -202,7 +202,8 @@ pangenome<-function(gffs=c(),
     mclapply(temps, function(x){
 
       runHmmsearch(fasta = x,
-                   pfam = hmmPfam,
+                   hmm = hmmPfam,
+                   pfam = TRUE,
                    n_threads = 0L)
 
     }, mc.cores = n_threads) -> hmm.temps
