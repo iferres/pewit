@@ -18,10 +18,10 @@ runHmmsearch <- function(fasta,
   paste0('hmmsearch -o /dev/null',
          ifelse(pfam, ' --domtblout ', ' --tblout '),
          blout,
-         ifelse(pfam, ' --noali --cut_ga --cpu ', ' --noali -E 1e-10 --cpu'),
+         ifelse(pfam, ' --noali --cut_ga --cpu ', ' --noali -E 1e-10 --cpu '),
          as.character(n_threads),
          ' ',
-         pfam,
+         hmm,
          ' ',
          fasta) -> pfm
   system(pfm)

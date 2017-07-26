@@ -27,7 +27,7 @@ realocateSingletons <- function(final.clusters,
     seqinr::write.fasta(sapply(ap, seqinr::s2c, simplify = FALSE),
                         names = names(ap),
                         file.out = tmp)
-    hmmModel <- hmmBuild(ali = tmp)
+    hmmModel <- hmmBuild(ali = tmp, name = names(final.clusters)[x])
     file.remove(tmp)
 
     return(hmmModel)
@@ -90,9 +90,9 @@ realocateSingletons <- function(final.clusters,
 
 
 
-hmmBuild <- function(ali){
+hmmBuild <- function(ali, name){
   tmp <- tempfile()
-  hmmbuild <- paste('hmmbuild -o /dev/null --amino', tmp, ali)
+  hmmbuild <- paste('hmmbuild -o /dev/null --amino -n', name, tmp, ali)
   system(hmmbuild)
   tmp
 }
