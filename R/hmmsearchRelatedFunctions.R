@@ -3,12 +3,15 @@
 #' @description Takes a fasta file and a Hidden Markov Model profile and
 #' performs a search of the former over the latter.
 #' @param fasta A protein fasta file.
-#' @param pfam A hmm file. Must be pressed (see hmmpress from HMMER manual).
+#' @param hmm A hmm file. Must be pressed (see hmmpress from HMMER manual).
+#' @param pfam \code{logical}. If hmm file is the Pfam-A.hmm file or not
+#' (custom hmm models).
 #' @param n_threads An \code{integer}. The number of cores to use.
 #' @return The path to a temporary file where the hmmsearch output is placed.
 #' @author Ignacio Ferres
 runHmmsearch <- function(fasta,
-                         pfam,
+                         hmm,
+                         pfam = FALSE,
                          n_threads=1L){
   #run hmmsearch
   tempfile(pattern = 'tmpo',fileext = '.tab') -> domtblout
