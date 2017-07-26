@@ -14,10 +14,11 @@ runHmmsearch <- function(fasta,
                          pfam = FALSE,
                          n_threads=1L){
   #run hmmsearch
-  tempfile(pattern = 'tmpo',fileext = '.tab') -> domtblout
-  paste0('hmmsearch -o /dev/null --domtblout ',
-         domtblout,
-         ifelse(pfam, ' --noali --cut_ga --cpu ', ' --noali --cpu'),
+  tempfile(pattern = 'tmpo',fileext = '.tab') -> blout
+  paste0('hmmsearch -o /dev/null',
+         ifelse(pfam, ' --domtblout ', ' --tblout '),
+         blout,
+         ifelse(pfam, ' --noali --cut_ga --cpu ', ' --noali -E 1e-10 --cpu'),
          as.character(n_threads),
          ' ',
          pfam,
@@ -25,7 +26,7 @@ runHmmsearch <- function(fasta,
          fasta) -> pfm
   system(pfm)
   file.remove(fasta)
-  domtblout
+  blout
 
 }
 
