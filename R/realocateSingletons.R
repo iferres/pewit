@@ -55,8 +55,13 @@ realocateSingletons <- function(final.clusters,
   sqs <- unlist(final.clusters[sog])
   sing <- tempfile()
   seqinr::write.fasta(fastas[sqs], names = sqs, file.out = sing)
-  pewit:::hmm
+
+  tblout <- runHmmsearch(fasta = sing,
+                         hmm = mdls,
+                         pfam = FALSE,
+                         n_threads = n_threads)
   file.remove(sing)
+
 
 
   # for (i in 1:length(sge)){
