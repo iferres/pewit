@@ -11,9 +11,14 @@ realocateSingletons <- function(final.clusters,
   sog <- which(ln==1)
 
   mn <- parallel::mclapply(aog, function(x){
+
+
+    # Takes up to five sequences from each accs cluster
     fc <- final.clusters[[x]]
     if (length(fc)>5) {set.seed(seed); fc <- sample(fc, 5)}
     fa <- fastas[fc]
+
+    # Align
     ali <- align(rf = fa, type = 'AA', n_threads = 1, accu = TRUE)
     ap <- apply(ali, 1, function(x){paste0(x, collapse = '')})
 
@@ -21,23 +26,30 @@ realocateSingletons <- function(final.clusters,
     seqinr::write.fasta(sapply(ap, seqinr::s2c, simplify = FALSE),
                         names = names(ap),
                         file.out = tmp)
+
+    #Build hmm model
     hmmModel <- hmmBuild(ali = tmp, name = names(final.clusters)[x])
-    # set threshold
     press <- hmmPress(hmmModel)
+
+    # set threshold. hmmsearch model vs proteins used to build model,
+    #  save 4/5 of the minimum threshold in tblout.
     se <- runHmmsearch(tmp, hmmModel, pfam = FALSE, n_threads = 1L)
     tbl <- readTblout(tblout = se)
     tr <- min(tbl$Score) * 4/5
     file.remove(se)
     file.remove(press[-1])
 
+    # Output model filename and computed threshold.
     attr(hmmModel, 'threshold') <- tr
-
     return(hmmModel)
 
+
   }, mc.cores = n_threads)
+
   tr <- sapply(mn, attr, 'threshold')
   mn <- unlist(mn)
 
+  # Concatenates all the generated models
   mdls <- paste0(tempdir(),'/accsModels.hmm')
   ct <- paste0('cat ', paste0(mn, collapse = ' '), ' > ', mdls)
   system(ct)
@@ -48,6 +60,7 @@ realocateSingletons <- function(final.clusters,
   sing <- tempfile()
   seqinr::write.fasta(fastas[sqs], names = sqs, file.out = sing)
 
+  # Search all singletons vs hmm models
   tblout <- runHmmsearch(fasta = sing,
                          hmm = mdls,
                          pfam = FALSE,
@@ -56,13 +69,18 @@ realocateSingletons <- function(final.clusters,
 
   m <- readTblout(tblout = tblout)
 
+  # Only conserve hits above the computed threshold.
   spl <- split(m, m$queryName)
+  rm(m)
   filt <- lapply(names(spl), function(x){
     cu <- tr[x]
     ta <- spl[[x]]
     ta[which(ta$Score>=cu),]
   })
   m <- do.call(rbind, filt)
+
+
+
 
 
 }
