@@ -79,7 +79,7 @@ realocateSingletons <- function(final.clusters,
   })
   m <- do.call(rbind, filt)
 
-
+  spl <- split(m, m$targetName)
 
 
 
