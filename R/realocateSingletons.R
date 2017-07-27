@@ -9,12 +9,6 @@ realocateSingletons <- function(final.clusters,
   ln <- rowSums(panm)
   aog <- which(ln>1 & ln<ncol(panm))
   sog <- which(ln==1)
-  ge <- unlist(final.clusters[sog])
-
-  tge <- as.data.frame(do.call(rbind, strsplit(ge, ';')))
-  sge <- split(tge, tge$V1)
-
-  f <- seqinr::a()#[-1]
 
   mn <- parallel::mclapply(aog, function(x){
     fc <- final.clusters[[x]]
@@ -28,22 +22,20 @@ realocateSingletons <- function(final.clusters,
                         names = names(ap),
                         file.out = tmp)
     hmmModel <- hmmBuild(ali = tmp, name = names(final.clusters)[x])
-    file.remove(tmp)
+    # set threshold
+    press <- hmmPress(hmmModel)
+    se <- runHmmsearch(tmp, hmmModel, pfam = FALSE, n_threads = 1L)
+    tbl <- readTblout(tblout = se)
+    tr <- min(tbl$Score) * 4/5
+    file.remove(se)
+    file.remove(press[-1])
+
+    attr(hmmModel, 'threshold') <- tr
 
     return(hmmModel)
 
-    # ssp <- strsplit(unlist(fastas[final.clusters[[x]]]),'')
-    # sap <-sapply(ssp, function(z){table(factor(z, levels = f))}, simplify = F)
-    # ori <- do.call(rbind, sap)
-    # re <- colMeans(ori)
-    # d <- as.data.frame(as.matrix(vegan::vegdist(rbind(ori,re), method = 'bray')))
-    # rmv <- grep('^re$',rownames(d))
-    # m <- min(d$re[-rmv])
-    # M <- max(d$re[-rmv])
-    # attr(re, 'max') <- M
-    # attr(re, 'min') <- m
-    # re
   }, mc.cores = n_threads)
+  tr <- sapply(mn, attr, 'threshold')
   mn <- unlist(mn)
 
   mdls <- paste0(tempdir(),'/accsModels.hmm')
@@ -62,29 +54,16 @@ realocateSingletons <- function(final.clusters,
                          n_threads = n_threads)
   file.remove(press)
 
+  m <- readTblout(tblout = tblout)
 
+  spl <- split(m, m$queryName)
+  filt <- lapply(names(spl), function(x){
+    cu <- tr[x]
+    ta <- spl[[x]]
+    ta[which(ta$Score>=cu),]
+  })
+  m <- do.call(rbind, filt)
 
-
-  # for (i in 1:length(sge)){
-  #   or <- as.character(sge[[i]]$V1[1])
-  #   gor <- paste(or, sge[[i]]$V2, sep = ';')
-  #   lp <- lapply(fastas[gor], function(x){
-  #     table(factor(strsplit(x, '')[[1]], levels = f))
-  #   })
-  #
-  #   nd <- sapply(lp, function(x){
-  #     lapply(mn, function(y){
-  #       d <- as.vector(vegan::vegdist(rbind(x,y)))
-  #       ifelse(d>attr(y, 'min') & d<attr(y, 'max'), TRUE, FALSE)
-  #     })
-  #   }, simplify = TRUE)
-  #
-  #   ap <- apply(nd, 2, function(x){which(unlist(x))})
-  #
-  #
-  #
-  #   # ...
-  # }
 
 }
 
@@ -100,7 +79,45 @@ hmmBuild <- function(ali, name){
 
 
 hmmPress <- function(model){
-  hmmpress <- paste('hmmpress', models)
-  system(hmmpress)
-  paste0(model, c('','.h3f', '.h3i', '.h3m', '.h3p'))
+  hmmpress <- paste('hmmpress', model)
+  system(hmmpress, ignore.stdout = TRUE)
+  o <- paste0(model, c('','.h3f', '.h3i', '.h3m', '.h3p'))
+  o
 }
+
+
+
+readTblout <- function(tblout) {
+  rl <- readLines(tblout)
+  rl <- rl[which(!grepl("^\\#", rl))]
+  rl <- gsub("[ ]+", " ", rl)
+  lst <- strsplit(rl, " ")
+
+  targetName <- sapply(lst, function(x) {
+    x[1]
+  })
+  queryName <- sapply(lst, function(x) {
+    x[3]
+  })
+  evalue <- sapply(lst, function(x) {
+    x[5]
+  })
+  score <- sapply(lst, function(x) {
+    x[6]
+  })
+
+  hmmer.table <- data.frame(targetName = targetName,
+                            queryName = queryName,
+                            Evalue = as.numeric(evalue),
+                            Score = as.numeric(score),
+                            stringsAsFactors = F)
+
+  return(hmmer.table)
+}
+
+
+
+
+
+
+
