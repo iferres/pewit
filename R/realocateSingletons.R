@@ -66,8 +66,8 @@ realocateSingletons <- function(final.clusters,
                          pfam = FALSE,
                          n_threads = n_threads)
   file.remove(press)
-
-  m <- readTblout(tblout = tblout)
+  sqs <- as.data.frame(cbind(sqs))
+  m <- readTblout(tblout = tblout)[,-3]
 
   # Only conserve hits above the computed threshold.
   spl <- split(m, m$queryName)
@@ -75,11 +75,23 @@ realocateSingletons <- function(final.clusters,
   filt <- lapply(names(spl), function(x){
     cu <- tr[x]
     ta <- spl[[x]]
-    ta[which(ta$Score>=cu),]
+    ta <- ta[which(ta$Score>=cu),]
+    ta$singClu <- sapply(ta$targetName, function(y){
+      rownames(sqs)[which(sqs$sqs==y)]
+    })
+    ta
   })
   m <- do.call(rbind, filt)
 
   spl <- split(m, m$targetName)
+  en <- lapply(spl, function(x){
+    x[which.max(x$Score),]
+  })
+  m <- do.call(rbind, en)
+
+  wpa <- which(sapply(m$singClu, function(x){
+    !is.null(attr(final.clusters[[x]],'paralogues'))
+  }))
 
 
 
@@ -134,7 +146,34 @@ readTblout <- function(tblout) {
 }
 
 
+assignOrphans <- function(m,
+                          final.clusters,
+                          panm){
+  for (i in 1:nrow(m)){
+    ocl <- final.clusters[m$singClu[i]]
+    at <- attr(ocl[[1]], 'paralogues')
+    org <- strsplit(ocl[[1]], ';')[[1]][1]
+    hav <- panm[ m$queryName[1], org ]
 
+    if (hav == 1){
+      atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
+      atv <- c(atv, ocl[[1]][1], at)
+      attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
+      final.clusters[m$singClu] <- NULL
+    }else{
+      ln <- length(final.clusters[[m$queryName[1]]])
+      final.clusters[[m$queryName[1]]][ln + 1] <- ocl[[1]][1]
+      atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
+      atv <- c(atv, at)
+      attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
+      final.clusters[m$singClu] <- NULL
+    }
+
+
+  }
+
+  return(final.clusters)
+}
 
 
 
