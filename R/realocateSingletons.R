@@ -89,11 +89,10 @@ realocateSingletons <- function(final.clusters,
   })
   m <- do.call(rbind, en)
 
-  wpa <- which(sapply(m$singClu, function(x){
-    !is.null(attr(final.clusters[[x]],'paralogues'))
-  }))
-
-
+  clusters <- assignOrphans(m = m,
+                            final.clusters = final.clusters,
+                            panm = panm)
+  return(clusters)
 
 }
 
@@ -152,21 +151,21 @@ assignOrphans <- function(m,
   for (i in 1:nrow(m)){
     ocl <- final.clusters[m$singClu[i]]
     at <- attr(ocl[[1]], 'paralogues')
-    org <- strsplit(ocl[[1]], ';')[[1]][1]
+    org <- strsplit(ocl[[1]][1], ';')[[1]][1]
     hav <- panm[ m$queryName[1], org ]
 
     if (hav == 1){
       atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
       atv <- c(atv, ocl[[1]][1], at)
       attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
-      final.clusters[m$singClu] <- NULL
+      final.clusters[m$singClu[i]] <- NULL
     }else{
       ln <- length(final.clusters[[m$queryName[1]]])
       final.clusters[[m$queryName[1]]][ln + 1] <- ocl[[1]][1]
       atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
       atv <- c(atv, at)
       attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
-      final.clusters[m$singClu] <- NULL
+      final.clusters[m$singClu[i]] <- NULL
     }
 
 
