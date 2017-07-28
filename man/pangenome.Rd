@@ -7,7 +7,7 @@
 pangenome(gffs = c(), hmmPfam = NULL, datPfam = NULL, n_threads = 1L,
   dir_out = "out", writeFfns = FALSE, writeFastas = FALSE,
   pmOutfileType = "representative", alignCore = TRUE, accuAli = FALSE,
-  coreLevel = 1)
+  coreLevel = 1, seed = 5)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 files as retrieved by prokka (Seeman,
@@ -48,6 +48,8 @@ genomes and on the core size.}
 \item{coreLevel}{\code{numeric}. A number between 1-0.9 which determines at
 what proportion of presence should clusters be considered as part of the
 core-genome.}
+
+\item{seed}{\code{integer}. A seed to allow reproducible analyses.}
 }
 \value{
 An object of class \code{pangenome} which basically consist on a

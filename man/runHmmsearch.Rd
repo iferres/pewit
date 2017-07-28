@@ -4,12 +4,15 @@
 \alias{runHmmsearch}
 \title{Run Hmmsearch (HMMER 3)}
 \usage{
-runHmmsearch(fasta, pfam, n_threads = 1L)
+runHmmsearch(fasta, hmm, pfam = FALSE, n_threads = 1L)
 }
 \arguments{
 \item{fasta}{A protein fasta file.}
 
-\item{pfam}{A hmm file. Must be pressed (see hmmpress from HMMER manual).}
+\item{hmm}{A hmm file. Must be pressed (see hmmpress from HMMER manual).}
+
+\item{pfam}{\code{logical}. If hmm file is the Pfam-A.hmm file or not
+(custom hmm models).}
 
 \item{n_threads}{An \code{integer}. The number of cores to use.}
 }

@@ -1,5 +1,18 @@
 
-
+#' @name realocateSingletons
+#' @title Refining Singletons
+#' @description Performs the final refinement which consist in evaluate the
+#' singletons against the accessory genes. This step is performed because it
+#' has benn seen that previous steps tends to generate more singletons than
+#' there really are, specially if working with many genomes (100+).
+#' @param final.clusters A \code{list} of clusters.
+#' @param panm A binary panmatrix.
+#' @param fastas A \code{list} of sequences.
+#' @param n_threads \code{integer} The number of cpus to use.
+#' @param seed \code{integer}. The algorithm uses a random step. This parameter
+#' is used to allow reproducible results.
+#' @return A new \code{list} of clusters.
+#' @author Ignacio Feres
 realocateSingletons <- function(final.clusters,
                                 panm,
                                 fastas,
@@ -98,7 +111,13 @@ realocateSingletons <- function(final.clusters,
 
 
 
-
+#' @name hmmBuild
+#' @title hmmBuild
+#' @description Wrapper function of \code{hmmbuild} (HMMER 3).
+#' @param ali \code{character} A fasta file name.
+#' @param name \code{character} The name of the model.
+#' @return The name of the hmm model file.
+#' @author Ignacio Ferres
 hmmBuild <- function(ali, name){
   tmp <- tempfile()
   hmmbuild <- paste('hmmbuild -o /dev/null --amino -n', name, tmp, ali)
@@ -106,7 +125,12 @@ hmmBuild <- function(ali, name){
   tmp
 }
 
-
+#' @name hmmPress
+#' @title hmmPress
+#' @description Wrapper function of \code{hmmpress} (HMMER 3).
+#' @param model \code{character} The name of the hmm file.
+#' @return The names of indexed files.
+#' @author Ignacio Ferres
 hmmPress <- function(model){
   hmmpress <- paste('hmmpress', model)
   system(hmmpress, ignore.stdout = TRUE)
@@ -115,7 +139,12 @@ hmmPress <- function(model){
 }
 
 
-
+#' @name readTblout
+#' @title Read tblout Formated Files
+#' @description Read hmmsearch output.
+#' @param tblout The file name.
+#' @return A \code{data.frame}.
+#' @author Ignacio Ferres
 readTblout <- function(tblout) {
   rl <- readLines(tblout)
   rl <- rl[which(!grepl("^\\#", rl))]
@@ -144,7 +173,14 @@ readTblout <- function(tblout) {
   return(hmmer.table)
 }
 
-
+#' @name assignOrphans
+#' @title Assign Orphan Clusters to other clusters.
+#' @description .
+#' @param m A tblout \code{data.frame}.
+#' @param final.clusters A \code{list} of clusters.
+#' @param panm A \code{data.frame}. The panmatrix.
+#' @return A \code{list} of refined clusters.
+#' @author Ignacio Ferres
 assignOrphans <- function(m,
                           final.clusters,
                           panm){

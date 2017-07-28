@@ -47,6 +47,7 @@
 #' @param coreLevel \code{numeric}. A number between 1-0.9 which determines at
 #' what proportion of presence should clusters be considered as part of the
 #' core-genome.
+#' @param seed \code{integer}. A seed to allow reproducible analyses.
 #' @details A scan against Pfam-A database is performed and only those hits of
 #' PF class 'domain' or 'family' are considered for further analysis.
 #' If two or more domains of the same clan overlap, then the one with the
@@ -101,7 +102,8 @@ pangenome<-function(gffs=c(),
                     pmOutfileType='representative',
                     alignCore=TRUE,
                     accuAli=FALSE,
-                    coreLevel=1){
+                    coreLevel=1,
+                    seed = 5){
 
   if (Sys.which("hmmsearch")==""){
     stop("\n\tHMMER (v.3) is not installed. (Couldn't find 'hmmsearch' in $PATH)
