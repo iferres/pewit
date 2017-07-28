@@ -285,11 +285,11 @@ pangenome<-function(gffs=c(),
 
   cat(' DONE!\n')
 
-  cat('Preparing output..\n')
+  # cat('Preparing output..\n')
 
   #Merge clusters (Clusters splited in previous step with clusters which
   # doesn't contained paralogues')
-  cat('          ..merging clusters.. ')
+  cat('Merging clusters.. ')
   c(unlist(splitedClusters,recursive = F),
     pre.clusters[-ind.withparalogues]) -> final.clusters
 
@@ -328,23 +328,38 @@ pangenome<-function(gffs=c(),
   }
 
   #Pan-matrix (presence/absence)
-  cat('          ..computing binary pan-matrix:')
+  cat('          ..computing binary pan-matrix..')
   buildPanMatrix(pangenome = final.clusters,
                  type='binary') -> panm
   cat(' DONE!\n')
   #write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
   #cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
 
+  cat('Refining..')
+  clusters <- realocateSingletons(final.clusters = final.clusters,
+                                 panm = panm,
+                                 fastas = fastas,
+                                 n_threads = n_threads,
+                                 seed = seed)
+  names(clusters) <- setClusterNames(final.clusters = clusters)
+  cat('          ..computing binary pan-matrix.')
+  panm <- buildPanMatrix(pangenome = clusters,
+                         type='binary')
+
+  cat(' DONE!\n')
+
+  cat('Preparing output..')
   #clusters.txt
   cat('          ..writing clusters:')
-  writeClusters(outdir=outdir,
-                final.clusters=final.clusters,
-                filename='clusters.txt')
+  writeClusters(outdir = outdir,
+                final.clusters = clusters,
+                filename = 'clusters.txt')
   cat(paste0(' DONE, saved at ',outdir,'clusters.txt\n'))
 
   #paralogues.txt
+  cat('Preparing output..')
   cat('          ..writing paralogues:')
-  writeParalogues(outdir=outdir,final.clusters=final.clusters)
+  writeParalogues(outdir = outdir,final.clusters = clusters)
   cat(paste0(' DONE, saved at ',outdir,'paralogues.txt\n'))
 
   #Out
@@ -357,11 +372,10 @@ pangenome<-function(gffs=c(),
   naccs <- length(which(rowSums(panm)<round(ncol(panm)*0.95)))-nsingles
 
 
-  list(final.clusters,
-       panm) -> out
-       # ffns,
-       # pfamstr) -> out
-  names(out) <- c('clusters','panmatrix')#,'pfam_structure')
+  out <- list(clusters,
+              panm)
+
+  names(out) <- c('clusters','panmatrix')
   attr(out,'ncds') <- ncds
   attr(out,'norgs') <- norgs
   attr(out,'nclust') <- nclust
