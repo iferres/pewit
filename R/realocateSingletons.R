@@ -188,20 +188,21 @@ assignOrphans <- function(m,
     ocl <- final.clusters[m$singClu[i]]
     at <- attr(ocl[[1]], 'paralogues')
     org <- strsplit(ocl[[1]][1], ';')[[1]][1]
-    hav <- panm[ m$queryName[1], org ]
+    hav <- panm[ m$queryName[i], org ]
 
     if (hav == 1){
-      atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
+      atv <- attr(final.clusters[[m$queryName[i]]], 'paralogues')
       atv <- c(atv, ocl[[1]][1], at)
-      attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
+      attr(final.clusters[[m$queryName[i]]], 'paralogues') <- atv
       final.clusters[m$singClu[i]] <- NULL
     }else{
       ln <- length(final.clusters[[m$queryName[1]]])
-      final.clusters[[m$queryName[1]]][ln + 1] <- ocl[[1]][1]
-      atv <- attr(final.clusters[[m$queryName[1]]], 'paralogues')
+      final.clusters[[m$queryName[i]]][ln + 1] <- ocl[[1]][1]
+      atv <- attr(final.clusters[[m$queryName[i]]], 'paralogues')
       atv <- c(atv, at)
-      attr(final.clusters[[m$queryName[1]]], 'paralogues') <- atv
+      attr(final.clusters[[m$queryName[i]]], 'paralogues') <- atv
       final.clusters[m$singClu[i]] <- NULL
+      panm[ m$queryName[i], org ] <- 1L
     }
 
 
