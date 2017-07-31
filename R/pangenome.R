@@ -291,7 +291,7 @@ pangenome<-function(gffs=c(),
 
   #Merge clusters (Clusters splited in previous step with clusters which
   # doesn't contained paralogues')
-  cat('Merging clusters.. ')
+  cat('Merging clusters.. \n')
   c(unlist(splitedClusters,recursive = F),
     pre.clusters[-ind.withparalogues]) -> final.clusters
 
@@ -330,27 +330,33 @@ pangenome<-function(gffs=c(),
   }
 
   #Pan-matrix (presence/absence)
-  cat('          ..computing binary pan-matrix..')
+  cat('..computing provisory binary pan-matrix..')
   buildPanMatrix(pangenome = final.clusters,
                  type='binary') -> panm
-  cat(' DONE!\n')
-  #write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
-  #cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
+  si1 <- length(which(rowSums(panm)==1))
+  cat(paste0(' there currently are ',si1,' singletons.\n'))
 
-  cat('Refining..')
+  cat('Refining..\n')
+  cat('        ..realocating misassigned singletones..\n')
   clusters <- realocateSingletons(final.clusters = final.clusters,
                                  panm = panm,
                                  fastas = fastas,
                                  n_threads = n_threads,
                                  seed = seed)
   names(clusters) <- setClusterNames(final.clusters = clusters)
-  cat('          ..computing binary pan-matrix.')
+  cat('         ..computing binary pan-matrix.\n')
   panm <- buildPanMatrix(pangenome = clusters,
                          type='binary')
+  si2 <- length(which(rowSums(panm)==1))
+  asgn <- si1 - si2
+  cat(paste0(' ..DONE! ',asgn,' singletons realocated.\n'))
 
-  cat(' DONE!\n')
+  cat('Preparing output..\n')
+  #panmatrix.tab
+  cat('          ..writing panmatrix:')
+  write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
+  cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
 
-  cat('Preparing output..')
   #clusters.txt
   cat('          ..writing clusters:')
   writeClusters(outdir = outdir,
