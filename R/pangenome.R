@@ -344,7 +344,7 @@ pangenome<-function(gffs=c(),
                                  n_threads = n_threads,
                                  seed = seed)
   names(clusters) <- setClusterNames(final.clusters = clusters)
-  cat('         ..computing binary pan-matrix.\n')
+  cat('        ..computing binary pan-matrix..\n')
   panm <- buildPanMatrix(pangenome = clusters,
                          type='binary')
   si2 <- length(which(rowSums(panm)==1))
@@ -365,7 +365,6 @@ pangenome<-function(gffs=c(),
   cat(paste0(' DONE, saved at ',outdir,'clusters.txt\n'))
 
   #paralogues.txt
-  cat('Preparing output..')
   cat('          ..writing paralogues:')
   writeParalogues(outdir = outdir,final.clusters = clusters)
   cat(paste0(' DONE, saved at ',outdir,'paralogues.txt\n'))
