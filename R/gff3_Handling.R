@@ -194,10 +194,10 @@ getFfnFaa <- function(fnas,contig,strand,from,to,id,product){
   if(strand=='-'){
     rev(seqinr::comp(ffn)) -> ffn
   }
-  seqinr::as.SeqFastadna(toupper(ffn),
+  seqinr::as.SeqFastadna(ffn,
                          name = id,
                          Annot = product) -> ffn
-  seqinr::as.SeqFastaAA(toupper(seqinr::translate(ffn,numcode = 11)),
+  seqinr::as.SeqFastaAA(seqinr::translate(ffn,numcode = 11),
                         name = id,
                         Annot = product) -> faa
 
@@ -280,4 +280,70 @@ getSeqOfType <- function(seqs,type='AA'){
   }
   names(lap) <- sub('.gff.',';',names(lap))
   lap
+}
+
+
+
+translate <- function (seq, frame = 0, sens = "F", numcode = 1, NAstring = "X",
+                       ambiguous = FALSE)
+{
+  if (any(seq %in% LETTERS)) {
+    seq <- tolower(seq)
+  }
+  if (sens == "R")
+    seq <- seqinr:::comp(rev(seq), ambiguous = ambiguous)
+  seqn <- seqinr:::s2n(seq, levels = s2c("tcag"), forceToLower = FALSE) ########################
+  l <- 3 * ((length(seq) - frame)%/%3)
+  c1 <- seq(from = frame + 1, to = frame + l, by = 3)
+  tra <- 16 * seqn[c1] + 4 * seqn[c1 + 1] + seqn[c1 + 2] +
+    1
+  code <- seqinr:::s2c(seqinr:::SEQINR.UTIL$CODES.NCBI$CODES[numcode])
+  result <- code[tra]
+  result[is.na(result)] <- NAstring
+  if (ambiguous) {
+    toCheck <- which(result == NAstring)
+    for (i in toCheck) {
+      codon <- seq[c1[i]:(c1[i] + 2)]
+      allcodons <- as.vector(outer(as.vector(outer(amb(codon[1]),
+                                                   amb(codon[2]), paste, sep = "")), amb(codon[3]),
+                                   paste, sep = ""))
+      allaminoacids <- sapply(allcodons, function(x) translate(s2c(x),
+                                                               numcode = numcode, ambiguous = FALSE))
+      if (all(allaminoacids == allaminoacids[1]))
+        result[i] <- allaminoacids[1]
+    }
+  }
+  return(result)
+}
+
+
+
+comp <- function (seq, forceToLower = TRUE, ambiguous = FALSE)
+{
+  if (all(seq %in% LETTERS)) {
+    isUpper <- TRUE
+  }
+  else {
+    isUpper <- FALSE
+  }
+  # seq <- tolower(seq) ##################################
+  result <- as.vector(n2s((3 - s2n(seq))))
+  if (ambiguous) {
+    result[which(seq == "b")] <- "v"
+    result[which(seq == "d")] <- "h"
+    result[which(seq == "h")] <- "d"
+    result[which(seq == "k")] <- "m"
+    result[which(seq == "m")] <- "k"
+    result[which(seq == "s")] <- "s"
+    result[which(seq == "v")] <- "b"
+    result[which(seq == "w")] <- "w"
+    result[which(seq == "n")] <- "n"
+    result[which(seq == "y")] <- "r"
+    result[which(seq == "r")] <- "y"
+  }
+  result[which(seq == "n")] <- "n"
+  if (isUpper && !forceToLower) {
+    result <- toupper(result)
+  }
+  return(result)
 }
