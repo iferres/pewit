@@ -54,7 +54,7 @@ extractSeqsFromGff3 <- function(infile,
     paste(fasta[x[1]:x[2]],collapse = '')
   }) -> ap
   names(ap) <- gsub('>','',fasta[fheaders])
-  lapply(ap,function(x){
+  lapply(tolower(ap),function(x){
     as.SeqFastadna(s2c(x),name = names(x))
   }) -> fnas
 
@@ -186,18 +186,19 @@ extractSeqsFromGff3 <- function(infile,
 #' and the last is the protein sequence. Object classes are \code{SeqFastadna}
 #' and \code{SeqFastaAA}, respectively.
 #' @author Ignacio Ferres
-#' @importFrom seqinr getFrag.SeqFrag comp as.SeqFastadna as.SeqFastaAA translate
+#' @importFrom seqinr as.SeqFastadna as.SeqFastaAA
 getFfnFaa <- function(fnas,contig,strand,from,to,id,product){
-  seqinr::getFrag.SeqFrag(fnas[contig][[1]],begin = from,end = to) -> ffn
-  attr(ffn,'begin') <- NULL
-  attr(ffn,'end') <- NULL
+  # seqinr::getFrag.SeqFrag(fnas[contig][[1]],begin = from,end = to) -> ffn
+  fnas[contig[1]][[1]][from:to] -> ffn
+  # attr(ffn,'begin') <- NULL
+  # attr(ffn,'end') <- NULL
   if(strand=='-'){
-    rev(seqinr::comp(ffn)) -> ffn
+    rev(comp(ffn)) -> ffn
   }
   seqinr::as.SeqFastadna(ffn,
                          name = id,
                          Annot = product) -> ffn
-  seqinr::as.SeqFastaAA(seqinr::translate(ffn,numcode = 11),
+  seqinr::as.SeqFastaAA(translate(ffn,numcode = 11),
                         name = id,
                         Annot = product) -> faa
 
@@ -283,32 +284,43 @@ getSeqOfType <- function(seqs,type='AA'){
 }
 
 
+#' @name translate
+#' @title Translate
+#' @description Slightly modified version of \link[seqinr]{translate} function
+#' of the \code{seqinr} package.
+#' @param seq See \link[seqinr]{translate}.
+#' @param frame See \link[seqinr]{translate}.
+#' @param sens See \link[seqinr]{translate}.
+#' @param numcode See \link[seqinr]{translate}.
+#' @param NAstring See \link[seqinr]{translate}.
+#' @param ambiguous See \link[seqinr]{translate}.
+#' @return See \link[seqinr]{translate}.
+#' @importFrom seqinr s2n s2c amb
+translate <- function(seq,
+                      frame = 0,
+                      sens = "F",
+                      numcode = 1,
+                      NAstring = "X",
+                      ambiguous = FALSE){
 
-translate <- function (seq, frame = 0, sens = "F", numcode = 1, NAstring = "X",
-                       ambiguous = FALSE)
-{
-  if (any(seq %in% LETTERS)) {
-    seq <- tolower(seq)
-  }
-  if (sens == "R")
-    seq <- seqinr:::comp(rev(seq), ambiguous = ambiguous)
-  seqn <- seqinr:::s2n(seq, levels = s2c("tcag"), forceToLower = FALSE) ########################
+
+  seqn <- seqinr::s2n(seq, levels = c('t', 'c', 'a', 'g'), forceToLower = FALSE) #######
   l <- 3 * ((length(seq) - frame)%/%3)
   c1 <- seq(from = frame + 1, to = frame + l, by = 3)
-  tra <- 16 * seqn[c1] + 4 * seqn[c1 + 1] + seqn[c1 + 2] +
-    1
-  code <- seqinr:::s2c(seqinr:::SEQINR.UTIL$CODES.NCBI$CODES[numcode])
+  tra <- 16 * seqn[c1] + 4 * seqn[c1 + 1] + seqn[c1 + 2] + 1
+  code <- seqinr::s2c(seqinr::SEQINR.UTIL$CODES.NCBI$CODES[numcode])
   result <- code[tra]
   result[is.na(result)] <- NAstring
   if (ambiguous) {
     toCheck <- which(result == NAstring)
     for (i in toCheck) {
       codon <- seq[c1[i]:(c1[i] + 2)]
-      allcodons <- as.vector(outer(as.vector(outer(amb(codon[1]),
-                                                   amb(codon[2]), paste, sep = "")), amb(codon[3]),
+      allcodons <- as.vector(outer(as.vector(outer(seqinr::amb(codon[1],forceToLower = F),
+                                                   seqinr::amb(codon[2], forceToLower = F), paste, sep = "")), amb(codon[3]),
                                    paste, sep = ""))
-      allaminoacids <- sapply(allcodons, function(x) translate(s2c(x),
-                                                               numcode = numcode, ambiguous = FALSE))
+      allaminoacids <- sapply(allcodons, function(x){
+        translate(seqinr::s2c(x), numcode = numcode, ambiguous = FALSE)
+      })
       if (all(allaminoacids == allaminoacids[1]))
         result[i] <- allaminoacids[1]
     }
@@ -317,17 +329,26 @@ translate <- function (seq, frame = 0, sens = "F", numcode = 1, NAstring = "X",
 }
 
 
+#' @name comp
+#' @title Complements a nucleic acid sequence
+#' @description See \link[seqinr]{comp}.
+#' @param seq See \link[seqinr]{comp}.
+#' @param forceToLower See \link[seqinr]{comp}.
+#' @param ambiguous See \link[seqinr]{comp}.
+#' @return See \link[seqinr]{comp}.
+#' @importFrom seqinr n2s s2n
+comp <- function (seq,
+                  forceToLower = TRUE,
+                  ambiguous = FALSE){
 
-comp <- function (seq, forceToLower = TRUE, ambiguous = FALSE)
-{
   if (all(seq %in% LETTERS)) {
     isUpper <- TRUE
   }
   else {
     isUpper <- FALSE
   }
-  # seq <- tolower(seq) ##################################
-  result <- as.vector(n2s((3 - s2n(seq))))
+  # seq <- tolower(seq) #######################################################
+  result <- as.vector(seqinr::n2s((3 - seqinr::s2n(seq, forceToLower=FALSE))))########
   if (ambiguous) {
     result[which(seq == "b")] <- "v"
     result[which(seq == "d")] <- "h"
