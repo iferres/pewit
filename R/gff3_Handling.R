@@ -18,7 +18,7 @@ extractSeqsFromGff3 <- function(infile,
                                 write.in.path='dna'){
 
   if (is.null(in.path)){
-    in.path <- '.'
+    in.path <- './'
   }
 
   if(!dir.exists(in.path)){
@@ -331,7 +331,8 @@ translate <- function(seq,
 
 #' @name comp
 #' @title Complements a nucleic acid sequence
-#' @description See \link[seqinr]{comp}.
+#' @description Sligthly modified version of \link[seqinr]{comp}, from
+#' \code{seqinr} package.
 #' @param seq See \link[seqinr]{comp}.
 #' @param forceToLower See \link[seqinr]{comp}.
 #' @param ambiguous See \link[seqinr]{comp}.

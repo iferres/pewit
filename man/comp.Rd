@@ -17,5 +17,6 @@ comp(seq, forceToLower = TRUE, ambiguous = FALSE)
 See \link[seqinr]{comp}.
 }
 \description{
-See \link[seqinr]{comp}.
+Sligthly modified version of \link[seqinr]{comp}, from
+\code{seqinr} package.
 }
