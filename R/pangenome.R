@@ -356,19 +356,19 @@ pangenome<-function(gffs=c(),
   #panmatrix.tab
   cat('        ..writing panmatrix:')
   write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
-  cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
+  cat(paste0(' DONE! Saved at ',outdir,'panmatrix.tab\n'))
 
   #clusters.txt
   cat('        ..writing clusters:')
   writeClusters(outdir = outdir,
                 final.clusters = clusters,
                 filename = 'clusters.txt')
-  cat(paste0(' DONE, saved at ',outdir,'clusters.txt\n'))
+  cat(paste0(' DONE! Saved at ',outdir,'clusters.txt\n'))
 
   #paralogues.txt
   cat('        ..writing paralogues:')
   writeParalogues(outdir = outdir,final.clusters = clusters)
-  cat(paste0(' DONE, saved at ',outdir,'paralogues.txt\n'))
+  cat(paste0(' DONE! Saved at ',outdir,'paralogues.txt\n'))
 
   #Out
   ncds <- length(fastas)
@@ -396,7 +396,11 @@ pangenome<-function(gffs=c(),
 
   class(out) <- c('pangenome')
 
+  cat('        ..saving pangenome object:')
   saveRDS(out,file = paste0(outdir,'pangenome.rds'))
+  cat(paste0(' DONE! Saved at ',outdir,'pangenome.rds\n'))
+
+
 
   ## OTHER OPTIONS
 
