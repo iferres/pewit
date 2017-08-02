@@ -168,7 +168,7 @@ pangenome<-function(gffs=c(),
 
 
     #Process Pfam-A.dat
-    cat('\n\nProcessing Pfam-A.hmm.dat..')
+    cat('Processing Pfam-A.hmm.dat..')
     ref<-processPfam_A_Dat(datPfam = datPfam,
                            n_threads = n_threads)
     cat(' DONE!\n')
@@ -328,13 +328,14 @@ pangenome<-function(gffs=c(),
     final.clusters[[i]] <- repr
     attr(final.clusters[[i]],'paralogues') <- toattr
   }
+  cat('DONE!\n')
 
   #Pan-matrix (presence/absence)
-  cat('..computing provisory binary pan-matrix..')
+  cat('Computing provisory binary pan-matrix..')
   buildPanMatrix(pangenome = final.clusters,
                  type='binary') -> panm
   si1 <- length(which(rowSums(panm)==1))
-  cat(paste0(' there currently are ',si1,' singletons.\n'))
+  cat(paste0(' there are currently ',si1,' singletons.\n'))
 
   cat('Refining..\n')
   cat('        ..realocating misassigned singletones..\n')
@@ -353,19 +354,19 @@ pangenome<-function(gffs=c(),
 
   cat('Preparing output..\n')
   #panmatrix.tab
-  cat('          ..writing panmatrix:')
+  cat('        ..writing panmatrix:')
   write.table(panm,file = paste0(outdir,'panmatrix.tab'),sep = '\t',quote = F)
   cat(paste0(' DONE, saved at ',outdir,'panmatrix.tab\n'))
 
   #clusters.txt
-  cat('          ..writing clusters:')
+  cat('        ..writing clusters:')
   writeClusters(outdir = outdir,
                 final.clusters = clusters,
                 filename = 'clusters.txt')
   cat(paste0(' DONE, saved at ',outdir,'clusters.txt\n'))
 
   #paralogues.txt
-  cat('          ..writing paralogues:')
+  cat('        ..writing paralogues:')
   writeParalogues(outdir = outdir,final.clusters = clusters)
   cat(paste0(' DONE, saved at ',outdir,'paralogues.txt\n'))
 
@@ -457,7 +458,7 @@ number of "soft" core genes lowering the level through "getCoreClusters()" funct
 
   }
 
-  cat('\nFINNISH!\n\nThanks for using PEWIT.\n')
+  cat('\nFINNISH!\nThanks for using PEWIT.\n')
   out
 
 }
