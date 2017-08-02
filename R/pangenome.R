@@ -559,6 +559,9 @@ summary.pangenome <- function(object, ...){
 #' organisms in the pangenome object. By default it uses the original file
 #' names without the extension (.gff).
 #' @param cexRow \code{numeric} The size of row labels.
+#' @param rowSideColors A \code{character} vector of length equals the number
+#' of organisms present in the pangenome object. The \code{default} is \code{NULL},
+#' so the rowSideColor column is not plotted.
 #' @param colSideColors A \code{character} vector of length 3 specifying the
 #' colors to use on the column bar. The colors correspond, in order, to
 #' singletons, accessory and soft-core clusters.
@@ -591,6 +594,7 @@ plot.pangenome <- function(x,
                            raster = TRUE,
                            labRow = NULL,
                            cexRow = 0.5,
+                           rowSideColors = NULL,
                            colSideColors = c('#4DBBD5FF','#00A087FF','#3C5488FF'),
                            colSideLabels = c('Softcore genome','Accessory','Singletones'),
                            cexKey = 1,
@@ -603,6 +607,7 @@ plot.pangenome <- function(x,
   ncore95 <- attr(x, 'ncore95')
   nsingles <- attr(x, 'nsingles')
   naccs <- attr(x, 'naccs')
+
 
   ### Distance and clustering ###
   dd <- distfun(t(x$panmatrix))
@@ -617,6 +622,27 @@ plot.pangenome <- function(x,
   nr <- nrow(mm)
   nc <- ncol(mm)
 
+  ### RowSideColors ###
+  if (!is.null(rowSideColors)){
+    if (!is.character(rowSideColors) || length(rowSideColors) != nc){
+      stop("'rowSideColors' must be a character vector of length equal to the
+           number of organisms in the pangenome")
+    }else{
+      rowSideColors <- rowSideColors[hc$order]
+      mat <- rbind(c(5,5,4), c(3,2,1))
+      wlo <- c(0.9, 0.1, 3)
+      # wlo <- c(0.8, 3)
+      # mim <- 0.2
+    }
+  }else{
+    mat <- rbind(c(4,3), c(2,1))
+    wlo <- c(1, 3)
+    #   wlo <- c(1,3)
+    #   mim <- 0L
+  }
+
+
+  ### Start device functions ###
   op <- par(no.readonly = T)
   on.exit(dev.flush())
   on.exit(par(op), add = TRUE)
@@ -624,13 +650,18 @@ plot.pangenome <- function(x,
   dev.hold()
 
   ### Set layout ###
-  layout(mat = rbind(c(4,3),c(2,1)),
-         widths = c(1,3),
-         heights = c(1,3),
+
+
+  layout(mat = mat,
+         widths = wlo,
+         heights = c(1, 3),
          respect = F)
 
   ### Image ###
-  par(mar = c(margins[1], 0, 0.5, margins[2]))
+  par(mar = c(margins[1],
+              0,
+              0.5,
+              margins[2]))
   image(x = 1:nr,
         y = 1:nc,
         z = mm,
@@ -657,6 +688,12 @@ plot.pangenome <- function(x,
        tick = 0,
        cex.axis = cexRow)
 
+  if (!is.null(rowSideColors)){
+    ### rowSideColors ###
+    par(mar = c(margins[1], 0, 0.5, 0))
+    image(rbind(1L:nc), col = rowSideColors, axes = F)
+  }
+
   ### Dendrogram ###
   par(mar = c(margins[1], 0, 0.5, 0), yaxs= 'i')
   plot(dhc,
@@ -667,12 +704,12 @@ plot.pangenome <- function(x,
        axes=F)
 
   ### Column colors ###
-  par(mar = c(0, 0, 2, margins[2]))
+  par(mar = c(0, 0, 0, margins[2]))
   plot.new()
   #position
-  k1 <- c((ncore95+naccs)/nr, 0, (ncore95+naccs+nsingles)/nr, 0.5)
-  k2 <- c(ncore95/nr, 0, (ncore95+naccs)/nr, 0.5)
-  k3 <- c(0, 0, ncore95/nr, 0.5)
+  k1 <- c((ncore95+naccs)/nr, 0, (ncore95+naccs+nsingles)/nr, 0.2)
+  k2 <- c(ncore95/nr, 0, (ncore95+naccs)/nr, 0.2)
+  k3 <- c(0, 0, ncore95/nr, 0.2)
   #draw
   rect(k1[1],k1[2],k1[3],k1[4], col = colSideColors[1], border = NA)
   rect(k2[1],k2[2],k2[3],k2[4], col = colSideColors[2], border = NA)
@@ -695,6 +732,3 @@ plot.pangenome <- function(x,
        tick = 0)
 
 }
-
-
-
