@@ -7,9 +7,9 @@
 \method{plot}{pangenome}(x, hclustfun = hclust, distfun = dist,
   edgePar = list(lwd = 1.5), margins = c(5, 7), col = c("white",
   "#E64B35FF"), raster = TRUE, labRow = NULL, cexRow = 0.5,
-  colSideColors = c("#4DBBD5FF", "#00A087FF", "#3C5488FF"),
-  colSideLabels = c("Softcore genome", "Accessory", "Singletones"),
-  cexKey = 1, ...)
+  rowSideColors = NULL, colSideColors = c("#4DBBD5FF", "#00A087FF",
+  "#3C5488FF"), colSideLabels = c("Softcore genome", "Accessory",
+  "Singletones"), cexKey = 1, ...)
 }
 \arguments{
 \item{x}{\code{pangenome} object.}
@@ -33,6 +33,10 @@ organisms in the pangenome object. By default it uses the original file
 names without the extension (.gff).}
 
 \item{cexRow}{\code{numeric} The size of row labels.}
+
+\item{rowSideColors}{A \code{character} vector of length equals the number
+of organisms present in the pangenome object. The \code{default} is \code{NULL},
+so the rowSideColor column is not plotted.}
 
 \item{colSideColors}{A \code{character} vector of length 3 specifying the
 colors to use on the column bar. The colors correspond, in order, to

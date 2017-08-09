@@ -15,6 +15,89 @@ runOnExit <- function(outdir){
 }
 
 
+#' @name domainSearch
+#' @title Compute All Pfam Related Functions
+#' @description Computes all Pfam-A related functions.
+#' @param fastas A \code{list} of amino acid sequences.
+#' @param hmmPfam \code{character} The path to the hmm file.
+#' @param datPfam \code{character} The path to the dat file.
+#' @param n_threads \code{integer} The number of cpus to use.
+#' @return a \code{list} with the domain and family clustering.
+#' @author Ignacio Ferres
+domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L){
+
+  #Process Pfam-A.dat
+  cat('Processing Pfam-A.hmm.dat..')
+  ref<-processPfam_A_Dat(datPfam = datPfam,
+                         n_threads = n_threads)
+  cat(' DONE!\n')
+
+  cat('Preparing HMMSEARCH.\n')
+  # Split indices and write fastas to distribute among threads with hmmscan
+  temps<-splitAndWriteFastas(fastas = fastas,
+                             n_threads = n_threads)
+
+  #Deprecated:
+  # #Run hmmscan (HMMER)
+  # cat('Running HMMSCAN against Pfam-A database (this can take a while)..')
+  # registerDoParallel(cores = n_threads)
+  # hmm.temps<-foreach(i=seq_along(temps),.inorder = F) %dopar% {
+  #   tempfile(pattern = "tmpo",tmpdir = tempdir(),fileext = ".tab")->dmblout
+  #   paste("hmmscan -o /dev/null --domtblout ",dmblout,
+  #         " --noali --cut_ga --cpu 0 ",
+  #         hmmPfam," ",temps[i],sep = "")->pfm
+  #   system(pfm)
+  #   dmblout
+  # }
+  # cat(' DONE!\n')
+
+  #Index hmm if not yet
+  if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
+    cat('Preparing Pfam-A.hmm files for hmmscan search.\n')
+    paste0('hmmpress ',hmmPfam) -> hmmpress
+    system(hmmpress)
+  }
+
+  #Run hmmsearch (HMMER)
+  cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
+  mclapply(temps, function(x){
+
+    runHmmsearch(fasta = x,
+                 hmm = hmmPfam,
+                 pfam = TRUE,
+                 n_threads = 0L)
+
+  }, mc.cores = n_threads) -> hmm.temps
+  cat(' DONE!\n')
+  # file.remove(temps)
+
+  #Load hmmscan output and process
+  cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
+  unlist(hmm.temps)->pout
+
+  registerDoParallel(cores = n_threads)
+  tout<-foreach(i=seq_along(pout),.combine =rbind,.inorder = T)%dopar%{
+    processHmmsearch(pout=pout[i],ref=ref)
+  }
+  cat(' DONE!\n')
+  file.remove(pout)
+
+  #Clustering by domain structure only
+  cat('Clustering sequences per domain structure..')
+  split(x = rownames(tout),
+        f = tout$Domain)[-1]->clu_dom
+  cat(' DONE!\n')
+
+  #Cluster sequences without domains asigned, by family
+  cat('Clustering sequences per family..')
+  split(x = rownames(tout[which(tout$Domain==''),]),
+        f = tout$Family[which(tout$Domain=='')])[-1]->clu_fam
+  cat(' DONE!\n')
+
+  o <- list(clu_dom, clu_fam)
+  return(o)
+}
+
 #Distributes all proteins in many files as n_threads set in order to optimize
 # the computing power in the following step (hmmscan).
 #' @name splitAndWriteFastas
