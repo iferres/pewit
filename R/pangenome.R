@@ -145,10 +145,8 @@ pangenome<-function(gffs=c(),
                                'none'))
 
 
-  #deprecated:
-#   #Format fasta headers
-#   fastas<-formatFastaHeaders(prots = prots,n_threads = n_threads)
-#   fastas<-unlist(lapply(fastas,function(x){x[[1]]}),recursive = F)
+
+
   cat('Extracting and translating gene sequences from gff files..')
 
   wffns <- ifelse(writeFfns,'dna','none')
@@ -161,6 +159,7 @@ pangenome<-function(gffs=c(),
 
   fastas <- unlist(fastas,recursive = F)
   cat(' DONE!\n')
+
 
 
 
@@ -182,12 +181,17 @@ pangenome<-function(gffs=c(),
   }
 
 
+
+
   # PHMMER + MCL
   cat('Clustering orphan sequences (phmmer + mcl) ..')
   clusterOrphans(fastas = fastas,
                  tout = tout,
                  n_threads = n_threads) -> orphans
   cat(' DONE!\n')
+
+
+
 
   #Split paralogs
   pre.clusters <- c(clu_dom, clu_fam, orphans)
@@ -198,35 +202,13 @@ pangenome<-function(gffs=c(),
 
   cat('Splitting pre-clusters..')
   mclapply(ind.withparalogues,function(x){
-    # splitClusters(clstr = lapply(fastas[pre.clusters[[x]]],memDecompress,'gzip',TRUE))
     splitClusters(clstr = fastas[pre.clusters[[x]]], accuAli = accuAli)
   },mc.cores=n_threads,mc.preschedule = FALSE) -> splitedClusters
 
-  # registerDoParallel(cores = n_threads)
-  # splitedClusters<-foreach(i=ind.withparalogues,
-  #                          .inorder = T,
-  #                          .options.multicore=list(preschedule=F))%dopar%{
-  #                            splitClusters(clstr = fastas[pre.clusters[[i]]])
-  #                          }
-
-  # A patch for avoiding cds prediction errors in gff (strange 'proteins' that
-  #  gives errors when are aligned with mafft).
-  # which(sapply(splitedClusters,class)!='list') -> errors
-  # if (length(errors)>0){
-  #   pre.clusters[ind.withparalogues[errors]] -> werr
-  #   names(werr) <- paste0('cluster_with_error(s)_',seq_len(length(werr)))
-  #   writeClusters(outdir = outdir,
-  #                 final.clusters = werr,
-  #                 filename='err.txt')
-  #   splitedClusters[-errors] -> splitedClusters
-  #   pre.clusters[-ind.withparalogues[errors]] -> pre.clusters
-  #   ind.withparalogues[-errors] -> ind.withparalogues
-  #   fastas[-sapply(unlist(werr),function(x){which(names(fastas)==x)})] -> fastas
-  # }
-
   cat(' DONE!\n')
 
-  # cat('Preparing output..\n')
+
+
 
   #Merge clusters (Clusters splited in previous step with clusters which
   # doesn't contained paralogues')
@@ -269,12 +251,18 @@ pangenome<-function(gffs=c(),
   }
   cat('DONE!\n')
 
+
+
+
   #Pan-matrix (presence/absence)
   cat('Computing provisory binary pan-matrix..')
   buildPanMatrix(pangenome = final.clusters,
                  type='binary') -> panm
   si1 <- length(which(rowSums(panm)==1))
   cat(paste0(' there are currently ',si1,' singletons.\n'))
+
+
+
 
   cat('Refining..\n')
   cat('        ..realocating misassigned singletones..\n')
@@ -290,6 +278,9 @@ pangenome<-function(gffs=c(),
   si2 <- length(which(rowSums(panm)==1))
   asgn <- si1 - si2
   cat(paste0(' ..DONE! ',asgn,' singletons realocated.\n'))
+
+
+
 
   cat('Preparing output..\n')
   #panmatrix.tab
@@ -317,8 +308,6 @@ pangenome<-function(gffs=c(),
   ncore95 <- length(which(rowSums(panm)>=round(ncol(panm)*0.95)))
   nsingles <- length(which(rowSums(panm)==1))
   naccs <- length(which(rowSums(panm)<round(ncol(panm)*0.95)))-nsingles
-
-
   out <- list(clusters,
               panm)
 
@@ -332,12 +321,12 @@ pangenome<-function(gffs=c(),
   attr(out, 'naccs') <- naccs
   attr(out,'output') <- outdir
   attr(out,'package') <- 'pewit'
-
   class(out) <- c('pangenome')
 
   cat('        ..saving pangenome object:')
   saveRDS(out,file = paste0(outdir,'pangenome.rds'))
   cat(paste0(' DONE! Saved at ',outdir,'pangenome.rds\n'))
+
 
 
 
