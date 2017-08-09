@@ -23,6 +23,9 @@ runOnExit <- function(outdir){
 #' @param datPfam \code{character} The path to the dat file.
 #' @param n_threads \code{integer} The number of cpus to use.
 #' @return a \code{list} with the domain and family clustering.
+#' @importFrom parallel mclapply
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach '%dopar%'
 #' @author Ignacio Ferres
 domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L){
 
