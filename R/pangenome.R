@@ -196,7 +196,8 @@ pangenome<-function(gffs=c(),
 
   #Split paralogs
   pre.clusters <- c(clu_dom, clu_fam, orphans)
-  clusters <- splitPreClusters(pre.clusters = pre.clusters,
+  clusters <- splitPreClusters(fastas = fastas,
+                               pre.clusters = pre.clusters,
                                accuAli = accuAli,
                                n_threads = n_threads)
 

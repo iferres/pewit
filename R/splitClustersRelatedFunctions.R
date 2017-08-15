@@ -27,7 +27,7 @@ splitPreClusters <- function(fastas,
 
   # Merge clusters (Clusters splited in previous step with clusters which doesn't
   # contained paralogues')
-  cat("Merging clusters.. \n")
+  cat("Merging clusters.. ")
   clusters <- c(unlist(splitedClusters, recursive = F),
                 pre.clusters[-ind.withparalogues])
 
