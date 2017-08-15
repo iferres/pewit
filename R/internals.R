@@ -97,7 +97,7 @@ domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L){
         f = tout$Family[which(tout$Domain=='')])[-1]->clu_fam
   cat(' DONE!\n')
 
-  o <- list(clu_dom, clu_fam)
+  o <- list(clu_dom, clu_fam, tout)
   return(o)
 }
 

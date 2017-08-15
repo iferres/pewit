@@ -171,6 +171,7 @@ pangenome<-function(gffs=c(),
                          n_threads = n_threads)
     clu_dom <- clus[[1]]
     clu_fam <- clus[[2]]
+    tout <- clus[[3]]
 
   }else{
 

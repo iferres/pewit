@@ -2,12 +2,14 @@
 #' @title Split Pre Clusters
 #' @description Takes coarse clusters and split them using a tree prunning
 #' algorithm.
+#' @param fastas Amino acid sequences
 #' @param pre.clusters A \code{list} of clusters.
 #' @param accuAli \code{logical}. Use accurate alignment?
 #' @param n_threads \code{integer} The number of cpus to use.
 #' @return A curated \code{list} of clusters.
 #' @author Ignacio Ferres
-splitPreClusters <- function(pre.clusters,
+splitPreClusters <- function(fastas,
+                             pre.clusters,
                              accuAli = FALSE,
                              n_threads = 1L) {
 

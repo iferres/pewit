@@ -4,9 +4,11 @@
 \alias{splitPreClusters}
 \title{Split Pre Clusters}
 \usage{
-splitPreClusters(pre.clusters, accuAli = FALSE, n_threads = 1L)
+splitPreClusters(fastas, pre.clusters, accuAli = FALSE, n_threads = 1L)
 }
 \arguments{
+\item{fastas}{Amino acid sequences}
+
 \item{pre.clusters}{A \code{list} of clusters.}
 
 \item{accuAli}{\code{logical}. Use accurate alignment?}
