@@ -178,6 +178,10 @@ pangenome<-function(gffs=c(),
     cat('Either hmmPfam or/and datPfam arguments were left NULL. Pfam search will be skipped.\n')
     clu_dom <- NULL
     clu_fam <- NULL
+    tout <- data.frame(Domain = character(),
+                       Family = character(),
+                       Motif = character(),
+                       Repeat = character())
 
   }
 
