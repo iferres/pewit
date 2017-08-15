@@ -4,10 +4,10 @@
 \alias{setClusterNames}
 \title{Set cluster names}
 \usage{
-setClusterNames(final.clusters)
+setClusterNames(clusters)
 }
 \arguments{
-\item{final.clusters}{A \code{list} of protein clusters.}
+\item{clusters}{A \code{list} of protein clusters.}
 }
 \value{
 A \code{vector} of names for the clusters

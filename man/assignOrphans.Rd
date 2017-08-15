@@ -4,12 +4,12 @@
 \alias{assignOrphans}
 \title{Assign Orphan Clusters to other clusters.}
 \usage{
-assignOrphans(m, final.clusters, panm)
+assignOrphans(m, clusters, panm)
 }
 \arguments{
 \item{m}{A tblout \code{data.frame}.}
 
-\item{final.clusters}{A \code{list} of clusters.}
+\item{clusters}{A \code{list} of clusters.}
 
 \item{panm}{A \code{data.frame}. The panmatrix.}
 }

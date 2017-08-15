@@ -4,10 +4,10 @@
 \alias{realocateSingletons}
 \title{Refining Singletons}
 \usage{
-realocateSingletons(final.clusters, panm, fastas, n_threads, seed = numeric())
+realocateSingletons(clusters, panm, fastas, n_threads, seed = numeric())
 }
 \arguments{
-\item{final.clusters}{A \code{list} of clusters.}
+\item{clusters}{A \code{list} of clusters.}
 
 \item{panm}{A binary panmatrix.}
 
