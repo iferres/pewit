@@ -47,7 +47,7 @@ splitPreClusters <- function(pre.clusters,
   }
 
   # Set cluster names
-  names(clusters) <- setClusterNames(final.clusters = clusters)
+  names(clusters) <- setClusterNames(clusters = clusters)
 
   # Clusters with recent paralogues:
   rcnt <- which(sapply(clusters, function(x) {

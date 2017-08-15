@@ -213,12 +213,12 @@ pangenome<-function(gffs=c(),
 
   cat('Refining..\n')
   cat('        ..realocating misassigned singletones..\n')
-  clusters <- realocateSingletons(final.clusters = final.clusters,
+  clusters <- realocateSingletons(clusters = clusters,
                                  panm = panm,
                                  fastas = fastas,
                                  n_threads = n_threads,
                                  seed = seed)
-  names(clusters) <- setClusterNames(final.clusters = clusters)
+  names(clusters) <- setClusterNames(clusters = clusters)
   cat('        ..computing binary pan-matrix..\n')
   panm <- buildPanMatrix(pangenome = clusters,
                          type='binary')

@@ -230,13 +230,13 @@ checkIfParalogues<-function(p){
 #' @name setClusterNames
 #' @title Set cluster names
 #' @description Creates othologue cluster names.
-#' @param final.clusters A \code{list} of protein clusters.
+#' @param clusters A \code{list} of protein clusters.
 #' @return A \code{vector} of names for the clusters
 #' @author Ignacio Ferres
-setClusterNames<-function(final.clusters){
-  np<-nchar(as.character(length(final.clusters)))
+setClusterNames<-function(clusters){
+  np<-nchar(as.character(length(clusters)))
   np<-paste("%0",np,"d",sep="")
-  npnam<-paste("OG",sprintf(np,1:length(final.clusters)),sep="")
+  npnam<-paste("OG",sprintf(np,1:length(clusters)),sep="")
   npnam
 }
 
