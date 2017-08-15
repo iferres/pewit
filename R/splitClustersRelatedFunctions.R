@@ -1,3 +1,71 @@
+#' @name splitPreClusters
+#' @title Split Pre Clusters
+#' @description Takes coarse clusters and split them using a tree prunning
+#' algorithm.
+#' @param pre.clusters A \code{list} of clusters.
+#' @param accuAli \code{logical}. Use accurate alignment?
+#' @param n_threads \code{integer} The number of cpus to use.
+#' @return A curated \code{list} of clusters.
+#' @author Ignacio Ferres
+splitPreClusters <- function(pre.clusters,
+                             accuAli = FALSE,
+                             n_threads = 1L) {
+
+  ind.withparalogues <- which(sapply(pre.clusters, function(x) {
+    checkIfParalogues(x)
+  }))
+
+  cat("Splitting pre-clusters..")
+  splitedClusters <- mclapply(ind.withparalogues, function(x) {
+    splitClusters(clstr = fastas[pre.clusters[[x]]], accuAli = accuAli)
+  }, mc.cores = n_threads, mc.preschedule = FALSE)
+
+  cat(" DONE!\n")
+
+
+  # Merge clusters (Clusters splited in previous step with clusters which doesn't
+  # contained paralogues')
+  cat("Merging clusters.. \n")
+  clusters <- c(unlist(splitedClusters, recursive = F),
+                pre.clusters[-ind.withparalogues])
+
+  # No domain and no phmmer hit (names):
+  hu <- names(fastas)[which(!names(fastas) %in% unlist(clusters))]
+
+
+  # Merge clusters (Clusters merged in previous step with orphans sequences which doesn't
+  # have any pfam domain or similarity with any other sequence[so coudn't be captured by
+  # phmmer thus neither by mcl]).
+  clusters <- c(clusters, as.list(hu))
+
+  if (!is.null(names(clusters))) {
+    pfamstr <- strsplit(names(clusters), ";")
+
+    for (i in 1:length(clusters)) {
+      attr(clusters[[i]], "pfamStr") <- pfamstr[[i]]
+    }
+  }
+
+  # Set cluster names
+  names(clusters) <- setClusterNames(final.clusters = clusters)
+
+  # Clusters with recent paralogues:
+  rcnt <- which(sapply(clusters, function(x) {
+    any(duplicated(do.call(rbind, strsplit(x, ";"))[, 1]))
+  }))
+  # Use the first one as representative and pass the other to attr(,'paralogues')
+  for (i in rcnt) {
+    repr <- clusters[[i]][1]
+    toattr <- clusters[[i]][-1]
+    clusters[[i]] <- repr
+    attr(clusters[[i]], "paralogues") <- toattr
+  }
+  cat("DONE!\n")
+
+  return(clusters)
+}
+
+
 #' @name splitClusters
 #' @title Split clusters
 #' @description Takes coarse protein groups clustered by ethier domain

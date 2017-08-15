@@ -195,68 +195,15 @@ pangenome<-function(gffs=c(),
 
   #Split paralogs
   pre.clusters <- c(clu_dom, clu_fam, orphans)
-
-  which(sapply(pre.clusters,function(x){
-    checkIfParalogues(x)
-    })) -> ind.withparalogues
-
-  cat('Splitting pre-clusters..')
-  mclapply(ind.withparalogues,function(x){
-    splitClusters(clstr = fastas[pre.clusters[[x]]], accuAli = accuAli)
-  },mc.cores=n_threads,mc.preschedule = FALSE) -> splitedClusters
-
-  cat(' DONE!\n')
-
-
-
-
-  #Merge clusters (Clusters splited in previous step with clusters which
-  # doesn't contained paralogues')
-  cat('Merging clusters.. \n')
-  c(unlist(splitedClusters,recursive = F),
-    pre.clusters[-ind.withparalogues]) -> final.clusters
-
-  #No domain and no phmmer hit (names):
-  names(fastas)[which(!names(fastas)%in%unlist(final.clusters))] -> hu
-
-
-  #Merge clusters (Clusters merged in previous step with orphans sequences
-  # which doesn't have any pfam domain or similarity with any other sequence[so
-  # coudn't be captured by phmmer thus neither by mcl]).
-  c(final.clusters,
-    as.list(hu)
-  ) -> final.clusters
-
-  if(!is.null(names(final.clusters))){
-    strsplit(names(final.clusters),';') -> pfamstr
-
-    for (i in 1:length(final.clusters)){
-      attr(final.clusters[[i]],'pfamStr') <- pfamstr[[i]]
-    }
-  }
-
-  #Set cluster names
-  names(final.clusters) <- setClusterNames(final.clusters = final.clusters)
-
-  #Clusters with recent paralogues:
-  which(sapply(final.clusters,function(x){
-    any(duplicated(do.call(rbind,strsplit(x,';'))[,1]))
-    })) -> rcnt
-  #Use the first one as representative and pass the other to attr(,'paralogues')
-  for(i in rcnt){
-    final.clusters[[i]][1] -> repr
-    final.clusters[[i]][-1] -> toattr
-    final.clusters[[i]] <- repr
-    attr(final.clusters[[i]],'paralogues') <- toattr
-  }
-  cat('DONE!\n')
-
+  clusters <- splitPreClusters(pre.clusters = pre.clusters,
+                               accuAli = accuAli,
+                               n_threads = n_threads)
 
 
 
   #Pan-matrix (presence/absence)
   cat('Computing provisory binary pan-matrix..')
-  buildPanMatrix(pangenome = final.clusters,
+  buildPanMatrix(pangenome = clusters,
                  type='binary') -> panm
   si1 <- length(which(rowSums(panm)==1))
   cat(paste0(' there are currently ',si1,' singletons.\n'))
