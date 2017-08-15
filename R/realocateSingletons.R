@@ -5,7 +5,7 @@
 #' singletons against the accessory genes. This step is performed because it
 #' has benn seen that previous steps tends to generate more singletons than
 #' there really are, specially if working with many genomes (100+).
-#' @param final.clusters A \code{list} of clusters.
+#' @param clusters A \code{list} of clusters.
 #' @param panm A binary panmatrix.
 #' @param fastas A \code{list} of sequences.
 #' @param n_threads \code{integer} The number of cpus to use.
@@ -13,7 +13,7 @@
 #' is used to allow reproducible results.
 #' @return A new \code{list} of clusters.
 #' @author Ignacio Feres
-realocateSingletons <- function(final.clusters,
+realocateSingletons <- function(clusters,
                                 panm,
                                 fastas,
                                 n_threads,
@@ -27,7 +27,7 @@ realocateSingletons <- function(final.clusters,
 
 
     # Takes up to five sequences from each accs cluster
-    fc <- final.clusters[[x]]
+    fc <- clusters[[x]]
     if (length(fc)>5) {set.seed(seed); fc <- sample(fc, 5)}
     fa <- fastas[fc]
 
@@ -41,7 +41,7 @@ realocateSingletons <- function(final.clusters,
                         file.out = tmp)
 
     #Build hmm model
-    hmmModel <- hmmBuild(ali = tmp, name = names(final.clusters)[x])
+    hmmModel <- hmmBuild(ali = tmp, name = names(clusters)[x])
     press <- hmmPress(hmmModel)
 
     # set threshold. hmmsearch model vs proteins used to build model,
@@ -69,7 +69,7 @@ realocateSingletons <- function(final.clusters,
   file.remove(mn)
   press <- hmmPress(model = mdls)
 
-  sqs <- unlist(final.clusters[sog])
+  sqs <- unlist(clusters[sog])
   sing <- tempfile()
   seqinr::write.fasta(fastas[sqs], names = sqs, file.out = sing)
 
@@ -103,7 +103,7 @@ realocateSingletons <- function(final.clusters,
   m <- do.call(rbind, en)
 
   clusters <- assignOrphans(m = m,
-                            final.clusters = final.clusters,
+                            clusters = clusters,
                             panm = panm)
   return(clusters)
 
@@ -177,38 +177,38 @@ readTblout <- function(tblout) {
 #' @title Assign Orphan Clusters to other clusters.
 #' @description .
 #' @param m A tblout \code{data.frame}.
-#' @param final.clusters A \code{list} of clusters.
+#' @param clusters A \code{list} of clusters.
 #' @param panm A \code{data.frame}. The panmatrix.
 #' @return A \code{list} of refined clusters.
 #' @author Ignacio Ferres
 assignOrphans <- function(m,
-                          final.clusters,
+                          clusters,
                           panm){
   for (i in 1:nrow(m)){
-    ocl <- final.clusters[m$singClu[i]]
+    ocl <- clusters[m$singClu[i]]
     at <- attr(ocl[[1]], 'paralogues')
     org <- strsplit(ocl[[1]][1], ';')[[1]][1]
     hav <- panm[ m$queryName[i], org ]
 
     if (hav == 1){
-      atv <- attr(final.clusters[[m$queryName[i]]], 'paralogues')
+      atv <- attr(clusters[[m$queryName[i]]], 'paralogues')
       atv <- c(atv, ocl[[1]][1], at)
-      attr(final.clusters[[m$queryName[i]]], 'paralogues') <- atv
-      final.clusters[m$singClu[i]] <- NULL
+      attr(clusters[[m$queryName[i]]], 'paralogues') <- atv
+      clusters[m$singClu[i]] <- NULL
     }else{
-      ln <- length(final.clusters[[m$queryName[1]]])
-      final.clusters[[m$queryName[i]]][ln + 1] <- ocl[[1]][1]
-      atv <- attr(final.clusters[[m$queryName[i]]], 'paralogues')
+      ln <- length(clusters[[m$queryName[1]]])
+      clusters[[m$queryName[i]]][ln + 1] <- ocl[[1]][1]
+      atv <- attr(clusters[[m$queryName[i]]], 'paralogues')
       atv <- c(atv, at)
-      attr(final.clusters[[m$queryName[i]]], 'paralogues') <- atv
-      final.clusters[m$singClu[i]] <- NULL
+      attr(clusters[[m$queryName[i]]], 'paralogues') <- atv
+      clusters[m$singClu[i]] <- NULL
       panm[ m$queryName[i], org ] <- 1L
     }
 
 
   }
 
-  return(final.clusters)
+  return(clusters)
 }
 
 
