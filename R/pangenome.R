@@ -131,7 +131,7 @@ pangenome<-function(gffs=c(),
 
   #Create output directory
   dir.create(dir_out)
-  paste0(normalizePath(dir_out),'/') -> outdir
+  outdir <- paste0(normalizePath(dir_out),'/')
 
   #Run on exit
   on.exit(runOnExit(outdir))
@@ -185,9 +185,9 @@ pangenome<-function(gffs=c(),
 
   # PHMMER + MCL
   cat('Clustering orphan sequences (phmmer + mcl) ..')
-  clusterOrphans(fastas = fastas,
-                 tout = tout,
-                 n_threads = n_threads) -> orphans
+  orphans <- clusterOrphans(fastas = fastas,
+                            tout = tout,
+                            n_threads = n_threads)
   cat(' DONE!\n')
 
 
@@ -203,8 +203,8 @@ pangenome<-function(gffs=c(),
 
   #Pan-matrix (presence/absence)
   cat('Computing provisory binary pan-matrix..')
-  buildPanMatrix(pangenome = clusters,
-                 type='binary') -> panm
+  panm <- buildPanMatrix(pangenome = clusters,
+                         type='binary')
   si1 <- length(which(rowSums(panm)==1))
   cat(paste0(' there are currently ',si1,' singletons.\n'))
 
@@ -310,12 +310,12 @@ pangenome<-function(gffs=c(),
                                 'representative',
                                 'allgenes')){
 
-      buildPanMatrix(out,type=pmOutfileType) -> panm
+      panm <- buildPanMatrix(out, type = pmOutfileType)
       write.table(panm,
-        file = paste0(outdir,'panmatrix.tab'),
-        quote = F,
-        na = '-',
-        sep = '\t')
+                  file = paste0(outdir,'panmatrix.tab'),
+                  quote = F,
+                  na = '-',
+                  sep = '\t')
     }
   }
 
