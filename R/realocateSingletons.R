@@ -196,7 +196,7 @@ assignOrphans <- function(m,
       attr(clusters[[m$queryName[i]]], 'paralogues') <- atv
       clusters[m$singClu[i]] <- NULL
     }else{
-      ln <- length(clusters[[m$queryName[1]]])
+      ln <- length(clusters[[m$queryName[i]]])
       clusters[[m$queryName[i]]][ln + 1] <- ocl[[1]][1]
       atv <- attr(clusters[[m$queryName[i]]], 'paralogues')
       atv <- c(atv, at)
