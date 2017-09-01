@@ -120,7 +120,7 @@ pangenome<-function(gffs=c(),
          \tPlease install it before re-running pangenome().\n\n")
   }
 
-  if(any(grepl('.gff$',gffs)==F)){
+  if(any(grepl('\\.gff$',gffs)==F)){
     stop("Files ('gffs') must have '.gff' extension.")
   }
 
