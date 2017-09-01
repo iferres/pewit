@@ -128,6 +128,10 @@ pangenome<-function(gffs=c(),
     stop(paste0('Directory ',dir_out,'/ already exists.'))
   }
 
+  if(any(file.info(gffs)$isdir)){
+    stop("At least one of the 'gffs' is a directory.")
+  }
+
 
   #Create output directory
   dir.create(dir_out)
