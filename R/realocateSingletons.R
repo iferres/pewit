@@ -64,8 +64,9 @@ realocateSingletons <- function(clusters,
 
   # Concatenates all the generated models
   mdls <- paste0(tempdir(),'/accsModels.hmm')
-  ct <- paste0('cat ', paste0(mn, collapse = ' '), ' > ', mdls)
-  system(ct)
+  for (i in seq_along(mn)) {file.append(file1 = mdls, file2 = mn[i])}
+  # ct <- paste0('cat ', paste0(mn, collapse = ' '), ' > ', mdls)
+  # system(ct)
   file.remove(mn)
   press <- hmmPress(model = mdls)
 
