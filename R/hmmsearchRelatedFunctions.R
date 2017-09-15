@@ -57,7 +57,11 @@ outhmmsearch<-function(pouti,ref){
 
   hmmer.table<-data.frame(Query=query,Hit=hit,PfamID=pfmID,Evalue=eval,Score=score,
                           Start=st,End=en,Description=desc,stringsAsFactors = F)
-  hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
+
+  wh <- which(hmmer.table$Evalue>0.1)
+  if (length(wh)>0){
+    hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
+  }
 
   sub("\\.\\d+","",ref$ID) -> codpf
   sub("\\.\\d+","",hmmer.table$PfamID) -> codhit
