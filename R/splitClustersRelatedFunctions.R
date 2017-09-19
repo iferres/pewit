@@ -254,7 +254,10 @@ align<-function(rf,type='AA',n_threads=1L,accu=TRUE,mxit1000=TRUE){
 #' Paradis et al.
 #' @author Ignacio Ferres
 pdist.aa <- function (x, scaled = TRUE) {
-  apply(x,1:2,function(i){charToRaw(toupper(i))}) -> x
+  if (any(x%in%letters)){
+    x <- toupper(x)
+  }
+  x <- apply(x,1:2,charToRaw)
   n <- nrow(x)
   d <- numeric(n * (n - 1)/2)
   X <- charToRaw("-")
