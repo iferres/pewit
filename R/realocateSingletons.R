@@ -48,7 +48,7 @@ realocateSingletons <- function(clusters,
     #  save 4/5 of the minimum threshold in tblout.
     se <- runHmmsearch(tmp, hmmModel, pfam = FALSE, n_threads = 1L)
     tbl <- readTblout(tblout = se)
-    tr <- min(tbl$Score) * 4/5
+    tr <- min(tbl$Score)
     file.remove(se)
     file.remove(press[-1])
 
