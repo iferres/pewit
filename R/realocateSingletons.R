@@ -45,7 +45,7 @@ realocateSingletons <- function(clusters,
     press <- hmmPress(hmmModel)
 
     # set threshold. hmmsearch model vs proteins used to build model,
-    #  save 4/5 of the minimum threshold in tblout.
+    #  save minimum threshold in tblout.
     se <- runHmmsearch(tmp, hmmModel, pfam = FALSE, n_threads = 1L)
     tbl <- readTblout(tblout = se)
     tr <- min(tbl$Score)
