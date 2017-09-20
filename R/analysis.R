@@ -433,7 +433,7 @@ writeFastaClusters <- function(x,
   paste0(normalizePath(outdir),'/') -> outdir
 
   cat('Writing..')
-  for (i in clustNames){
+  for (i in seq_along(clustNames)){
     x$clusters[[clustNames[i]]] -> a
 
     # if(paralogues){
