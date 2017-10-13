@@ -63,7 +63,7 @@ realocateSingletons <- function(clusters,
   mn <- unlist(mn)
 
   # Concatenates all the generated models
-  mdls <- paste0(tempdir(),'/accsModels.hmm')
+  mdls <- tempfile('accsmodels_')
   for (i in seq_along(mn)) {file.append(file1 = mdls, file2 = mn[i])}
   # ct <- paste0('cat ', paste0(mn, collapse = ' '), ' > ', mdls)
   # system(ct)
