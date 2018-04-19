@@ -103,7 +103,7 @@ realocateSingletons <- function(clusters,
   })
   m <- do.call(rbind, en)
 
-  if (dim(m)[1]!=0){
+  if (length(m)!=0){
     clusters <- assignOrphans(m = m,
                               clusters = clusters,
                               panm = panm)
