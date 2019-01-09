@@ -25,9 +25,9 @@ buildPanMatrix <- function(pangenome, type='binary'){
   if(class(pangenome)=='pangenome' & type=='binary'){
     return(pangenome$panmatrix)
   }else if(class(pangenome)=='pangenome' & all(type!=c('none','binary'))){
-    pangenome$clusters -> final.clusters
+    final.clusters <- pangenome$clusters
   }else if(class(pangenome)=='list'){
-    pangenome -> final.clusters
+    final.clusters <- pangenome
   }else{
     stop('"pangenome" must be an object of class "pangenome" or "list".')
   }
@@ -38,9 +38,9 @@ buildPanMatrix <- function(pangenome, type='binary'){
                                 'representative',
                                 'allgenes'))
 
-  sort(unique(sapply(unlist(final.clusters),function(x){
+  cls <- sort(unique(sapply(unlist(final.clusters),function(x){
     strsplit(x,';')[[1]][1]
-  }))) -> cls
+  })))
   m <- matrix(nrow = length(final.clusters),
               ncol = length(cls))
   rownames(m) <- names(final.clusters)
@@ -48,46 +48,46 @@ buildPanMatrix <- function(pangenome, type='binary'){
 
   if(type=='binary'){
       for (i in seq_along(final.clusters)){
-        as.numeric(cls%in%sapply(final.clusters[[i]],function(x){
+        m[i, ] <- as.numeric(cls%in%sapply(final.clusters[[i]],function(x){
           strsplit(x,';')[[1]][1]
-        })) -> m[i,]
+        }))
       }
 
   }else if (type=='nparalog'){
 
     for (i in seq_along(final.clusters)){
-      c(final.clusters[[i]],attr(final.clusters[[i]],'paralogues')) -> alls
-      factor(do.call(rbind,strsplit(alls,';'))[,1],levels = cls) -> this
-      as.vector(table(this)) -> m[i,]
+      alls <- c(final.clusters[[i]],attr(final.clusters[[i]],'paralogues'))
+      this <- factor(do.call(rbind,strsplit(alls,';'))[,1],levels = cls)
+      m[i, ] <- as.vector(table(this))
     }
 
   }else if(type=='representative'){
 
     for (i in seq_along(final.clusters)){
-      final.clusters[[i]] -> alls
-      factor(do.call(rbind,strsplit(alls,';'))[,1,drop=F],levels = cls) -> this
-      which(table(this)>0) -> hav
-      sapply(names(hav),function(x){
+      alls <- final.clusters[[i]]
+      this <- factor(do.call(rbind,strsplit(alls,';'))[,1,drop=F],levels = cls)
+      hav <- which(table(this)>0)
+      gens <- sapply(names(hav),function(x){
         grep(paste0(x,';'),alls,value = T)
-        },simplify = T) -> gens
-      sapply(gens,function(x){
+        },simplify = T)
+      gens <- sapply(gens,function(x){
         do.call(rbind,strsplit(x,';'))[,2]
-        },simplify = T) -> gens
+        },simplify = T)
       m[i,hav] <- as.vector(unlist(gens))
     }
 
   }else if(type=='allgenes'){
 
     for (i in seq_along(final.clusters)){
-      c(final.clusters[[i]],attr(final.clusters[[i]],'paralogues')) -> alls
-      factor(do.call(rbind,strsplit(alls,';'))[,1,drop=F],levels = cls) -> this
-      which(table(this)>0) -> hav
-      sapply(names(hav),function(x){
+      alls <- c(final.clusters[[i]],attr(final.clusters[[i]],'paralogues'))
+      this <- factor(do.call(rbind,strsplit(alls,';'))[,1,drop=F],levels = cls)
+      hav <- which(table(this)>0)
+      gens <- sapply(names(hav),function(x){
         grep(paste0(x,';'),alls,value = T)
-        },simplify = F) -> gens
-      sapply(gens,function(x){
+        },simplify = F)
+      gens <- sapply(gens,function(x){
         paste0(do.call(rbind,strsplit(x,';'))[,2,drop=F],collapse = ';')
-        },simplify = T) -> gens
+        },simplify = T)
       m[i,hav] <- as.vector(gens)
     }
 
@@ -122,18 +122,18 @@ getClusterGenes <- function(x,clustNames=c(),annot=F){
     clustNames <- rownames(x$panmatrix)
   }
 
-  unlist(lapply(clustNames,function(y){
+   a <- unlist(lapply(clustNames,function(y){
     x$clusters[y]
-  }),recursive = F) -> a
+  }),recursive = F)
   if (!annot) {
     attr(a,'Annot') <- FALSE
     a
   }else{
-    lapply(a,function(y){
+    a <- lapply(a,function(y){
       sapply(y,function(z){
         attr(x$cds[z][[1]],'Annot')
       })
-    }) -> a
+    })
     attr(a,'Annot') <- TRUE
     a
   }
@@ -270,8 +270,8 @@ plotRarefaction <- function(x,
     stop('Object is not of class "pangenome" (pewit).')
   }
 
-  ncol(x$panmatrix) -> n
-  seq(1, n, 1) -> br
+  n <- ncol(x$panmatrix)
+  br <- seq(1, n, 1)
 
   corev <- matrix(nrow = nsamp, ncol = n) -> panev
   rownames(corev) <- paste("sample", 1:nsamp, sep = "")
@@ -282,16 +282,16 @@ plotRarefaction <- function(x,
   for (b in 1:n){
     for (i in 1:nsamp){
 
-      x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F] -> mu
+      mu <- x$panmatrix[,as.vector(sample(colnames(x$panmatrix),br[b],replace = F)),drop=F]
       if(length(which(rowSums(mu)==0))>0){
-        mu[-which(rowSums(mu)==0),,drop=F] -> mu
+        mu <- mu[-which(rowSums(mu)==0),,drop=F]
       }
-      nrow(mu) -> panev[i,b]
-      length(which(apply(mu,1,function(x){all(x>0)}))) -> corev[i,b]
+      panev[i, b] <- nrow(mu)
+      corev[i, b] <- length(which(apply(mu,1,function(x){all(x>0)})))
     }
   }
 
-  unlist(c(corev,panev)) -> vl
+  vl <- unlist(c(corev,panev))
   ymar <- c(min(vl)*y.mar[1], max(vl)*y.mar[2])
 
   if(plot){
@@ -315,14 +315,14 @@ plotRarefaction <- function(x,
 
     if (shadow){
 
-      apply(panev, 2, quantile) -> pg.quant
-      predict(loess(pg.quant[shadow.quant[1],] ~ c(1:n))) -> pg.mi
-      predict(loess(pg.quant[shadow.quant[2],] ~ c(1:n))) -> pg.ma
+      pg.quant <- apply(panev, 2, quantile)
+      pg.mi <- predict(loess(pg.quant[shadow.quant[1],] ~ c(1:n)))
+      pg.ma <- predict(loess(pg.quant[shadow.quant[2],] ~ c(1:n)))
       # pg.mi[n] <- pg.quant[1,n]
 
-      apply(corev, 2, quantile) -> cg.quant
-      predict(loess(cg.quant[shadow.quant[1],] ~ c(1:n))) -> cg.mi
-      predict(loess(cg.quant[shadow.quant[2],] ~ c(1:n))) -> cg.ma
+      cg.quant <- apply(corev, 2, quantile)
+      cg.mi <- predict(loess(cg.quant[shadow.quant[1],] ~ c(1:n)))
+      cg.ma <- predict(loess(cg.quant[shadow.quant[2],] ~ c(1:n)))
       # cg.mi[n] <- cg.quant[1,n]
 
       polygon(x = c(1:n, (n-1):1),
@@ -350,8 +350,8 @@ plotRarefaction <- function(x,
           col = adjustcolor(cg.col, alpha.f = pt.alpha),
           cex = pt.cex)
 
-    loess(apply(panev, 2, mean) ~ c(1:n)) -> p.me
-    loess(apply(corev, 2, mean) ~ c(1:n)) -> c.me
+    p.me <- loess(apply(panev, 2, mean) ~ c(1:n))
+    c.me <- loess(apply(corev, 2, mean) ~ c(1:n))
 
     lines(predict(p.me), col = pg.col, lwd = li.lwd)
     lines(predict(c.me), col = cg.col, lwd = li.lwd)
@@ -419,22 +419,22 @@ writeFastaClusters <- function(x,
     clustNames <- names(x$clusters)
   }
 
-  normalizePath(ffns) -> ffndir
+  ffndir <- normalizePath(ffns)
   # seqinr::read.fasta(paste0(ffndir,'all.ffn'),
   #                    seqtype = 'DNA',
   #                    as.string = T) -> seqs
   cat('Reading fasta files..')
-  parallel::mclapply(ffndir,function(x){
+  seqs <- parallel::mclapply(ffndir,function(x){
     seqinr::read.fasta(x,seqtype = 'DNA',as.string = T)
-  },mc.cores = n_threads) -> seqs
-  unlist(seqs,recursive = F) -> seqs
+  },mc.cores = n_threads)
+  seqs <- unlist(seqs,recursive = F)
   cat(' DONE!\n')
 
-  paste0(normalizePath(outdir),'/') -> outdir
+  out.dir <- paste0(normalizePath(outdir),'/')
 
   cat('Writing..')
   for (i in seq_along(clustNames)){
-    x$clusters[[clustNames[i]]] -> a
+    a <- x$clusters[[clustNames[i]]]
 
     # if(paralogues){
     #   c(a,attr(x$clusters[clustNames[i]],'paralogues')) -> a
@@ -445,12 +445,12 @@ writeFastaClusters <- function(x,
                           names = a,
                           file.out = paste0(outdir,clustNames[i],'.fasta'))
     }else if(type=='all'){
-      c(a,attr(x$clusters[clustNames[i]],'paraligues')) -> a
+      a <- c(a,attr(x$clusters[clustNames[i]],'paraligues'))
       seqinr::write.fasta(seqs[a],
                           names = a,
                           file.out = paste0(outdir,clustNames[i],'.fasta'))
     }else if(type=='representative'){
-      a[1] -> a
+      a <- a[1]
       seqinr::write.fasta(seqs[a],
                           names = a,
                           file.out = paste0(outdir,clustNames[i],'.fasta'))
@@ -498,53 +498,53 @@ coreAlign <- function(x,
   }
 
   cat('Getting core-genes.\n')
-  getCoreClusters(x,level=level) -> clusters
-  x$clusters[clusters] -> sid
+  clusters <- getCoreClusters(x,level=level)
+  sid <- x$clusters[clusters]
 
 
-  mclapply(ffns,function(x){
+  seqs <- mclapply(ffns,function(x){
     seqinr::read.fasta(x,seqtype = 'DNA',as.string = T)
-  },mc.cores = n_threads) -> seqs
-  unlist(seqs,recursive = F) -> seqs
+  },mc.cores = n_threads)
+  seqs <- unlist(seqs,recursive = F)
 
-  mclapply(sid,function(y){
+  seqs <- mclapply(sid,function(y){
     seqs[y]
-  },mc.cores = n_threads) -> seqs
+  },mc.cores = n_threads)
 
-  colnames(x$panmatrix) -> orgs
+  orgs <- colnames(x$panmatrix)
 
   #Align.
   cat('Aligning.\n')
   al <- list()
-  pb<- txtProgressBar(min = 0,max = length(seqs),style = 3)
+  pb <- txtProgressBar(min = 0,max = length(seqs),style = 3)
   for (i in 1:length(seqs)){
     if(accu){
-      align(rf = seqs[[i]],
+      a <- align(rf = seqs[[i]],
             type = 'DNA',
             n_threads = n_threads,
             accu = TRUE,
-            mxit1000 = TRUE) -> a
+            mxit1000 = TRUE)
     }else{
-      align(rf = seqs[[i]],
+      a <- align(rf = seqs[[i]],
             type = 'DNA',
             n_threads = n_threads,
-            accu=FALSE) -> a
+            accu=FALSE)
     }
 
 
     #If some organism/s doesn't have a core gene...
     if(nrow(a)!=length(orgs)){
-      orgs[which(!orgs%in%do.call(rbind,strsplit(rownames(a),';'))[,1])] -> nw
-      matrix('-',nrow = length(nw),ncol = ncol(a)) -> nwm
+      nw <- orgs[which(!orgs%in%do.call(rbind,strsplit(rownames(a),';'))[,1])]
+      nwm <- matrix('-',nrow = length(nw),ncol = ncol(a))
       rownames(nwm) <- paste0(nw,';')
-      rbind(a,nwm) -> a
+      a <- rbind(a,nwm)
     }
 
     #Order
-    a[sapply(paste0('^',orgs,';'),grep,rownames(a)),] -> a
+    a <- a[sapply(paste0('^',orgs,';'),grep,rownames(a)),]
     #Write
     tmp <- tempfile(fileext = '.ali')
-    ape::as.alignment(a) -> a
+    a <- ape::as.alignment(a)
     seqinr::write.fasta(sequences = as.list(a$seq),names = a$nam,file.out = tmp)
     al[[i]] <- tmp
     setTxtProgressBar(pb,i)
@@ -552,17 +552,17 @@ coreAlign <- function(x,
   close(pb)
 
 
-  unlist(al) -> al
+  al <- unlist(al)
 
 
   #Concatenate (horizontal)
   cat('Merging..')
-  mclapply(orgs,function(x){
+  supergenes <- mclapply(orgs,function(x){
 
     li <- list()
     for (i in 1:length(al)){
-      seqinr::read.alignment(al[i],format = 'fasta') -> ral
-      ral$seq[[grep(paste0('^',x,';'),ral$nam)]] -> li[[i]]
+      ral <- seqinr::read.alignment(al[i],format = 'fasta')
+      li[[i]] <- ral$seq[[grep(paste0('^',x,';'),ral$nam)]]
     }
     he <- paste0('>',x)
     tmp <- tempfile(fileext = '.supergene')
@@ -571,13 +571,13 @@ coreAlign <- function(x,
                sep = '\n')
     tmp
 
-  },mc.cores = n_threads) -> supergenes
-  unlist(supergenes) -> supergenes
+  },mc.cores = n_threads)
+  supergenes <- unlist(supergenes)
   cat(' DONE!\n')
   file.remove(al)
 
   #Concatenate (vertical). Output.
-  paste('Writing output at',file.out,'..') -> p
+  p <- paste('Writing output at',file.out,'..')
   cat(p)
   for (i in 1:length(supergenes)){
     cat(readLines(supergenes[i]),
