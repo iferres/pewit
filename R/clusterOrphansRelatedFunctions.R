@@ -1,4 +1,4 @@
-#Heuristic phmmer comparisons in order to cluster proteins without Pfam-A
+# Heuristic phmmer comparisons in order to cluster proteins without Pfam-A
 # domains asigned.
 #' @name clusterOrphans
 #' @title Cluster 'orphan' sequences (i.e. without Pfam-A domains of classes
@@ -27,98 +27,91 @@
 #' @importFrom foreach foreach '%dopar%'
 #' @importFrom seqinr write.fasta
 #' @importFrom utils write.table
-clusterOrphans <- function(tout,fastas,n_threads){
+clusterOrphans <- function(tout, fastas, n_threads) {
 
-  #Retrieve all orphan sequences from previous steps.
-  c(rownames(tout)[which(tout$Domain=='' & tout$Family=='')],
-    names(fastas)[which(!names(fastas)%in%rownames(tout))])->orph.n
+  # Retrieve all orphan sequences from previous steps.
+  orph.n <- c(rownames(tout)[which(tout$Domain == "" & tout$Family == "")], names(fastas)[which(!names(fastas) %in%
+                                                                                                  rownames(tout))])
 
-  orph.n -> orps
+  orps <- orph.n
 
   res <- list()
-  while (length(orps)>0){
+  while (length(orps) > 0) {
 
-    table(sapply(orps,function(x){strsplit(x,';')[[1]][1]})) -> tcont
-    sort(tcont,decreasing = T) -> so
+    tcont <- table(sapply(orps, function(x) {
+      strsplit(x, ";")[[1]][1]
+    }))
+    so <- sort(tcont, decreasing = T)
 
-    if(length(so)>=3){
+    if (length(so) >= 3) {
       tk <- 3
-    }else{
+    } else {
       tk <- length(so)
     }
 
-    names(so[1:tk]) -> ma
-    unlist(sapply(ma,function(x){
-      grep(paste0(x,';'),orps,fixed = T,value = T)
-    })) -> fi
+    ma <- names(so[1:tk])
+    fi <- unlist(sapply(ma, function(x) {
+      grep(paste0(x, ";"), orps, fixed = T, value = T)
+    }))
 
-    if (length(fi)>=n_threads){
+    if (length(fi) >= n_threads) {
       parts <- n_threads
-    }else{
+    } else {
       parts <- length(fi)
     }
 
-    splitIndices(length(fi),parts) -> spin
-    unlist(lapply(spin,function(x){
-      tmp1<-tempfile()
-      # write.fasta(lapply(fastas[fi[x]],memDecompress,'gzip',TRUE),
-      #             names = fi[x],
-      #             file.out = tmp1)
-      write.fasta(fastas[fi[x]],
-                  names = fi[x],
-                  file.out = tmp1)
+    spin <- splitIndices(length(fi), parts)
+    temps <- unlist(lapply(spin, function(x) {
+      tmp1 <- tempfile()
+      # write.fasta(lapply(fastas[fi[x]],memDecompress,'gzip',TRUE), names = fi[x],
+      # file.out = tmp1)
+      write.fasta(fastas[fi[x]], names = fi[x], file.out = tmp1)
       tmp1
-    })) -> temps
+    }))
 
     tmp2 <- tempfile()
-    # write.fasta(lapply(fastas[orps],memDecompress,'gzip',TRUE),
-    #             names = orps,
-    #             file.out = tmp2)
-    write.fasta(fastas[orps],
-                names = orps,
-                file.out = tmp2)
+    # write.fasta(lapply(fastas[orps],memDecompress,'gzip',TRUE), names = orps,
+    # file.out = tmp2)
+    write.fasta(fastas[orps], names = orps, file.out = tmp2)
 
     registerDoParallel(cores = n_threads)
-    abc<-foreach(i=seq_along(spin),.combine = rbind)%dopar%{
-      phmm.tmp<-tempfile()
-      system2(command = "phmmer",
-              args = c("-o /dev/null",
-                       paste("--tblout",phmm.tmp),
-                       "--cpu 0 --mx BLOSUM45",
-                       temps[i],tmp2))
+    abc <- foreach(i = seq_along(spin), .combine = rbind) %dopar% {
+      phmm.tmp <- tempfile()
+      system2(command = "phmmer", args = c("-o /dev/null", paste("--tblout",
+                                                                 phmm.tmp), "--cpu 0 --mx BLOSUM45", temps[i], tmp2))
 
-      #Return phmmer results
+      # Return phmmer results
       outphmmer(pouti = phmm.tmp)
     }
 
-    abc -> res[[length(res)+1]]
+    res[[length(res) + 1]] <- abc
 
-    #MCL
-    tempfile() -> tmp
-    write.table(abc[,c(1,2,4)],file = tmp,sep = "\t",
-                quote = F,row.names = F,col.names = F)
-    strsplit(runMCL(abc = tmp,neg.log10 = F,infl = 4),split = '\t') -> mclust
+    # MCL
+    tmp <- tempfile()
+    write.table(abc[, c(1, 2, 4)], file = tmp, sep = "\t", quote = F, row.names = F,
+                col.names = F)
+    mclust <- strsplit(runMCL(abc = tmp, neg.log10 = F, infl = 4), split = "\t")
 
-    which(sapply(mclust,length)==1) -> sin
-    sapply(unlist(mclust[sin]),function(x){
-      strsplit(x,';')[[1]][1]
-    }) -> b
-    which(!b%in%names(so)[1:3]) -> w
-    if(length(w)==0){
+    sin <- which(sapply(mclust, length) == 1)
+    b <- sapply(unlist(mclust[sin]), function(x) {
+      strsplit(x, ";")[[1]][1]
+    })
+    w <- which(!b %in% names(so)[1:3])
+    if (length(w) == 0) {
       # mclust -> res[[length(res)+1]]
-      orps[-which(orps%in%unlist(mclust))] -> orps
-    }else{
+      orps <- orps[-which(orps %in% unlist(mclust))]
+    } else {
       # mclust[-sin[w]] -> res[[length(res)+1]]
-      orps[-which(orps%in%unlist(mclust[-sin[w]]))] -> orps
+      orps <- orps[-which(orps %in% unlist(mclust[-sin[w]]))]
     }
 
   }
 
-  do.call(rbind,res) -> res
-  tempfile() -> restmp
-  write.table(res[,c(1,2,4)],file = restmp,sep = '\t',
-              quote = F,row.names=F,col.names = F)
-  strsplit(runMCL(abc = restmp, neg.log10 = F,infl = 4),split = '\t') -> mclust
+  res <- do.call(rbind, res)
+  restmp <- tempfile()
+  write.table(res[, c(1, 2, 4)], file = restmp, sep = "\t", quote = F, row.names = F,
+              col.names = F)
+  mclust <- strsplit(runMCL(abc = restmp, neg.log10 = F, infl = 4), split = "\t")
   mclust
 
 }
@@ -133,20 +126,27 @@ clusterOrphans <- function(tout,fastas,n_threads){
 #' @param pouti \code{character}. phmmer output temporary file.
 #' @return A \code{data.frame} with the phmmer output.
 #' @author Ignacio Ferres
-outphmmer<-function(pouti){
-  readLines(pouti)->rl
-  rl[which(!grepl("^\\#",rl))]->rl
-  gsub("[ ]+"," ",rl)->rl
-  strsplit(rl," ")->lst
+outphmmer <- function(pouti) {
+  rl <- readLines(pouti)
+  rl <- rl[which(!grepl("^\\#", rl))]
+  rl <- gsub("[ ]+", " ", rl)
+  lst <- strsplit(rl, " ")
 
-  hit<-sapply(lst,function(x){x[1]})
-  query<-sapply(lst,function(x){x[3]})
-  eval<-as.numeric(sapply(lst,function(x){x[5]}))
-  score<-as.numeric(sapply(lst,function(x){x[6]}))
+  hit <- sapply(lst, function(x) {
+    x[1]
+  })
+  query <- sapply(lst, function(x) {
+    x[3]
+  })
+  eval <- as.numeric(sapply(lst, function(x) {
+    x[5]
+  }))
+  score <- as.numeric(sapply(lst, function(x) {
+    x[6]
+  }))
 
-  hmmer.table<-data.frame(Query=query,Hit=hit,
-                          Evalue=eval,Score=score,
-                          stringsAsFactors = F)
+  hmmer.table <- data.frame(Query = query, Hit = hit, Evalue = eval, Score = score,
+                            stringsAsFactors = F)
   return(hmmer.table)
 }
 
@@ -162,33 +162,22 @@ outphmmer<-function(pouti){
 #' @param infl \code{integer}. Inflacion value.
 #' @return MCL output.
 #' @author Ignacio Ferres
-runMCL<-function(abc,neg.log10=TRUE,infl=6){
+runMCL <- function(abc, neg.log10 = TRUE, infl = 6) {
 
-  if(neg.log10){
-    arg <- paste("--abc --abc-neg-log10 -discard-loops y -abc-tf 'ceil(300)' -I",infl)
-  }else{
-    arg <- paste("--abc -discard-loops y -I",infl)
+  if (neg.log10) {
+    arg <- paste("--abc --abc-neg-log10 -discard-loops y -abc-tf 'ceil(300)' -I",
+                 infl)
+  } else {
+    arg <- paste("--abc -discard-loops y -I", infl)
   }
 
-  #deprecated
-  #Run MCL
-  # system2(command = "mcl",
-  #         args = c(abc,arg,
-  #                  "-q x -o -"),
-  #         stdout = TRUE,
-  #         stderr = FALSE)->rl
-  #
-  # rl
+  # deprecated Run MCL system2(command = 'mcl', args = c(abc,arg, '-q x -o -'),
+  # stdout = TRUE, stderr = FALSE)->rl rl
 
-  #Run MCL
+  # Run MCL
   tmpmcl <- tempfile()
-  system(paste0('mcl ',
-                abc,
-                ' ',
-                arg,
-                ' -q x -o ',
-                tmpmcl))
-  readLines(tmpmcl) -> rl
+  system(paste0("mcl ", abc, " ", arg, " -q x -o ", tmpmcl))
+  rl <- readLines(tmpmcl)
   file.remove(tmpmcl)
   rl
 }
