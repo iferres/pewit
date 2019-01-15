@@ -141,15 +141,13 @@ processPfam_A_Dat <- function(datPfam, n_threads) {
     rl[x[1]:x[2]]
   })
   ref <- do.call(rbind, mclapply(li, function(y) {
-    c(regmatches(y[grep("GF AC", y)], regexpr("PF\\d+[.]*\\d{0,1}", y[grep("GF AC",
-                                                                           y)])), regmatches(y[grep("GF TP", y)], regexpr("Domain|Family|Motif|Repeat|Disordered|Coiled-coil",
-                                                                                                                          y[grep("GF TP", y)])), if (length(grep("GF CL", y)) != 0) {
-                                                                                                                            regmatches(y[grep("GF CL", y)], regexpr("CL\\d{4}", y[grep("GF CL", y)]))
-                                                                                                                          } else {
-                                                                                                                            "No-Clan"
-                                                                                                                          })
+    g1 <- grep('^#=GF AC', y, value = TRUE)
+    g2 <- grep('^#=GF TP', y, value = TRUE)
+    g3 <- grep('^#=GF CL', y)
+    c(g1, g2, ifelse(length(g3)!=0, y[g3], 'No-Clan'))
   }, mc.cores = n_threads))
   colnames(ref) <- c("ID", "TP", "CL")
+  ref <- sub('^#=\\w{2}[ ]\\w{2}[ ]{3}', '', ref)
   ref <- data.frame(ref, stringsAsFactors = F)
   return(ref)
 }
