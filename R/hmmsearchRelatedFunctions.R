@@ -286,8 +286,8 @@ rm_overlaping_clans <- function(tping, type) {
         if (length(multiclan) >= 1) {
           dej <- list()
           for (k in seq_along(multiclan)) {
-            indx  #columna de evalue
-            <- which.min(lping[[i]][ovlp[[multiclan[k]]],
+            #columna de evalue
+            indx <- which.min(lping[[i]][ovlp[[multiclan[k]]],
                                     4])
             # Remove the rest
             dej[[k]] <- lping[[i]][ovlp[[multiclan[k]]][indx], , drop = F]
