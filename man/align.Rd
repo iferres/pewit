@@ -4,7 +4,8 @@
 \alias{align}
 \title{Multiple alignment with mafft.}
 \usage{
-align(rf, type = "AA", n_threads = 1L, accu = TRUE, mxit1000 = TRUE)
+align(rf, type = "AA", n_threads = 1L, accu = TRUE,
+  mxit1000 = TRUE)
 }
 \arguments{
 \item{rf}{A \code{list} of \code{SeqFastaAA} objects.}

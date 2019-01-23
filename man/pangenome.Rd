@@ -4,10 +4,10 @@
 \alias{pangenome}
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
-pangenome(gffs = c(), hmmPfam = NULL, datPfam = NULL, n_threads = 1L,
-  dir_out = "out", writeFfns = FALSE, writeFastas = FALSE,
-  pmOutfileType = "representative", alignCore = TRUE, accuAli = FALSE,
-  coreLevel = 1, seed = 5)
+pangenome(gffs = c(), hmmPfam = NULL, datPfam = NULL,
+  n_threads = 1L, dir_out = "out", writeFfns = FALSE,
+  writeFastas = FALSE, pmOutfileType = "representative",
+  alignCore = TRUE, accuAli = FALSE, coreLevel = 1, seed = 5)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 files as retrieved by prokka (Seeman,

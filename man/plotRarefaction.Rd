@@ -6,11 +6,12 @@
 \usage{
 plotRarefaction(x, nsamp = 10, plot = TRUE, xlab = "# of genomes",
   ylab = "# of genes", y.mar = c(0.85, 1.15), las = 0,
-  pg.col = "#E64B35FF", cg.col = "#4DBBD5FF", pt.pch = 20, pt.cex = 1,
-  pt.alpha = 0.4, li.lwd = 3, shadow = TRUE, shadow.quant = c(2, 4),
-  shadow.col = "grey", leg = TRUE, legend = c("Pangenome", "Coregenome"),
-  leg.pos = "topleft", leg.cex = par("cex"), leg.pt.cex = par("cex"),
-  leg.pch = 22, leg.bty = "n", ...)
+  pg.col = "#E64B35FF", cg.col = "#4DBBD5FF", pt.pch = 20,
+  pt.cex = 1, pt.alpha = 0.4, li.lwd = 3, shadow = TRUE,
+  shadow.quant = c(2, 4), shadow.col = "grey", leg = TRUE,
+  legend = c("Pangenome", "Coregenome"), leg.pos = "topleft",
+  leg.cex = par("cex"), leg.pt.cex = par("cex"), leg.pch = 22,
+  leg.bty = "n", ...)
 }
 \arguments{
 \item{x}{An object of class \code{pangenome}.}

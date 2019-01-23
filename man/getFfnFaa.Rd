@@ -11,11 +11,11 @@ getFfnFaa(fnas, contig, strand, from, to, id, product)
 
 \item{contig}{\code{character}. The name of the contig.}
 
-\item{strand}{\code{character}. Either "+" or "-".}
+\item{strand}{\code{character}. Either '+' or '-'.}
 
-\item{from}{\code{numeric}. The coordinate "from".}
+\item{from}{\code{numeric}. The coordinate 'from'.}
 
-\item{to}{\code{numeric}. The coordinate "to".}
+\item{to}{\code{numeric}. The coordinate 'to'.}
 
 \item{id}{\code{character}. The ID of the CDS.}
 

@@ -12,11 +12,11 @@ extractSeqsFromGff3(infile, in.path = NULL, keep = "aa",
 
 \item{in.path}{Where the output (fasta files) will be written.}
 
-\item{keep}{\code{character}. What to keep in memory. One of "aa", "dna",
-"both" or "none".}
+\item{keep}{\code{character}. What to keep in memory. One of 'aa', 'dna',
+'both' or 'none'.}
 
 \item{write.in.path}{\code{character}. What to write \code{in.path}. One of
-"aa", "dna", "both" or "none".}
+'aa', 'dna', 'both' or 'none'.}
 }
 \value{
 A \code{list} with CDS gene and/or protein sequences, if specifyied.

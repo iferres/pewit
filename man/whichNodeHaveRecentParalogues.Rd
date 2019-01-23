@@ -8,7 +8,7 @@
 whichNodesHaveRecentParalogues(subtrees)
 }
 \arguments{
-\item{subtrees}{A \code{list} of trees of class "phylo".}
+\item{subtrees}{A \code{list} of trees of class 'phylo'.}
 }
 \value{
 A \code{vector} of nodes that contain recen paralogues.
