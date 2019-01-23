@@ -26,12 +26,12 @@ test_that('outhmmsearch works', {
 
 
 test_that('single hit grouping works', {
-
+  x <- pewit:::outhmmsearch(example_domtblout_file, ref)
   y <- pewit:::grouping(x, singlehit = TRUE, type = 'Domain')
 
   expect_true(all(sapply(y, class)=='data.frame'))
 
-  y_dims <- all(vapply(dom.sing, function(z){
+  y_dims <- all(vapply(y, function(z){
     identical(dim(z), c(1L, 10L))
   }, FUN.VALUE = NA))
   expect_true(y_dims)
@@ -40,7 +40,7 @@ test_that('single hit grouping works', {
 
 
 test_that('multiple hit grouping works',{
-
+  x <- pewit:::outhmmsearch(example_domtblout_file, ref)
   y <- pewit:::grouping(x, singlehit = FALSE)
 
   expect_true(all(sapply(y, class)=='data.frame'))
