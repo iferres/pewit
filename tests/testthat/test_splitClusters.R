@@ -8,9 +8,10 @@ phy$tip.label <- c('genome1;gene1','genome1;gene2','genome2;gene1','genome3;gene
 
 
 l <- ape::subtrees(phy)
+x <- pewit:::whichNodesHaveRecentParalogues(subtrees = l)
+
 
 test_that('whichNodesHaveRecentParalogues work', {
-  x <- whichNodesHaveRecentParalogues(subtrees = l)
   expect_is(x, 'integer')
   expect_length(x, 2L)
   expect_equal(x, c(11L, 15L))
@@ -18,10 +19,8 @@ test_that('whichNodesHaveRecentParalogues work', {
 
 
 d <- as.dist(ape::cophenetic.phylo(phy))
+tree.trim <- pewit:::rmvRecentParalogues(phy,w = x,d = d)
 test_that('rmvRecentParalogues works',{
-  tree.trim <- pewit:::rmvRecentParalogues(phy,
-                                           w = x,
-                                           d = d)
   expect_is(tree.trim, 'list')
   expect_named(tree.trim, c('tree', 'paralogs'))
   expect_is(tree.trim$tree, 'phylo')
@@ -33,15 +32,15 @@ test_that('rmvRecentParalogues works',{
 })
 
 l <- ape::subtrees(tree.trim$tree)
+x <- pewit:::whichSubtreesAreTrueOrthologues(subtrees = l)
 test_that('whichSubtreesAreTrueOrthologues works',{
-  x <- pewit:::whichSubtreesAreTrueOrthologues(subtrees = l)
   expect_is(x, 'logical')
   expect_length(x, 5L)
   expect_equal(x, c(FALSE, TRUE, TRUE, TRUE, TRUE))
 })
 
+y <- pewit:::maxTrueOGs(tru.or = x, l = l)
 test_that('maxTrueOGs works',{
-  y <- pewit:::maxTrueOGs(tru.or = x, l = l)
   expect_is(y, 'logical')
   expect_length(y, 5L)
   expect_equal(y, c(FALSE, TRUE, FALSE, TRUE, FALSE))
