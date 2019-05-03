@@ -5,167 +5,179 @@
 #' protein sequence.
 #' @param infile \code{character}. The gff3 filename.
 #' @param in.path Where the output (fasta files) will be written.
-#' @param keep \code{character}. What to keep in memory. One of "aa", "dna",
-#' "both" or "none".
+#' @param keep \code{character}. What to keep in memory. One of 'aa', 'dna',
+#' 'both' or 'none'.
 #' @param write.in.path \code{character}. What to write \code{in.path}. One of
-#' "aa", "dna", "both" or "none".
+#' 'aa', 'dna', 'both' or 'none'.
 #' @return A \code{list} with CDS gene and/or protein sequences, if specifyied.
 #' @author Gregorio Iraola and Ignacio Ferres.
 #' @importFrom seqinr as.SeqFastadna s2c
-extractSeqsFromGff3 <- function(infile,
-                                in.path=NULL,
-                                keep = 'aa',
-                                write.in.path='dna'){
+extractSeqsFromGff3 <- function(infile, in.path = NULL, keep = "aa", write.in.path = "dna") {
 
-  if (is.null(in.path)){
-    in.path <- './'
+  if (is.null(in.path)) {
+    in.path <- "./"
   }
 
-  if(!dir.exists(in.path)){
-    stop('Directory does not exist.')
+  if (!dir.exists(in.path)) {
+    stop("Directory does not exist.")
   }
 
-  write.in.path <- match.arg(write.in.path, c('aa','dna','both','none'))
+  write.in.path <- match.arg(write.in.path, c("aa", "dna", "both", "none"))
 
-  keep <- match.arg(keep, c('aa', 'dna', 'both', 'none'))
+  keep <- match.arg(keep, c("aa", "dna", "both", "none"))
 
-  readLines(infile) -> rl
-  if(rl[1]!="##gff-version 3"){
-    stop('One or more gff files seems not to be gff3 (version 3).')
+  rl <- readLines(infile)
+  if (rl[1] != "##gff-version 3") {
+    stop("One or more gff files seems not to be gff3 (version 3).")
   }
 
-  if(grepl('#',infile)){
-    warning('Conflictive character "#", will be substituted by "_".')
-    gsub('#','_',infile) -> infile
+  if (grepl("#", infile)) {
+    warning("Conflictive character \"#\", will be substituted by \"_\".")
+    infile <- gsub("#", "_", infile)
   }
 
-  #Save sequence in SeqFastadna object
-  if(!any(grepl("##FASTA",rl))){
+  # Save sequence in SeqFastadna object
+  if (!any(grepl("##FASTA", rl))) {
     stop("One or more gff files do(es) not contain the fasta genome sequences.")
   }
-  grep("##FASTA",rl) + 1 -> fasta.ini
-  length(rl) -> fasta.end
-  rl[fasta.ini:fasta.end] -> fasta
-  grep('>',fasta,fixed = T) -> fheaders
-  matrix(nrow = length(fheaders),ncol = 2) -> t
-  fheaders + 1 -> t[,1]
-  c((fheaders - 1)[-1],length(fasta)) -> t[,2]
-  apply(t,1,function(x){
-    paste(fasta[x[1]:x[2]],collapse = '')
-  }) -> ap
-  names(ap) <- gsub('>','',fasta[fheaders])
-  lapply(tolower(ap),function(x){
-    as.SeqFastadna(s2c(x),name = names(x))
-  }) -> fnas
+  fasta.ini <- grep("##FASTA", rl) + 1
+  fasta.end <- length(rl)
+  fasta <- rl[fasta.ini:fasta.end]
+  fheaders <- grep(">", fasta, fixed = T)
+  t <- matrix(nrow = length(fheaders), ncol = 2)
+  t[, 1] <- fheaders + 1
+  t[, 2] <- c((fheaders - 1)[-1], length(fasta))
+  ap <- apply(t, 1, function(x) {
+    paste(fasta[x[1]:x[2]], collapse = "")
+  })
+  names(ap) <- gsub(">", "", fasta[fheaders])
+  fnas <- lapply(tolower(ap), function(x) {
+    as.SeqFastadna(s2c(x), name = names(x))
+  })
 
-  extractGffTable(rl = rl) -> gfftable
+  gfftable <- extractGffTable(rl = rl)
 
-  gfftable[which(gfftable$Type=='CDS'),] -> cds
+  cds <- gfftable[which(gfftable$Type == "CDS"), ]
 
-  #Patch to avoid wrong formatted cds in gff3 file (predictions with artemis
+  # Patch to avoid wrong formatted cds in gff3 file (predictions with artemis
   # return a different format than Prodigal or Aragorn, so they are discarded.
   # Usually there are very few (if any) proteins predicted with this method,
   # nothing to worry about).
-  rl[which(grepl('^\\#\\#sequence-region',rl))] -> sqreg
-  do.call(rbind,strsplit(sqreg,' '))[,2] -> contigs
-  which(!cds$Contig%in%contigs) -> bad
-  if (length(bad)>0){
-    cds[-bad,] -> cds
+  sqreg <- rl[which(grepl("^\\#\\#sequence-region", rl))]
+  contigs <- do.call(rbind, strsplit(sqreg, " "))[, 2]
+  bad <- which(!cds$Contig %in% contigs)
+  if (length(bad) > 0) {
+    cds <- cds[-bad, ]
   }
 
 
-  apply(cds,1,function(x){
-    getFfnFaa(fnas=fnas,
-              contig = x[1],
-              strand = x[9],
-              from = as.numeric(x[7]),
-              to = as.numeric(x[8]),id = x[2],
-              product = x[5])
-  }) -> fin
-  nam <- sapply(fin,function(x){attr(x[[1]],'name')})
+  fin <- apply(cds, 1, function(x) {
+    getFfnFaa(fnas = fnas, contig = x[1], strand = x[9], from = as.numeric(x[7]),
+              to = as.numeric(x[8]), id = x[2], product = x[5])
+  })
+  nam <- sapply(fin, function(x) {
+    attr(x[[1]], "name")
+  })
 
-  if(any(grepl('#',nam))){
-    warning('Conflictive character "#", will be substituted by "_".')
-    gsub('#','_',nam) -> nam
+  if (any(grepl("#", nam))) {
+    warning("Conflictive character \"#\", will be substituted by \"_\".")
+    nam <- gsub("#", "_", nam)
   }
   names(fin) <- nam
 
-  if (write.in.path == 'dna'){
+  if (write.in.path == "dna") {
 
-    ffn <- sapply(fin,function(x){x[[1]]})
-    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
-    write.fasta(ffn,
-                names = names(ffn),
-                file.out = paste0(in.path,
-                                  sub('.gff','.ffn',rev(strsplit(infile,'/')[[1]])[1]),
-                                  collapse = '/'))
+    ffn <- sapply(fin, function(x) {
+      x[[1]]
+    })
+    names(ffn) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(ffn))
+    write.fasta(ffn, names = names(ffn), file.out = paste0(in.path, sub(".gff",
+                                                                        ".ffn", rev(strsplit(infile, "/")[[1]])[1]), collapse = "/"))
 
-  }else if(write.in.path == 'aa'){
+  } else if (write.in.path == "aa") {
 
-    faa <- sapply(fin,function(x){x[[2]]})
-    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
-    write.fasta(faa,
-                names = names(faa),
-                file.out = paste0(in.path,
-                                  sub('.gff','.faa',rev(strsplit(infile,'/')[[1]])[1]),
-                                  collapse = '/'))
+    faa <- sapply(fin, function(x) {
+      x[[2]]
+    })
+    names(faa) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(faa))
+    write.fasta(faa, names = names(faa), file.out = paste0(in.path, sub(".gff",
+                                                                        ".faa", rev(strsplit(infile, "/")[[1]])[1]), collapse = "/"))
 
-  }else if(write.in.path == 'both'){
+  } else if (write.in.path == "both") {
 
-    ffn <- sapply(fin,function(x){x[[1]]})
-    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
-    write.fasta(ffn,
-                names = names(ffn),
-                file.out = paste0(in.path,
-                                  sub('.gff','.ffn',rev(strsplit(infile,'/')[[1]])[1]),
-                                  collapse = '/'))
+    ffn <- sapply(fin, function(x) {
+      x[[1]]
+    })
+    names(ffn) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(ffn))
+    write.fasta(ffn, names = names(ffn), file.out = paste0(in.path, sub(".gff",
+                                                                        ".ffn", rev(strsplit(infile, "/")[[1]])[1]), collapse = "/"))
 
-    faa <- sapply(fin,function(x){x[[2]]})
-    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
-    write.fasta(faa,
-                names = names(faa),
-                file.out = paste0(in.path,
-                                  sub('.gff','.faa',rev(strsplit(infile,'/')[[1]])[1]),
-                                  collapse = '/'))
+    faa <- sapply(fin, function(x) {
+      x[[2]]
+    })
+    names(faa) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(faa))
+    write.fasta(faa, names = names(faa), file.out = paste0(in.path, sub(".gff",
+                                                                        ".faa", rev(strsplit(infile, "/")[[1]])[1]), collapse = "/"))
 
-  }else if(write.in.path == 'none'){
-    ffn <- sapply(fin,function(x){x[[1]]})
-    names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
-    faa <- sapply(fin,function(x){x[[2]]})
-    names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
+  } else if (write.in.path == "none") {
+    ffn <- sapply(fin, function(x) {
+      x[[1]]
+    })
+    names(ffn) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(ffn))
+    faa <- sapply(fin, function(x) {
+      x[[2]]
+    })
+    names(faa) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(faa))
   }
 
-  if (keep == 'dna'){
+  if (keep == "dna") {
 
-    if(!exists('ffn')){
-      ffn <- sapply(fin,function(x){x[[1]]})
-      names(ffn) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(ffn))
+    if (!exists("ffn")) {
+      ffn <- sapply(fin, function(x) {
+        x[[1]]
+      })
+      names(ffn) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                           names(ffn))
     }
-    ffn <- lapply(ffn, function(x){paste0(x, collapse = '')})
+    ffn <- lapply(ffn, function(x) {
+      paste0(x, collapse = "")
+    })
     ffn
 
-  }else if(keep == 'aa'){
+  } else if (keep == "aa") {
 
-    if (!exists('faa')){
-      faa <-  sapply(fin,function(x){x[[2]]})
-      names(faa) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(faa))
+    if (!exists("faa")) {
+      faa <- sapply(fin, function(x) {
+        x[[2]]
+      })
+      names(faa) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                           names(faa))
     }
-    faa <- lapply(faa, function(x){paste0(x, collapse = '')})
+    faa <- lapply(faa, function(x) {
+      paste0(x, collapse = "")
+    })
     faa
 
-  }else if (keep == 'both'){
+  } else if (keep == "both") {
 
-    fin <- lapply(fin,function(x){
-      lapply(x, function(y){
-        paste0(y, collapse = '')
+    fin <- lapply(fin, function(x) {
+      lapply(x, function(y) {
+        paste0(y, collapse = "")
       })
     })
-    names(fin) <- paste0(sub('.gff$',';',rev(strsplit(infile,'/')[[1]])[1]),names(fin))
+    names(fin) <- paste0(sub(".gff$", ";", rev(strsplit(infile, "/")[[1]])[1]),
+                         names(fin))
     fin
 
-  }else if (keep == 'none'){
+  } else if (keep == "none") {
 
-    cat('Nothing to return.\n')
+    cat("Nothing to return.\n")
 
   }
 
@@ -177,9 +189,9 @@ extractSeqsFromGff3 <- function(infile,
 #' gff3 table and the fasta sequence.
 #' @param fnas A \code{list} of \code{SeqFastadna} genome sequences.
 #' @param contig \code{character}. The name of the contig.
-#' @param strand \code{character}. Either "+" or "-".
-#' @param from \code{numeric}. The coordinate "from".
-#' @param to \code{numeric}. The coordinate "to".
+#' @param strand \code{character}. Either '+' or '-'.
+#' @param from \code{numeric}. The coordinate 'from'.
+#' @param to \code{numeric}. The coordinate 'to'.
 #' @param id \code{character}. The ID of the CDS.
 #' @param product \code{character}. The gene product.
 #' @return A \code{list} with two entries. The first is the CDS's DNA sequence,
@@ -187,22 +199,17 @@ extractSeqsFromGff3 <- function(infile,
 #' and \code{SeqFastaAA}, respectively.
 #' @author Ignacio Ferres
 #' @importFrom seqinr as.SeqFastadna as.SeqFastaAA
-getFfnFaa <- function(fnas,contig,strand,from,to,id,product){
+getFfnFaa <- function(fnas, contig, strand, from, to, id, product) {
   # seqinr::getFrag.SeqFrag(fnas[contig][[1]],begin = from,end = to) -> ffn
-  fnas[contig[1]][[1]][from:to] -> ffn
-  # attr(ffn,'begin') <- NULL
-  # attr(ffn,'end') <- NULL
-  if(strand=='-'){
-    rev(comp(ffn)) -> ffn
+  ffn <- fnas[contig[1]][[1]][from:to]
+  # attr(ffn,'begin') <- NULL attr(ffn,'end') <- NULL
+  if (strand == "-") {
+    ffn <- rev(comp(ffn))
   }
-  seqinr::as.SeqFastadna(ffn,
-                         name = id,
-                         Annot = product) -> ffn
-  seqinr::as.SeqFastaAA(translate(ffn,numcode = 11),
-                        name = id,
-                        Annot = product) -> faa
+  ffn <- seqinr::as.SeqFastadna(ffn, name = id, Annot = product)
+  faa <- seqinr::as.SeqFastaAA(translate(ffn, numcode = 11), name = id, Annot = product)
 
-  list(ffn,faa) -> out
+  out <- list(ffn, faa)
   out
 }
 
@@ -213,51 +220,73 @@ getFfnFaa <- function(fnas,contig,strand,from,to,id,product){
 #' \code{readLines()}, reading the gff3 file.
 #' @return A \code{data.frame}.
 #' @author Ignacio Ferres
-extractGffTable <- function(rl){
-  which(grepl('^\\#\\#',rl)) -> w
-  rev(w)[1] - 1 -> upto
-  rev(w)[2] + 1 -> from
-  rl[from:upto] -> o
+extractGffTable <- function(rl) {
+  w <- which(grepl("^\\#\\#", rl))
+  upto <- rev(w)[1] - 1
+  from <- rev(w)[2] + 1
+  o <- rl[from:upto]
 
-  strsplit(o,'\t') -> lst
+  lst <- strsplit(o, "\t")
 
-  contig <- sapply(lst,function(x){x[1]})
-  type <- sapply(lst,function(x){x[3]})
-  from <- sapply(lst,function(x){x[4]})
-  to <- sapply(lst,function(x){x[5]})
-  strand <- sapply(lst,function(x){x[7]})
-  phase <- sapply(lst,function(x){x[8]})
-  attrib <- sapply(lst,function(x){x[9]})
-
-  metadata <- strsplit(attrib,';')
-
-  id <- sapply(metadata,function(x){
-    gp<-grep('ID=',x,value = T)
-    if(length(gp)>0){sub('ID=','',gp)}else{''}
+  contig <- sapply(lst, function(x) {
+    x[1]
   })
-  locustag <- sapply(metadata,function(x){
-    gp<-grep('locus_tag=',x,value = T)
-    if(length(gp)>0){sub('locus_tag=','',gp)}else{''}
+  type <- sapply(lst, function(x) {
+    x[3]
   })
-  gene <- sapply(metadata,function(x){
-    gp<-grep('gene=',x,value = T)
-    if(length(gp)>0){sub('gene=','',gp)}else{''}
+  from <- sapply(lst, function(x) {
+    x[4]
   })
-  product <- sapply(metadata,function(x){
-    gp<-grep('product=',x,value = T)
-    if(length(gp)>0){sub('product=','',gp)}else{''}
+  to <- sapply(lst, function(x) {
+    x[5]
+  })
+  strand <- sapply(lst, function(x) {
+    x[7]
+  })
+  phase <- sapply(lst, function(x) {
+    x[8]
+  })
+  attrib <- sapply(lst, function(x) {
+    x[9]
   })
 
-  out <- data.frame(Contig=contig,
-                    ID=id,
-                    LocusTag=locustag,
-                    Gene=gene,
-                    Product=product,
-                    Type=type,
-                    From=from,
-                    To=to,
-                    Strand=strand,
-                    Phase=phase,
+  metadata <- strsplit(attrib, ";")
+
+  id <- sapply(metadata, function(x) {
+    gp <- grep("ID=", x, value = T)
+    if (length(gp) > 0) {
+      sub("ID=", "", gp)
+    } else {
+      ""
+    }
+  })
+  locustag <- sapply(metadata, function(x) {
+    gp <- grep("locus_tag=", x, value = T)
+    if (length(gp) > 0) {
+      sub("locus_tag=", "", gp)
+    } else {
+      ""
+    }
+  })
+  gene <- sapply(metadata, function(x) {
+    gp <- grep("gene=", x, value = T)
+    if (length(gp) > 0) {
+      sub("gene=", "", gp)
+    } else {
+      ""
+    }
+  })
+  product <- sapply(metadata, function(x) {
+    gp <- grep("product=", x, value = T)
+    if (length(gp) > 0) {
+      sub("product=", "", gp)
+    } else {
+      ""
+    }
+  })
+
+  out <- data.frame(Contig = contig, ID = id, LocusTag = locustag, Gene = gene,
+                    Product = product, Type = type, From = from, To = to, Strand = strand, Phase = phase,
                     stringsAsFactors = F)
   out
 }
@@ -270,16 +299,20 @@ extractGffTable <- function(rl){
 #' @param type \code{character}. Either 'AA' or 'DNA'.
 #' @return A \code{list} of sequences.
 #' @author Ignacio Ferres
-getSeqOfType <- function(seqs,type='AA'){
-  names(seqs) -> n
+getSeqOfType <- function(seqs, type = "AA") {
+  n <- names(seqs)
 
-  unlist(seqs,recursive = F) -> un
-  if (type=='AA'){
-    lapply(un,function(x){x[[2]]}) -> lap
-  }else{
-    lapply(un,function(x){x[[1]]}) -> lap
+  un <- unlist(seqs, recursive = F)
+  if (type == "AA") {
+    lap <- lapply(un, function(x) {
+      x[[2]]
+    })
+  } else {
+    lap <- lapply(un, function(x) {
+      x[[1]]
+    })
   }
-  names(lap) <- sub('.gff.',';',names(lap))
+  names(lap) <- sub(".gff.", ";", names(lap))
   lap
 }
 
@@ -296,15 +329,10 @@ getSeqOfType <- function(seqs,type='AA'){
 #' @param ambiguous See \link[seqinr]{translate}.
 #' @return See \link[seqinr]{translate}.
 #' @importFrom seqinr s2n s2c amb
-translate <- function(seq,
-                      frame = 0,
-                      sens = "F",
-                      numcode = 1,
-                      NAstring = "X",
-                      ambiguous = FALSE){
+translate <- function(seq, frame = 0, sens = "F", numcode = 1, NAstring = "X", ambiguous = FALSE) {
 
 
-  seqn <- seqinr::s2n(seq, levels = c('t', 'c', 'a', 'g'), forceToLower = FALSE) #######
+  seqn <- seqinr::s2n(seq, levels = c("t", "c", "a", "g"), forceToLower = FALSE)  #######
   l <- 3 * ((length(seq) - frame)%/%3)
   c1 <- seq(from = frame + 1, to = frame + l, by = 3)
   tra <- 16 * seqn[c1] + 4 * seqn[c1 + 1] + seqn[c1 + 2] + 1
@@ -315,10 +343,10 @@ translate <- function(seq,
     toCheck <- which(result == NAstring)
     for (i in toCheck) {
       codon <- seq[c1[i]:(c1[i] + 2)]
-      allcodons <- as.vector(outer(as.vector(outer(seqinr::amb(codon[1],forceToLower = F),
+      allcodons <- as.vector(outer(as.vector(outer(seqinr::amb(codon[1], forceToLower = F),
                                                    seqinr::amb(codon[2], forceToLower = F), paste, sep = "")), amb(codon[3]),
                                    paste, sep = ""))
-      allaminoacids <- sapply(allcodons, function(x){
+      allaminoacids <- sapply(allcodons, function(x) {
         translate(seqinr::s2c(x), numcode = numcode, ambiguous = FALSE)
       })
       if (all(allaminoacids == allaminoacids[1]))
@@ -338,18 +366,15 @@ translate <- function(seq,
 #' @param ambiguous See \link[seqinr]{comp}.
 #' @return See \link[seqinr]{comp}.
 #' @importFrom seqinr n2s s2n
-comp <- function (seq,
-                  forceToLower = TRUE,
-                  ambiguous = FALSE){
+comp <- function(seq, forceToLower = TRUE, ambiguous = FALSE) {
 
   if (all(seq %in% LETTERS)) {
     isUpper <- TRUE
-  }
-  else {
+  } else {
     isUpper <- FALSE
   }
   # seq <- tolower(seq) #######################################################
-  result <- as.vector(seqinr::n2s((3 - seqinr::s2n(seq, forceToLower=FALSE))))########
+  result <- as.vector(seqinr::n2s((3 - seqinr::s2n(seq, forceToLower = FALSE))))  ########
   if (ambiguous) {
     result[which(seq == "b")] <- "v"
     result[which(seq == "d")] <- "h"

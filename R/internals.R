@@ -1,4 +1,4 @@
-#Internal functions.
+# Internal functions.
 
 #' @name runOnExit
 #' @title Removes everything if an error occur
@@ -6,11 +6,11 @@
 #' @param outdir The normalized path of the output directory
 #' @return Warning message if exits before finnishing all the process.
 #' @author Ignacio Ferres
-runOnExit <- function(outdir){
-  paste0(outdir,'pangenome.rds') -> fi
-  if (!file.exists(fi)){
-    warning('Something gone wrong: removing output directory.')
-    unlink(outdir,recursive = TRUE)
+runOnExit <- function(outdir) {
+  fi <- paste0(outdir, "pangenome.rds")
+  if (!file.exists(fi)) {
+    warning("Something gone wrong: removing output directory.")
+    unlink(outdir, recursive = TRUE)
   }
 }
 
@@ -27,81 +27,69 @@ runOnExit <- function(outdir){
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach foreach '%dopar%'
 #' @author Ignacio Ferres
-domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L){
+domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L) {
 
-  #Process Pfam-A.dat
-  cat('Processing Pfam-A.hmm.dat..')
-  ref<-processPfam_A_Dat(datPfam = datPfam,
-                         n_threads = n_threads)
-  cat(' DONE!\n')
+  # Process Pfam-A.dat
+  cat("Processing Pfam-A.hmm.dat..")
+  ref <- processPfam_A_Dat(datPfam = datPfam, n_threads = n_threads)
+  cat(" DONE!\n")
 
-  cat('Preparing HMMSEARCH.\n')
+  cat("Preparing HMMSEARCH.\n")
   # Split indices and write fastas to distribute among threads with hmmscan
-  temps<-splitAndWriteFastas(fastas = fastas,
-                             n_threads = n_threads)
+  temps <- splitAndWriteFastas(fastas = fastas, n_threads = n_threads)
 
-  #Deprecated:
-  # #Run hmmscan (HMMER)
-  # cat('Running HMMSCAN against Pfam-A database (this can take a while)..')
-  # registerDoParallel(cores = n_threads)
-  # hmm.temps<-foreach(i=seq_along(temps),.inorder = F) %dopar% {
-  #   tempfile(pattern = "tmpo",tmpdir = tempdir(),fileext = ".tab")->dmblout
-  #   paste("hmmscan -o /dev/null --domtblout ",dmblout,
-  #         " --noali --cut_ga --cpu 0 ",
-  #         hmmPfam," ",temps[i],sep = "")->pfm
-  #   system(pfm)
-  #   dmblout
-  # }
-  # cat(' DONE!\n')
+  # Deprecated: #Run hmmscan (HMMER) cat('Running HMMSCAN against Pfam-A database
+  # (this can take a while)..') registerDoParallel(cores = n_threads)
+  # hmm.temps<-foreach(i=seq_along(temps),.inorder = F) %dopar% { tempfile(pattern
+  # = 'tmpo',tmpdir = tempdir(),fileext = '.tab')->dmblout paste('hmmscan -o
+  # /dev/null --domtblout ',dmblout, ' --noali --cut_ga --cpu 0 ', hmmPfam,'
+  # ',temps[i],sep = '')->pfm system(pfm) dmblout } cat(' DONE!\n')
 
-  #Index hmm if not yet
-  if(any(!file.exists(paste0(hmmPfam,c('.h3f','.h3i','.h3m','.h3p'))))){
-    cat('Preparing Pfam-A.hmm files for hmmscan search.\n')
-    paste0('hmmpress ',hmmPfam) -> hmmpress
+  # Index hmm if not yet
+  if (any(!file.exists(paste0(hmmPfam, c(".h3f", ".h3i", ".h3m", ".h3p"))))) {
+    cat("Preparing Pfam-A.hmm files for hmmscan search.\n")
+    hmmpress <- paste0("hmmpress ", hmmPfam)
     system(hmmpress)
   }
 
-  #Run hmmsearch (HMMER)
-  cat('Running HMMSEARCH against Pfam-A database (this can take a while)..')
-  mclapply(temps, function(x){
+  # Run hmmsearch (HMMER)
+  cat("Running HMMSEARCH against Pfam-A database (this can take a while)..")
+  hmm.temps <- mclapply(temps, function(x) {
 
-    runHmmsearch(fasta = x,
-                 hmm = hmmPfam,
-                 pfam = TRUE,
-                 n_threads = 0L)
+    runHmmsearch(fasta = x, hmm = hmmPfam, pfam = TRUE, n_threads = 0L)
 
-  }, mc.cores = n_threads) -> hmm.temps
-  cat(' DONE!\n')
+  }, mc.cores = n_threads)
+  cat(" DONE!\n")
   # file.remove(temps)
 
-  #Load hmmscan output and process
-  cat('Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..')
-  unlist(hmm.temps)->pout
+  # Load hmmscan output and process
+  cat("Processing hmmsearch output (resolving overlapping Pfam hits and building protein families profiles)..")
+  pout <- unlist(hmm.temps)
 
   registerDoParallel(cores = n_threads)
-  tout<-foreach(i=seq_along(pout),.combine =rbind,.inorder = T)%dopar%{
-    processHmmsearch(pout=pout[i],ref=ref)
+  tout <- foreach(i = seq_along(pout), .combine = rbind, .inorder = T) %dopar%
+  {
+    processHmmsearch(pout = pout[i], ref = ref)
   }
-  cat(' DONE!\n')
+  cat(" DONE!\n")
   file.remove(pout)
 
-  #Clustering by domain structure only
-  cat('Clustering sequences per domain structure..')
-  split(x = rownames(tout),
-        f = tout$Domain)[-1]->clu_dom
-  cat(' DONE!\n')
+  # Clustering by domain structure only
+  cat("Clustering sequences per domain structure..")
+  clu_dom <- split(x = rownames(tout), f = tout$Domain)[-1]
+  cat(" DONE!\n")
 
-  #Cluster sequences without domains asigned, by family
-  cat('Clustering sequences per family..')
-  split(x = rownames(tout[which(tout$Domain==''),]),
-        f = tout$Family[which(tout$Domain=='')])[-1]->clu_fam
-  cat(' DONE!\n')
+  # Cluster sequences without domains asigned, by family
+  cat("Clustering sequences per family..")
+  clu_fam <- split(x = rownames(tout[which(tout$Domain == ""), ]), f = tout$Family[which(tout$Domain ==
+                                                                                           "")])[-1]
+  cat(" DONE!\n")
 
   o <- list(clu_dom, clu_fam, tout)
   return(o)
 }
 
-#Distributes all proteins in many files as n_threads set in order to optimize
+# Distributes all proteins in many files as n_threads set in order to optimize
 # the computing power in the following step (hmmscan).
 #' @name splitAndWriteFastas
 #' @title Split sequences to distribute among threads
@@ -117,28 +105,21 @@ domainSearch <- function(fastas, hmmPfam, datPfam, n_threads = 1L){
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach foreach '%dopar%'
 #' @importFrom seqinr write.fasta
-splitAndWriteFastas<-function(fastas,n_threads){
+splitAndWriteFastas <- function(fastas, n_threads) {
 
-  splitIndices(length(fastas),n_threads)->spi
-  names(spi)<-seq_along(spi)
-  tdir<-tempdir()
+  spi <- splitIndices(length(fastas), n_threads)
+  names(spi) <- seq_along(spi)
+  tdir <- tempdir()
   registerDoParallel(cores = n_threads)
-  temps<-foreach(i=seq_along(spi))%dopar%{
-    tpo<-tempfile(pattern = "tmpo",tmpdir = tdir,fileext = ".fasta")
-    # lapply(fastas[spi[[i]]],function(x){
-    #   memDecompress(x,type = 'gzip',asChar = T)
-    #   }) -> sq
-    # names(sq) -> nsq
-    # write.fasta(sq,
-    #             names = nsq,
-    #             file.out = tpo)
-    write.fasta(fastas[spi[[i]]],
-                names=names(fastas[spi[[i]]]),
-                file.out = tpo)
+  temps <- foreach(i = seq_along(spi)) %dopar% {
+    tpo <- tempfile(pattern = "tmpo", tmpdir = tdir, fileext = ".fasta")
+    # lapply(fastas[spi[[i]]],function(x){ memDecompress(x,type = 'gzip',asChar = T)
+    # }) -> sq names(sq) -> nsq write.fasta(sq, names = nsq, file.out = tpo)
+    write.fasta(fastas[spi[[i]]], names = names(fastas[spi[[i]]]), file.out = tpo)
     tpo
   }
 
-  temps<-unlist(temps)
+  temps <- unlist(temps)
   return(temps)
 }
 
@@ -151,19 +132,23 @@ splitAndWriteFastas<-function(fastas,n_threads){
 #' @return A \code{data.frame} with information of each Pfam entry.
 #' @author Ignacio Ferres
 #' @importFrom parallel mclapply
-processPfam_A_Dat<-function(datPfam,n_threads){
-  readLines(datPfam,skipNul = T)->rl
-  grep("STOCKHOLM 1.0",rl)+1 -> pr
-  grep("//",rl)-1 -> fn
-  cbind(pr,fn)->pa
-  apply(pa,1,function(x){rl[x[1]:x[2]]})->li
-  do.call(rbind,mclapply(li,function(y){
-    c(regmatches(y[grep('GF AC',y)],regexpr("PF\\d+[.]*\\d{0,1}",y[grep('GF AC',y)])),
-      regmatches(y[grep('GF TP',y)],regexpr("Domain|Family|Motif|Repeat|Disordered|Coiled-coil",y[grep('GF TP',y)])),
-      if(length(grep('GF CL',y))!=0){regmatches(y[grep('GF CL',y)],regexpr("CL\\d{4}",y[grep('GF CL',y)]))}else{'No-Clan'})
-  },mc.cores = n_threads))->ref
-  colnames(ref)<-c("ID","TP","CL")
-  ref<-data.frame(ref,stringsAsFactors=F)
+processPfam_A_Dat <- function(datPfam, n_threads) {
+  rl <- readLines(datPfam, skipNul = T)
+  pr <- grep("STOCKHOLM 1.0", rl) + 1
+  fn <- grep("//", rl) - 1
+  pa <- cbind(pr, fn)
+  li <- apply(pa, 1, function(x) {
+    rl[x[1]:x[2]]
+  })
+  ref <- do.call(rbind, mclapply(li, function(y) {
+    g1 <- grep('^#=GF AC', y, value = TRUE)
+    g2 <- grep('^#=GF TP', y, value = TRUE)
+    g3 <- grep('^#=GF CL', y)
+    c(g1, g2, ifelse(length(g3)!=0, y[g3], 'No-Clan'))
+  }, mc.cores = n_threads))
+  colnames(ref) <- c("ID", "TP", "CL")
+  ref <- sub('^#=\\w{2}[ ]\\w{2}[ ]{3}', '', ref)
+  ref <- data.frame(ref, stringsAsFactors = F)
   return(ref)
 }
 
@@ -178,31 +163,20 @@ processPfam_A_Dat<-function(datPfam,n_threads){
 #' #@note Taken and adapted from \code{micropan} package (Lars Snipen and
 #' Kristian Hovde Liland).
 #' #@author Ignacio Ferres
-# outhmmscan<-function(pouti,ref){
-#   readLines(pouti)->rl
-#   rl[which(!grepl("^\\#",rl))]->rl
-#   gsub("[ ]+"," ",rl)->rl
-#   strsplit(rl," ")->lst
-#
-#   hit<-sapply(lst,function(x){x[1]})
-#   pfmID<-sapply(lst,function(x){x[2]})
-#   query<-sapply(lst,function(x){x[4]})
-#   eval<-as.numeric(sapply(lst,function(x){x[13]}))
-#   score<-as.numeric(sapply(lst,function(x){x[14]}))
-#   st<-as.numeric(sapply(lst, function(x){x[18]}))
-#   en<-as.numeric(sapply(lst,function(x){x[19]}))
-#   desc<-sapply(lst,function(x){paste(x[23:length(x)],collapse = " ")})
-#
-#   hmmer.table<-data.frame(Query=query,Hit=hit,PfamID=pfmID,Evalue=eval,Score=score,
-#                           Start=st,End=en,Description=desc,stringsAsFactors = F)
-#   hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
-#
-#   sub("\\.\\d+","",ref$ID) -> codpf
-#   sub("\\.\\d+","",hmmer.table$PfamID) -> codhit
-#   sapply(codhit,function(x){which(codpf==x)})->ind
-#   ref$TP[ind]->hmmer.table$Type
-#   ref$CL[ind]->hmmer.table$Clan
-#   return(hmmer.table)
+# outhmmscan<-function(pouti,ref){ readLines(pouti)->rl
+# rl[which(!grepl('^\\#',rl))]->rl gsub('[ ]+',' ',rl)->rl strsplit(rl,'
+# ')->lst hit<-sapply(lst,function(x){x[1]}) pfmID<-sapply(lst,function(x){x[2]})
+# query<-sapply(lst,function(x){x[4]})
+# eval<-as.numeric(sapply(lst,function(x){x[13]}))
+# score<-as.numeric(sapply(lst,function(x){x[14]})) st<-as.numeric(sapply(lst,
+# function(x){x[18]})) en<-as.numeric(sapply(lst,function(x){x[19]}))
+# desc<-sapply(lst,function(x){paste(x[23:length(x)],collapse = ' ')})
+# hmmer.table<-data.frame(Query=query,Hit=hit,PfamID=pfmID,Evalue=eval,Score=score,
+# Start=st,End=en,Description=desc,stringsAsFactors = F)
+# hmmer.table<-hmmer.table[-which(hmmer.table$Evalue>0.1),]
+# sub('\\.\\d+','',ref$ID) -> codpf sub('\\.\\d+','',hmmer.table$PfamID)
+# -> codhit sapply(codhit,function(x){which(codpf==x)})->ind
+# ref$TP[ind]->hmmer.table$Type ref$CL[ind]->hmmer.table$Clan return(hmmer.table)
 # }
 
 #' @name checkIfParalogues
@@ -212,16 +186,18 @@ processPfam_A_Dat<-function(datPfam,n_threads){
 #' @return \code{logical}, if contains paralogues (i.e. proteins of the same
 #' organism).
 #' @author Ignacio Ferres
-checkIfParalogues<-function(p){
-  sapply(p,function(y){strsplit(y,";")[[1]][1]})-> st
-  if (any(duplicated(st))){
+checkIfParalogues <- function(p) {
+  st <- sapply(p, function(y) {
+    strsplit(y, ";")[[1]][1]
+  })
+  if (any(duplicated(st))) {
     TRUE
-    if (length(unique(st))==1){
+    if (length(unique(st)) == 1) {
       FALSE
-    }else{
+    } else {
       TRUE
     }
-  }else{
+  } else {
     FALSE
   }
 }
@@ -233,10 +209,10 @@ checkIfParalogues<-function(p){
 #' @param clusters A \code{list} of protein clusters.
 #' @return A \code{vector} of names for the clusters
 #' @author Ignacio Ferres
-setClusterNames<-function(clusters){
-  np<-nchar(as.character(length(clusters)))
-  np<-paste("%0",np,"d",sep="")
-  npnam<-paste("OG",sprintf(np,1:length(clusters)),sep="")
+setClusterNames <- function(clusters) {
+  np <- nchar(as.character(length(clusters)))
+  np <- paste("%0", np, "d", sep = "")
+  npnam <- paste("OG", sprintf(np, 1:length(clusters)), sep = "")
   npnam
 }
 
@@ -249,17 +225,18 @@ setClusterNames<-function(clusters){
 #' @param filename File name.
 #' @return A file 'clusters.txt' in \code{outdir}.
 #' @author Ignacio Ferres
-writeClusters <- function(outdir,final.clusters,filename){
-  sink(paste0(outdir,filename))
-  for(i in 1:length(final.clusters)){
-    attr(final.clusters[[i]],'pfamStr') -> pfm
-    if(length(pfm)>0){
-      paste('[',paste(pfm,collapse = ';'),']',sep = '') -> pfm
-    }else{
-      '' -> pfm
+writeClusters <- function(outdir, final.clusters, filename) {
+  sink(paste0(outdir, filename))
+  for (i in 1:length(final.clusters)) {
+    pfm <- attr(final.clusters[[i]], "pfamStr")
+    if (length(pfm) > 0) {
+      pfm <- paste("[", paste(pfm, collapse = ";"), "]", sep = "")
+    } else {
+      pfm <- ""
     }
-    cat(paste0('>',names(final.clusters[i]),' ',pfm,'\n'))
-    cat(final.clusters[[i]],sep = ' ',fill = F);cat('\n')
+    cat(paste0(">", names(final.clusters[i]), " ", pfm, "\n"))
+    cat(final.clusters[[i]], sep = " ", fill = F)
+    cat("\n")
   }
   sink()
 }
@@ -274,21 +251,23 @@ writeClusters <- function(outdir,final.clusters,filename){
 #' @param final.clusters A list of clusters
 #' @return A file 'paralogues.txt' in \code{outdir}.
 #' @author Ignacio Ferres
-writeParalogues <- function(outdir,final.clusters){
-  sink(paste0(outdir,'paralogues.txt'))
-  for(i in 1:length(final.clusters)){
-    attr(final.clusters[[i]],'pfamStr') -> pfm
-    if(length(pfm)>0){
-      paste('[',paste(pfm,collapse = ';'),']',sep = '') -> pfm
-      if(!is.null(attributes(final.clusters[[i]])$paralogues)){
-        cat(paste0('>',names(final.clusters[i]),' ',pfm,'\n'))
-        cat(attr(final.clusters[[i]],'paralogues'),sep = ' ',fill = F);cat('\n')
+writeParalogues <- function(outdir, final.clusters) {
+  sink(paste0(outdir, "paralogues.txt"))
+  for (i in 1:length(final.clusters)) {
+    pfm <- attr(final.clusters[[i]], "pfamStr")
+    if (length(pfm) > 0) {
+      pfm <- paste("[", paste(pfm, collapse = ";"), "]", sep = "")
+      if (!is.null(attributes(final.clusters[[i]])$paralogues)) {
+        cat(paste0(">", names(final.clusters[i]), " ", pfm, "\n"))
+        cat(attr(final.clusters[[i]], "paralogues"), sep = " ", fill = F)
+        cat("\n")
       }
-    }else{
-      '' -> pfm
-      if(!is.null(attributes(final.clusters[[i]])$paralogues)){
-        cat(paste0('>',names(final.clusters[i]),' ',pfm,'\n'))
-        cat(attr(final.clusters[[i]],'paralogues'),sep = ' ',fill = F);cat('\n')
+    } else {
+      pfm <- ""
+      if (!is.null(attributes(final.clusters[[i]])$paralogues)) {
+        cat(paste0(">", names(final.clusters[i]), " ", pfm, "\n"))
+        cat(attr(final.clusters[[i]], "paralogues"), sep = " ", fill = F)
+        cat("\n")
       }
     }
 
