@@ -263,7 +263,7 @@ rm_overlaping_clans <- function(tping, type) {
       if (dim(lping[[i]])[1] > 1) {
 
         # Order by start (this is in order to allow determineOverlap() to work)
-        lping[[1]] <- lping[[1]][order(lping[[1]]$Start), ]
+        lping[[i]] <- lping[[i]][order(lping[[i]]$Start), ]
 
         # Create list with sequence positions
         inc <- unlist(apply(lping[[i]], 1, function(p) {
