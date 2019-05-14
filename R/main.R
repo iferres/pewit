@@ -135,7 +135,7 @@ pangenome <- function(gffs,
   lfa <- length(faas)
   if(lfs!=lfa & verbose){
     redundant <- lfs - lfa
-    mssg <- paste('   ', redundant, 'out of', lfs, 'sequences are redundant at amino acid level.')
+    mssg <- paste('  ', redundant, 'out of', lfs, 'sequences are redundant at amino acid level.')
     message(mssg)
   }
 
