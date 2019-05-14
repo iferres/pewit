@@ -21,8 +21,8 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
 
 
 #' @importFrom DECIPHER AlignTranslation DistanceMatrix
-#' @importFrom phangorn midpoint
-#' @importFrom ape bionjs cophenetic.phylo
+#' @importFrom phangorn midpoint Descendants
+#' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 splitCluster <- function(x, sep, verbose = TRUE){
 
