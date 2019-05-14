@@ -6,6 +6,7 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
   preclusters <- split(fastas, mcols(fastas)$Arch)
 
   splited <- mclapply(preclusters, splitCluster, sep = sep, verbose = verbose, mc.cores = n_threads)
+  attr(splited, 'varname') <- 'Arch'
 
   splited_df <- melt(splited, id.vars=c('Gene', 'NODE'))
 
@@ -140,7 +141,7 @@ splitCluster <- function(x, sep, verbose = TRUE){
     df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
   }
 
-  attr(splited, 'varname') <- 'Arch'
+  # attr(splited, 'varname') <- 'Arch'
   return(df)
 }
 
