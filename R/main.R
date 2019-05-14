@@ -30,7 +30,7 @@
 #' \code{paste}ing this prefix to a number identifiying each cluster, in the
 #' form [group_prefix]\code{0001}.
 #' @param sep \code{character}. A separator to form unique gene names using the
-#' name of the organism, in the form [organism]\code{sep}[gene_id]. This is
+#' name of the organism, in the form (if \code{sep='___'}) \code{organism___geneid}. This is
 #' mostly used inside the function, although is used to form unique sequence
 #' names in the final output. Default is "___" (3 underscores), and should be
 #' changed if any of your input files or gene identifiers already contain this
@@ -68,7 +68,7 @@
 #'
 #' In that way true-orthologue clusters are retrieved and saved in an object of
 #' class "PgR6MS".
-#' @return An object of class \code[pagoo]{PgR6MS} (pagoo package). For details
+#' @return An object of class \link[pagoo]{PgR6MS} (pagoo package). For details
 #' of this type of object, consult \code{help('PgR6MS')}, or go to
 #' \url{https://github.com/iferres/pagoo} for a tutorial showing how to use this
 #' class. A bunch of statistical and visualization methods are provided, as well
