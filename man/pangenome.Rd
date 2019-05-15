@@ -32,6 +32,8 @@ mostly used inside the function, although is used to form unique sequence
 names in the final output. Default is "___" (3 underscores), and should be
 changed if any of your input files or gene identifiers already contain this
 separator string, so it not conflicts the process.}
+
+\item{verbose}{\code{logical}. Whether display progress messages or not.}
 }
 \value{
 An object of class \link[pagoo]{PgR6MS} (pagoo package). For details
