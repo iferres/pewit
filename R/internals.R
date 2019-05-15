@@ -7,6 +7,7 @@
 #' @param n_threads \code{integer} The number of cpus to use.
 #' @return a \code{list} with the domain and family clustering.
 #' @importFrom parallel mclapply
+#' @importFrom reshape2 melt
 #' @author Ignacio Ferres
 domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRUE) {
 
@@ -27,7 +28,7 @@ domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRU
 
   # Index hmm if not yet
   if (any(!file.exists(paste0(hmm_pfam, c(".h3f", ".h3i", ".h3m", ".h3p"))))) {
-    if (verbose) message("  Preparing Pfam-A.hmm files for hmmscan search.")
+    if (verbose) message("  Preparing Pfam-A.hmm files for hmmseach.")
     hmmpress <- paste0("hmmpress ", hmmPfam)
     system(hmmpress)
   }
@@ -56,6 +57,31 @@ domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRU
   fm <- which(tout$Domain=='' & tout$Family!='')
   rw <- rownames(tout[fm, ])
   mcols(faas[rw])$arch <- tout$Family[fm]
+
+  if (verbose){
+    lfaas <- length(faas)
+    march <- mcols(faas)$arch
+    lfawd <- length(which(!is.na(march)))
+    alld <- length(unlist(strsplit(march, ';')))
+    mssg1 <- paste0(alld, ' domains distributed among ', lfawd, ' proteins (out of ',lfaas,').')
+    message(mssg1)
+    diff <- length(unique(march))
+    mssg2 <- paste(diff, 'distinct domain architectures found.')
+    message(mssg2)
+    mgene <- mcols(faas)$X
+    mgene <- mgene[!is.na(march)]
+    mgene[] <- lapply(mgene, function(x) sapply(strsplit(x, sep), '[', 1))
+    tab <- table(unlist(mgene))
+    nam <- names(tab)
+    nch <- nchar(nam)
+    upt <- nch[which.max(nch)] + 3L
+    lna <- sapply(nch, function(x) paste0(rep('-', upt - x), collapse = ''))
+    arr <- paste(lna, '>', sep = '')
+    for (i in seq_along(tab)){
+      mssg <- paste('', nam[i], arr[i], tab[i], 'proteins with domain architecture.')
+      message(mssg)
+    }
+  }
 
   faas
 }
@@ -115,18 +141,5 @@ processPfam_A_Dat <- function(datPfam) {
 }
 
 
-
-#' @name setClusterNames
-#' @title Set cluster names
-#' @description Creates othologue cluster names.
-#' @param clusters A \code{list} of protein clusters.
-#' @return A \code{vector} of names for the clusters
-#' @author Ignacio Ferres
-# setClusterNames <- function(clusters) {
-#   np <- nchar(as.character(length(clusters)))
-#   np <- paste("%0", np, "d", sep = "")
-#   npnam <- paste("OG", sprintf(np, 1:length(clusters)), sep = "")
-#   npnam
-# }
 
 

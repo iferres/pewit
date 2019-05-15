@@ -35,6 +35,7 @@
 #' names in the final output. Default is "___" (3 underscores), and should be
 #' changed if any of your input files or gene identifiers already contain this
 #' separator string, so it not conflicts the process.
+#' @param verbose \code{logical}. Whether display progress messages or not.
 #' @details A scan against Pfam-A database is performed and only those hits of
 #' PF class 'domain' or 'family' are considered for further analysis.
 #' If two or more domains of the same clan overlap, then the one with the
@@ -78,7 +79,7 @@
 #' @note External dependencies are HMMER3 and MCL, without them, running the
 #' function will stop with an error.
 #' @importFrom parallel mclapply
-#' @importFrom S4Vectors mcols mcols<- DataFrame List
+#' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS
 #' @importFrom Biostrings DNAStringSetList translate
 #' @importFrom reshape2 melt
 #' @import pagoo
@@ -116,6 +117,20 @@ pangenome <- function(gffs,
   fastas <- mclapply(gffs,function(x){
     extractSeqsFromGff3(infile = x)
   }, mc.cores = n_threads, mc.preschedule = FALSE)
+
+  if (verbose){
+    nam <- sub('[.]gff$','', basename(gffs))
+    nch <- nchar(nam)
+    upt <- nch[which.max(nch)] + 3L
+    nsq <- elementNROWS(fastas)
+    lna <- sapply(nch, function(x) paste0(rep('-', upt - x), collapse = ''))
+    arr <- paste(lna, '>', sep = '')
+    for (i in seq_along(gffs)){
+      mssg <- paste('', nam[i], arr[i], nsq[i], 'CDS.')
+      message(mssg)
+    }
+
+  }
 
   mcls <- lapply(fastas, mcols)
   mcls <- do.call(rbind, mcls)

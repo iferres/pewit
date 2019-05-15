@@ -1,4 +1,4 @@
-
+#' @importFrom parallel mclapply
 #' @importFrom S4Vectors split
 #' @importFrom reshape2 melt
 splitPreClusters <- function(fastas, n_threads, sep, verbose){
@@ -16,11 +16,18 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
 
   mcols(fastas[splited_df$Gene])$Cluster <- splited_df$CLUSTER
 
+  if (verbose){
+    lpre <- length(preclusters)
+    lpos <- length(unique(splited$CLUSTER))
+    mssg <- paste(lpre, 'pre-clusters splited into', lpos, 'final groups of orthologues.')
+    message(mssg)
+  }
+
   fastas
 }
 
 
-#' @importFrom DECIPHER AlignTranslation DistanceMatrix
+#' @import DECIPHER
 #' @importFrom phangorn midpoint Descendants
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
@@ -51,7 +58,7 @@ splitCluster <- function(x, sep, verbose = TRUE){
       tree <- midpoint(bionjs(as.dist(dm)))
 
       # Determine recent paralogues, prune
-      wh_rec <- recent_par_nodes(phy = tree)
+      wh_rec <- recent_par_nodes(phy = tree, sep = sep)
       tree2 <- tree
       paralogs <- c()
       if (length(wh_rec)){
@@ -66,7 +73,7 @@ splitCluster <- function(x, sep, verbose = TRUE){
           par_rm <- names(pars[-pmin])
           paralogs <- c(paralogs, par_rm)
           tree2 <- drop.tip(tree2, par_rm)
-          wh_rec <- recent_par_nodes(phy = tree2)
+          wh_rec <- recent_par_nodes(phy = tree2, sep = sep)
         }
       }
 
@@ -146,7 +153,7 @@ splitCluster <- function(x, sep, verbose = TRUE){
 }
 
 #' @importFrom ape subtrees
-recent_par_nodes <- function(phy){
+recent_par_nodes <- function(phy, sep = '___'){
   subtrees <- subtrees(phy)
   names(subtrees) <- as.character(sapply(subtrees, '[[', 'name'))
   rcnt <- vapply(subtrees, function(y){
