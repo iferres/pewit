@@ -19,4 +19,4 @@ Remotes:
 Description: Describir
 License: GPL-3 | file LICENSE
 LazyData: TRUE
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1
