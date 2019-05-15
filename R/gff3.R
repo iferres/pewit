@@ -1,11 +1,11 @@
-#' @name extractSeqsFromGff3
-#' @title Extract Sequences from Gff3 file
-#' @description Extract Sequences from Gff3 file and outputs a list of element,
-#' one per each CDS. Each element contain the DNA gene sequence and the AA
-#' protein sequence.
-#' @param infile \code{character}. The gff3 filename.
-#' @return A \code{DNAStringSet}.
-#' @author Gregorio Iraola and Ignacio Ferres.
+# @name extractSeqsFromGff3
+# @title Extract Sequences from Gff3 file
+# @description Extract Sequences from Gff3 file and outputs a list of element,
+# one per each CDS. Each element contain the DNA gene sequence and the AA
+# protein sequence.
+# @param infile \code{character}. The gff3 filename.
+# @return A \code{DNAStringSet}.
+# @author Gregorio Iraola and Ignacio Ferres.
 #' @importFrom Biostrings DNAStringSet subseq reverseComplement
 #' @importFrom S4Vectors mcols<-
 extractSeqsFromGff3 <- function(infile) {
@@ -76,13 +76,13 @@ extractSeqsFromGff3 <- function(infile) {
 }
 
 
-#' @name extractGffTable
-#' @title Extract the gff3 table and make it 'R'eadable.
-#' @description Read a gff3 file and transforms the table in a \code{data.frame}.
-#' @param rl \code{character}. A vector of character strings as passed by
-#' \code{readLines()}, reading the gff3 file.
-#' @return A \code{data.frame}.
-#' @author Ignacio Ferres
+# @name extractGffTable
+# @title Extract the gff3 table and make it 'R'eadable.
+# @description Read a gff3 file and transforms the table in a \code{data.frame}.
+# @param rl \code{character}. A vector of character strings as passed by
+# \code{readLines()}, reading the gff3 file.
+# @return A \code{data.frame}.
+# @author Ignacio Ferres
 extractGffTable <- function(rl) {
   w <- which(grepl("^\\#\\#", rl))
   upto <- rev(w)[1] - 1

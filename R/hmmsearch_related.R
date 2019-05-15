@@ -1,14 +1,14 @@
-#' @name runHmmsearch
-#' @title Run Hmmsearch (HMMER 3)
-#' @description Takes a fasta file and a Hidden Markov Model profile and
-#' performs a search of the former over the latter.
-#' @param fasta A protein fasta file.
-#' @param hmm A hmm file. Must be pressed (see hmmpress from HMMER manual).
-#' @param pfam \code{logical}. If hmm file is the Pfam-A.hmm file or not
-#' (custom hmm models).
-#' @param n_threads An \code{integer}. The number of cores to use.
-#' @return The path to a temporary file where the hmmsearch output is placed.
-#' @author Ignacio Ferres
+# name runHmmsearch
+# title Run Hmmsearch (HMMER 3)
+# description Takes a fasta file and a Hidden Markov Model profile and
+# performs a search of the former over the latter.
+# param fasta A protein fasta file.
+# param hmm A hmm file. Must be pressed (see hmmpress from HMMER manual).
+# param pfam \code{logical}. If hmm file is the Pfam-A.hmm file or not
+# (custom hmm models).
+# param n_threads An \code{integer}. The number of cores to use.
+# return The path to a temporary file where the hmmsearch output is placed.
+# author Ignacio Ferres
 runHmmsearch <- function(fasta, hmm, pfam = FALSE, n_threads = 1L) {
   # run hmmsearch
   blout <- tempfile(pattern = "tmpo", fileext = "_pewit.tab")
@@ -21,16 +21,16 @@ runHmmsearch <- function(fasta, hmm, pfam = FALSE, n_threads = 1L) {
 
 }
 
-#' @name outhmmsearch
-#' @title Process hmmsearch output to make it 'R'eadable.
-#' @description Process hmmsearch output to make it readable by R.
-#' @param pouti \code{character}. hmmsearch output temporary file.
-#' @param ref \code{data.frame}. Information about each Pfam-A entry.
-#' @return A \code{data.frame} with the hmmsearch output plus information about
-#' Pfam-A hits.
-#' @note Taken and adapted from \code{micropan} package (Lars Snipen and
-#' Kristian Hovde Liland).
-#' @author Ignacio Ferres
+# name outhmmsearch
+# title Process hmmsearch output to make it 'R'eadable.
+# description Process hmmsearch output to make it readable by R.
+# param pouti \code{character}. hmmsearch output temporary file.
+# param ref \code{data.frame}. Information about each Pfam-A entry.
+# return A \code{data.frame} with the hmmsearch output plus information about
+# Pfam-A hits.
+# note Taken and adapted from \code{micropan} package (Lars Snipen and
+# Kristian Hovde Liland).
+# author Ignacio Ferres
 outhmmsearch <- function(pouti, ref) {
   rl <- readLines(pouti)
   rl <- rl[which(!grepl("^\\#", rl))]
@@ -82,16 +82,16 @@ outhmmsearch <- function(pouti, ref) {
 }
 
 
-#' @name processHmmsearch
-#' @title Main hmmsearch output processing function
-#' @description Outputs a data.frame with the domain structure of each sequence
-#' (rows). It has 6 columns, each one with the semi-colon separated found
-#' sequences of Pfam (PF) entries of the following 6 categories: 'Domain',
-#' 'Family', 'Motif', 'Repeat','Disordered' or 'Coiled-coil'.
-#' @param pout \code{character}. Temporary file name (hmmsearch output).
-#' @param ref \code{data.frame}. Information about each Pfam-A entry.
-#' @return A \code{data.frame} with the domain structure of each sequence.
-#' @author Ignacio Ferres
+# name processHmmsearch
+# title Main hmmsearch output processing function
+# description Outputs a data.frame with the domain structure of each sequence
+# (rows). It has 6 columns, each one with the semi-colon separated found
+# sequences of Pfam (PF) entries of the following 6 categories: 'Domain',
+# 'Family', 'Motif', 'Repeat','Disordered' or 'Coiled-coil'.
+# param pout \code{character}. Temporary file name (hmmsearch output).
+# param ref \code{data.frame}. Information about each Pfam-A entry.
+# return A \code{data.frame} with the domain structure of each sequence.
+# author Ignacio Ferres
 processHmmsearch <- function(pout, ref) {
   # writeLines('Loading hmmsearch output..') outhmmscan(pouti = pout,ref = ref)->t
   t <- outhmmsearch(pout, ref)
@@ -207,15 +207,15 @@ processHmmsearch <- function(pout, ref) {
 }
 
 
-#' @name grouping
-#' @title Split hmmscan output by query.
-#' @description Split hmmscan output by query.
-#' @param t \code{data.frame}. hmmscan output passed by \link{outhmmsearch}.
-#' @param singlehit \code{logical}. Has this query just one hit?
-#' @param type \code{character}. One of 'Domain', 'Family', 'Motif', 'Repeat',
-#' 'Disordered' or 'Coiled-coil'.
-#' @return A \code{list} of \code{data.frame} with hits by query.
-#' @author Ignacio Ferres
+# name grouping
+# title Split hmmscan output by query.
+# description Split hmmscan output by query.
+# param t \code{data.frame}. hmmscan output passed by \link{outhmmsearch}.
+# param singlehit \code{logical}. Has this query just one hit?
+# param type \code{character}. One of 'Domain', 'Family', 'Motif', 'Repeat',
+# 'Disordered' or 'Coiled-coil'.
+# return A \code{list} of \code{data.frame} with hits by query.
+# author Ignacio Ferres
 grouping <- function(t, singlehit = FALSE, type = "Domain") {
   if (!singlehit) {
     x <- split.data.frame(t, t$Query)
@@ -236,19 +236,19 @@ grouping <- function(t, singlehit = FALSE, type = "Domain") {
 }
 
 
-#' @name rm_overlaping_clans
-#' @title Removes same-clan overlapping domains
-#' @description Removes those overlapping domains (which belong to the same
-#' clan) with higher e-value. In a case like (a[b)c] with
-#' \code{which.min(evalue)=='a'}, the algorithm will keep only domain 'a', even
-#' if 'a' doesn't overlaps with 'c'. Will also remove overlapping domains with
-#' no clan assigned, following the same above criteria as if all no clan
-#' assigned domains were from the same clan.
-#' @param tping A \code{data.frame} with all hits for each sequence.
-#' @param type \code{character}. One of 'Domain', 'Family', 'Motif', 'Repeat',
-#' 'Disordered' or 'Coiled-coil'.
-#' @return a \code{data.frame} of non-overlapping domains.
-#' @author Ignacio Ferres
+# name rm_overlaping_clans
+# title Removes same-clan overlapping domains
+# description Removes those overlapping domains (which belong to the same
+# clan) with higher e-value. In a case like (a[b)c] with
+# \code{which.min(evalue)=='a'}, the algorithm will keep only domain 'a', even
+# if 'a' doesn't overlaps with 'c'. Will also remove overlapping domains with
+# no clan assigned, following the same above criteria as if all no clan
+# assigned domains were from the same clan.
+# param tping A \code{data.frame} with all hits for each sequence.
+# param type \code{character}. One of 'Domain', 'Family', 'Motif', 'Repeat',
+# 'Disordered' or 'Coiled-coil'.
+# return a \code{data.frame} of non-overlapping domains.
+# author Ignacio Ferres
 rm_overlaping_clans <- function(tping, type) {
 
   # Just consider one type tpingo<-tping[which(tping$Type==type),,drop=F]
@@ -310,14 +310,14 @@ rm_overlaping_clans <- function(tping, type) {
 }
 
 
-#' @name determineOverlap
-#' @title Determine which Pfam domains overlaps.
-#' @description Takes an overlappling-domain logical matrix \code{m} and
-#' through a 'trace-forward' precedure from \code{m[1,1]} to \code{m[ ,ncol(m)]}
-#' outputs a list with overlappling-domains row names.
-#' @param m A logical \code{matrix} indicating if 'x' domain overlaps with 'y'.
-#' @return A \code{list} of overlapping domains.
-#' @author Ignacio Ferres
+# name determineOverlap
+# title Determine which Pfam domains overlaps.
+# description Takes an overlappling-domain logical matrix \code{m} and
+# through a 'trace-forward' precedure from \code{m[1,1]} to \code{m[ ,ncol(m)]}
+# outputs a list with overlappling-domains row names.
+# param m A logical \code{matrix} indicating if 'x' domain overlaps with 'y'.
+# return A \code{list} of overlapping domains.
+# author Ignacio Ferres
 determineOverlap <- function(m) {
   st <- c(1, 1)
   li <- list()

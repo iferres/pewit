@@ -1,14 +1,14 @@
-#' @name domainSearch
-#' @title Compute All Pfam Related Functions
-#' @description Computes all Pfam-A related functions.
-#' @param faas A \code{list} of amino acid sequences.
-#' @param hmmPfam \code{character} The path to the hmm file.
-#' @param datPfam \code{character} The path to the dat file.
-#' @param n_threads \code{integer} The number of cpus to use.
-#' @return a \code{list} with the domain and family clustering.
+# @name domainSearch
+# @title Compute All Pfam Related Functions
+# @description Computes all Pfam-A related functions.
+# @param faas A \code{list} of amino acid sequences.
+# @param hmmPfam \code{character} The path to the hmm file.
+# @param datPfam \code{character} The path to the dat file.
+# @param n_threads \code{integer} The number of cpus to use.
+# @return a \code{list} with the domain and family clustering.
+# author Ignacio Ferres
 #' @importFrom parallel mclapply
 #' @importFrom reshape2 melt
-#' @author Ignacio Ferres
 domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRUE) {
 
   # Process Pfam-A.dat
@@ -88,16 +88,16 @@ domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRU
 
 # Distributes all proteins in many files as n_threads set in order to optimize
 # the computing power in the following step (hmmscan).
-#' @name splitAndWriteFastas
-#' @title Split sequences to distribute among threads
-#' @description Split sequences to distribute among threads.
-#' @param faas A \code{list} of aminoacid sequences in \code{SeqFastaAA}
-#' class.
-#' @param n_threads \code{integer} The number of threads to use.
-#' @details Distributes all proteins in many files as n_threads
-#' set in order to optimize the computing power in the following step(hmmscan).
-#' @return A \code{vector} of temporary file names.
-#' @author Ignacio Ferres
+# @name splitAndWriteFastas
+# title Split sequences to distribute among threads
+# description Split sequences to distribute among threads.
+# param faas A \code{list} of aminoacid sequences in \code{SeqFastaAA}
+# class.
+# param n_threads \code{integer} The number of threads to use.
+# details Distributes all proteins in many files as n_threads
+# set in order to optimize the computing power in the following step(hmmscan).
+# return A \code{vector} of temporary file names.
+# author Ignacio Ferres
 #' @importFrom parallel splitIndices
 #' @importFrom Biostrings writeXStringSet
 splitAndWriteFastas <- function(faas, n_threads) {
@@ -113,12 +113,12 @@ splitAndWriteFastas <- function(faas, n_threads) {
 }
 
 
-#' @name processPfam_A_Dat
-#' @title Process Pfam-A.dat file
-#' @description Process Pfam-A.dat file.
-#' @param datPfam \code{character}. The path to Pfam-A.dat file.
-#' @return A \code{data.frame} with information of each Pfam entry.
-#' @author Ignacio Ferres
+# @name processPfam_A_Dat
+# title Process Pfam-A.dat file
+# description Process Pfam-A.dat file.
+# param datPfam \code{character}. The path to Pfam-A.dat file.
+# return A \code{data.frame} with information of each Pfam entry.
+# author Ignacio Ferres
 #' @importFrom parallel mclapply
 processPfam_A_Dat <- function(datPfam) {
   rl <- readLines(datPfam, skipNul = T)

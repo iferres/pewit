@@ -97,14 +97,14 @@ clusterOrphans <- function(faas, n_threads, sep = '___', verbose = TRUE) {
 
 
 
-#' @name outphmmer
-#' @title Process phmmer output to make ir 'R'eadable.
-#' @description Process phmmer output to make it readable by R. Taken and
-#' adapted from \code{micropan} package (Lars Snipen and Kristian Hovde
-#' Liland).
-#' @param pouti \code{character}. phmmer output temporary file.
-#' @return A \code{data.frame} with the phmmer output.
-#' @author Ignacio Ferres
+# name outphmmer
+# title Process phmmer output to make ir 'R'eadable.
+# description Process phmmer output to make it readable by R. Taken and
+# adapted from \code{micropan} package (Lars Snipen and Kristian Hovde
+# Liland).
+# param pouti \code{character}. phmmer output temporary file.
+# return A \code{data.frame} with the phmmer output.
+# author Ignacio Ferres
 outphmmer <- function(pouti) {
   rl <- readLines(pouti)
   rl <- rl[which(!grepl("^\\#", rl))]
@@ -130,17 +130,17 @@ outphmmer <- function(pouti) {
 }
 
 
-#' @name runMCL
-#' @title Run MCL
-#' @description Cluster protein sequences by running the Markov Clustering
-#' algorithm (MCL) over the phmmer comparison scores.
-#' @param abc \code{character}. Temporary files of abc formatted phmmer
-#' comparisons.
-#' @param neg.log10 \code{logical}. Should the negative of the log10 value be
-#' used as similarity measure?
-#' @param infl \code{integer}. Inflacion value.
-#' @return MCL output.
-#' @author Ignacio Ferres
+# name runMCL
+# title Run MCL
+# description Cluster protein sequences by running the Markov Clustering
+# algorithm (MCL) over the phmmer comparison scores.
+# param abc \code{character}. Temporary files of abc formatted phmmer
+# comparisons.
+# param neg.log10 \code{logical}. Should the negative of the log10 value be
+# used as similarity measure?
+# param infl \code{integer}. Inflacion value.
+# return MCL output.
+# author Ignacio Ferres
 runMCL <- function(abc, neg.log10 = TRUE, infl = 6) {
 
   if (neg.log10) {
