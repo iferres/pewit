@@ -1,4 +1,4 @@
-
+#' @importFrom utils write.table
 #' @importFrom Biostrings writeXStringSet
 #' @importFrom parallel mclapply
 #' @importFrom reshape2 melt

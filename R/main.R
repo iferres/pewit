@@ -160,7 +160,9 @@ pangenome <- function(gffs,
     faas <- domainSearch(faas = faas,
                          hmm_pfam = hmm_pfam,
                          dat_pfam = dat_pfam,
-                         n_threads = n_threads)
+                         n_threads = n_threads,
+                         sep = sep,
+                         verbose = verbose)
 
   }else{
 

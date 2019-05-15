@@ -9,7 +9,12 @@
 # author Ignacio Ferres
 #' @importFrom parallel mclapply
 #' @importFrom reshape2 melt
-domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRUE) {
+domainSearch <- function(faas,
+                         hmm_pfam,
+                         dat_pfam,
+                         n_threads = 1L,
+                         sep = '___',
+                         verbose = TRUE) {
 
   # Process Pfam-A.dat
   if (verbose) message("   Processing Pfam-A.hmm.dat.")
@@ -29,7 +34,7 @@ domainSearch <- function(faas, hmm_pfam, dat_pfam, n_threads = 1L, verbose = TRU
   # Index hmm if not yet
   if (any(!file.exists(paste0(hmm_pfam, c(".h3f", ".h3i", ".h3m", ".h3p"))))) {
     if (verbose) message("  Preparing Pfam-A.hmm files for hmmseach.")
-    hmmpress <- paste0("hmmpress ", hmmPfam)
+    hmmpress <- paste0("hmmpress ", hmm_pfam)
     system(hmmpress)
   }
 

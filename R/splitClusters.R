@@ -31,6 +31,7 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
 #' @importFrom phangorn midpoint Descendants
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
+#' @importFrom stats as.dist
 splitCluster <- function(x, sep, verbose = TRUE){
 
   mcls <- mcols(x)
