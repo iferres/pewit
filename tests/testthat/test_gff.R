@@ -1,69 +1,49 @@
 context('gff')
 
-tgz <- system.file('testdata', 'test_gff.tar.gz', package = 'pewit')
-
-untar(tgz, files = 'test.gff', exdir = tempdir())
-test_gff <- list.files(path = tempdir(),
-                       pattern = '^test.gff$',
-                       full.names = TRUE)
-
-gff_table_df_file <- system.file('testdata', 'gff_table_df.rds', package = 'pewit')
-gff_table_df <- readRDS(gff_table_df_file)
+example_data <- system.file('extdata', 'Hinfluenzae.tar.gz', package = 'pewit')
+untar(tarfile = example_data, files = 'Hinfluenzae_2019.gff')
+example_gff <- 'Hinfluenzae_2019.gff'
 
 
 test_that("extracting table from gff works", {
-  rl <- readLines(test_gff)
-  tt <- pewit:::extractGffTable(rl)
-  d <- dim(tt)
+  rl <- readLines(example_gff)
+  x <- pewit:::extractGffTable(rl)
+  d <- dim(x)
   d1 <- d[1]
   d2 <- d[2]
-  expect_is(tt, class = "data.frame")
-  expect_equal(d1, 236)
+  colc <- vapply(x, class, NA_character_)
+  expect_is(x, class = "data.frame")
+  expect_equal(d1, 1975)
   expect_equal(d2, 10)
-  expect_identical(tt, gff_table_df)
+  expect_named(x, c("Contig", "ID", "LocusTag", "Gene",
+                    "Product", "Type", "From", "To",
+                    "Strand", "Phase"))
+  expect_identical(colc, structure(c("character", "character", "character", "character",
+                                     "character", "character", "integer", "integer",
+                                     "character","character"),
+                                   .Names = c("Contig", "ID", "LocusTag", "Gene",
+                                              "Product", "Type", "From", "To",
+                                              "Strand", "Phase")))
+})
+
+require(Biostrings)
+test_that("extracting sequences from gff works",{
+  x <- pewit:::extractSeqsFromGff3(example_gff)
+  meta <- mcols(x)
+  d <- dim(meta)
+  colc <- vapply(meta, class, NA_character_)
+  expect_is(x, 'DNAStringSet')
+  expect_length(x, 1916)
+  expect_is(meta, 'DataFrame')
+  expect_equal(d[1], 1916)
+  expect_equal(d[2], 7)
+  expect_named(meta, c("geneName", "organism", "product", "Contig",
+                       "From", "To", "Strand"))
+  expect_identical(colc, structure(c("character", "character", "character", "character",
+                                     "integer", "integer", "character"),
+                                   .Names = c("geneName", "organism", "product",
+                                              "Contig", "From", "To", "Strand")))
 })
 
 
-gene_SeqFastadna_file <- system.file('testdata',
-                                     'gene_SeqFastadna.rds',
-                                     package = 'pewit')
-gene_SeqFastadna <- readRDS(gene_SeqFastadna_file)
-
-gene_SeqFastaAA_file <- system.file('testdata',
-                                    'gene_SeqFastaAA.rds',
-                                    package = 'pewit')
-gene_SeqFastaAA <- readRDS(gene_SeqFastaAA_file)
-
-
-test_that("translate works", {
-  tr <- pewit:::translate(gene_SeqFastadna, numcode = 11)
-  expect_equivalent(tr, unclass(gene_SeqFastaAA))
-})
-
-
-SeqFastadna_file <- system.file('testdata',
-                                'SeqFastadna.rds',
-                                package = 'pewit')
-SeqFastadna <- readRDS(SeqFastadna_file)
-
-
-test_that("extracting sequences from gff table works",{
-  cds <- gff_table_df[1, ]
-  sq <- pewit:::getFfnFaa(SeqFastadna,
-                          contig = cds$Contig,
-                          strand = cds$Strand,
-                          from = cds$From,
-                          to = cds$To,
-                          id = cds$ID,
-                          product = cds$Product)
-
-  expect_is(sq, 'list')
-  expect_length(sq, 2)
-  expect_is(sq[[1]], "SeqFastadna")
-  expect_is(sq[[2]], "SeqFastaAA")
-  expect_equivalent(sq[[1]], gene_SeqFastadna)
-  expect_equivalent(sq[[2]], gene_SeqFastaAA)
-})
-
-
-file.remove(test_gff)
+file.remove(example_gff)
