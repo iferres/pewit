@@ -17,7 +17,11 @@ Imports:
   Biostrings,
 Remotes:
   github::iferres/pagoo
-Description: Describir
+Description: This package provides a function for reconstructing a bacterial
+  pangenome from a set of microbial genomes in gff3 format, and using a local 
+  copy of Pfam-A database. It attempts to group proteins with equal domain
+  architecture, and then applies a tree prunning algorithm to split true
+  orthologue sequences from paraogues.
 License: GPL-3 | file LICENSE
 LazyData: TRUE
 RoxygenNote: 6.1.1
