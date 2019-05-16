@@ -26,7 +26,7 @@ test_that("extracting table from gff works", {
                                               "Strand", "Phase")))
 })
 
-require(Biostrings)
+# require(Biostrings)
 test_that("extracting sequences from gff works",{
   x <- pewit:::extractSeqsFromGff3(example_gff)
   meta <- mcols(x)

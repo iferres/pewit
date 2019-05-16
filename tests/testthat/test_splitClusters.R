@@ -1,6 +1,6 @@
 context('splitClusters')
 
-require(DECIPHER)
+# require(DECIPHER)
 rda_file <- system.file('testdata', 'preclust_1.rda', package = 'pewit')
 load(rda_file) #preclust_1
 x <- pewit:::splitCluster(preclust_1, sep = '___')
