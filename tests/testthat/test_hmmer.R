@@ -91,11 +91,7 @@ test_that('removing overlaping domains works',{
 
 
 
-example_tblout_tgz <- system.file('testdata', 'example_tblout.tar.gz', package = 'pewit')
-untar(example_tblout_tgz, exdir = tempdir())
-example_tblout_file <- list.files(path = tempdir(),
-                                  pattern = '^example_tblout.tab$',
-                                  full.names = TRUE)
+example_tblout_file <- system.file('testdata', 'example_tblout.tab', package = 'pewit')
 
 test_that('outphmmer works', {
   x <- pewit:::outphmmer(example_tblout_file)
@@ -105,12 +101,5 @@ test_that('outphmmer works', {
                    .Names = c("Query","Hit", "Evalue", "Score"))
   expect_identical(sapply(x, class), xcl)
 })
-
-
-
-
-file.remove(example_domtblout_file)
-file.remove(example_tblout_file)
-
 
 
