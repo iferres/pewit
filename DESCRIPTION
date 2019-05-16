@@ -14,7 +14,7 @@ Imports:
   phangorn,
   reshape2,
   S4Vectors,
-  Biostrings,
+  Biostrings
 Remotes:
   github::iferres/pagoo
 Description: This package provides a function for reconstructing a bacterial
