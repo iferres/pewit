@@ -1,11 +1,6 @@
 context('Processing HMMER results')
 
-example_domtblout_tgz <- system.file('testdata', 'example_domtblout.tar.gz', package = 'pewit')
-untar(example_domtblout_tgz, files = 'example_domtblout.tab', exdir = tempdir())
-example_domtblout_file <- list.files(path = tempdir(),
-                                     pattern = '^example_domtblout.tab$',
-                                     full.names = TRUE)
-
+example_domtblout_file <- system.file('testdata', 'example_domtblout.tab', package = 'pewit')
 ref <- readRDS(system.file('testdata', 'processed_pfamadat2.rds', package = 'pewit'))
 ccls <- structure(c("character", "character", "character", "numeric",
                     "numeric", "numeric", "numeric", "character",
