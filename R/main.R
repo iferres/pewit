@@ -78,6 +78,38 @@
 #' or create highly customized figures.
 #' @note External dependencies are HMMER3 and MCL, without them, running the
 #' function will stop with an error.
+#' @examples
+#' \dontrun{
+#' setwd(tempdir())
+#'
+#' # Download Pfam-A.hmm
+#' pfam_hmm_url <- 'http://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz'
+#' pfam_hmm_gz <- 'Pfam-A.hmm.gz'
+#' download.file(url = pfam_hmm_url, destfile = pfam_hmm_gz, method = 'wget')
+#'
+#' # Download Pfam-A.hmm.dat
+#' pfam_dat_url <- 'http://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz'
+#' pfam_dat_gz <- 'Pfam-A.hmm.dat.gz'
+#' download.file(url = pfam_dat_url, destfile = pfam_dat_gz, method = 'wget')
+#'
+#' # Uncompress those files
+#' library(R.utils)
+#' gunzip(pfam_hmm_gz)
+#' gunzip(pfam_dat_gz)
+#' pfam_hmm <- sub('[.]gz$', '', pfam_hmm_gz)
+#' pfam_dat <- sub('[.]gz$', '', pfam_dat_gz)
+#'
+#' # Extract pewit's example data
+#' example_data <- system.file('extdata', 'Hinfluenzae.tar.gz', package = 'pewit')
+#' untar(tarfile = example_data)
+#' gffs <- list.files(pattern = '[.]gff$')
+#'
+#' # Run pewit
+#' # note: You must have HMMER 3 and MCL installed !
+#' library(pewit)
+#' pg <- pangenome(gffs = gffs, hmm_pfam = pfam_hmm, dat_pfam = pfam_dat, n_threads = 1)
+#'
+#' }
 #' @importFrom parallel mclapply
 #' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS
 #' @importFrom Biostrings DNAStringSetList translate
