@@ -4,7 +4,7 @@ pfamdat_file <- system.file('testdata', 'Pfam-A.hmm.dat', package = 'pewit')
 ref_pfamdat_file <- system.file('testdata', 'processed_pfamadat.rds', package = 'pewit')
 ref_pfamdat <- readRDS(ref_pfamdat_file)
 
-x <- pewit:::processPfam_A_Dat(pfamdat_file, n_threads = 1)
+x <- pewit:::processPfam_A_Dat(pfamdat_file)
 xcln <- c("ID", "TP", "CL")
 d <- dim(x)
 
