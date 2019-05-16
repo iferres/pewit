@@ -1,0 +1,16 @@
+#                                                               --- full sequence ---- --- best 1 domain ---- --- domain number estimation ----
+# target name        accession  query name           accession    E-value  score  bias   E-value  score  bias   exp reg clu  ov env dom rep inc description of target
+#------------------- ---------- -------------------- ---------- --------- ------ ----- --------- ------ -----   --- --- --- --- --- --- --- --- ---------------------
+727.604;HINF_00102   -          727.604;HINF_00102   -            6.6e-67  209.4   0.1   7.3e-67  209.3   0.1   1.0   1   0   0   1   1   1   1 -
+374931.1;HINF_00843  -          374931.1;HINF_00843  -           2.9e-266  870.2  30.2  3.2e-266  870.1  30.2   1.0   1   0   0   1   1   1   1 -
+374930.9;HINF_00834  -          374930.9;HINF_00834  -           2.9e-108  346.0   5.5  3.2e-108  345.8   5.5   1.0   1   0   0   1   1   1   1 -
+#
+# Program:         phmmer
+# Version:         3.1b2 (February 2015)
+# Pipeline mode:   SEARCH
+# Query file:      sample_phmmer.fasta
+# Target file:     sample_phmmer.fasta
+# Option settings: phmmer --tblout tblout_phmmer.tab --noali sample_phmmer.fasta sample_phmmer.fasta 
+# Current dir:     /home/ignacio/Desktop/pewit_extdata
+# Date:            Tue Jan 22 13:20:01 2019
+# [ok]

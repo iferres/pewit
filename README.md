@@ -37,5 +37,5 @@ Some of them are part of the r-base pre-installed set of packages, so it's highl
 The PEWIT package has been designed and tested in UNIX-like platforms only.
 
 ## Citation
-	"Pewit: Pangenome Estimation - Walks Inside Taxonomy"; Ignacio Ferrés, Gregorio Iraola, Pablo Fresia, Daniela Costa. 
+	"Pewit: Pangenome Estimation - Walks Inside Taxonomy"; Ignacio Ferres, Gregorio Iraola, Pablo Fresia, Daniela Costa. 
 	https://github.com/iferres/pewit (2017,	Development version).
