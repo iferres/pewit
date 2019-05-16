@@ -1,0 +1,51 @@
+# STOCKHOLM 1.0
+#=GF ID   1-cysPrx_C
+#=GF AC   PF10417.8
+#=GF DE   C-terminal domain of 1-Cys peroxiredoxin
+#=GF GA   20.40; 20.40;
+#=GF TP   Domain
+#=GF ML   40
+//
+# STOCKHOLM 1.0
+#=GF ID   120_Rick_ant
+#=GF AC   PF12574.7
+#=GF DE   120 KDa Rickettsia surface antigen
+#=GF GA   21.00; 21.00;
+#=GF TP   Family
+#=GF ML   246
+//
+# STOCKHOLM 1.0
+#=GF ID   12TM_1
+#=GF AC   PF09847.8
+#=GF DE   Membrane protein of 12 TMs
+#=GF GA   33.20; 33.20;
+#=GF TP   Family
+#=GF ML   449
+//
+# STOCKHOLM 1.0
+#=GF ID   14-3-3
+#=GF AC   PF00244.19
+#=GF DE   14-3-3 protein
+#=GF GA   24.90; 24.90;
+#=GF TP   Domain
+#=GF ML   222
+//
+# STOCKHOLM 1.0
+#=GF ID   17kDa_Anti_2
+#=GF AC   PF16998.4
+#=GF DE   17 kDa outer membrane surface antigen
+#=GF GA   26.60; 26.60;
+#=GF TP   Family
+#=GF ML   116
+#=GF CL   CL0500
+//
+# STOCKHOLM 1.0
+#=GF ID   2-Hacid_dh
+#=GF AC   PF00389.29
+#=GF DE   D-isomer specific 2-hydroxyacid dehydrogenase, catalytic domain
+#=GF GA   24.60; 24.60;
+#=GF TP   Domain
+#=GF ML   134
+#=GF NE   2-Hacid_dh_C
+#=GF CL   CL0325
+//
