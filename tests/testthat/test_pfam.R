@@ -1,10 +1,6 @@
 context('pfam')
 
-example_file <- system.file('testdata', 'Pfam-A.hmm.dat.tar.gz', package = 'pewit')
-untar(example_file, files = 'Pfam-A.hmm.dat', exdir = tempdir())
-example_pfamdat <- list.files(path = tempdir(),
-                              pattern = '^Pfam-A.hmm.dat$',
-                              full.names = TRUE)
+pfamdat_file <- system.file('testdata', 'Pfam-A.hmm.dat', package = 'pewit')
 ref_pfamdat_file <- system.file('testdata', 'processed_pfamadat.rds', package = 'pewit')
 ref_pfamdat <- readRDS(ref_pfamdat_file)
 
@@ -20,4 +16,3 @@ test_that('processPfam_A_Dat works', {
   expect_identical(x, ref_pfamdat)
 })
 
-file.remove(example_pfamdat)
