@@ -1,11 +1,6 @@
 context('Processing HMMER results')
 
-example_domtblout_tgz <- system.file('testdata', 'example_domtblout.tar.gz', package = 'pewit')
-untar(example_domtblout_tgz, files = 'example_domtblout.tab', exdir = tempdir())
-example_domtblout_file <- list.files(path = tempdir(),
-                                     pattern = '^example_domtblout.tab$',
-                                     full.names = TRUE)
-
+example_domtblout_file <- system.file('testdata', 'example_domtblout.tab', package = 'pewit')
 ref <- readRDS(system.file('testdata', 'processed_pfamadat2.rds', package = 'pewit'))
 ccls <- structure(c("character", "character", "character", "numeric",
                     "numeric", "numeric", "numeric", "character",
@@ -26,12 +21,12 @@ test_that('outhmmsearch works', {
 
 
 test_that('single hit grouping works', {
-
+  x <- pewit:::outhmmsearch(example_domtblout_file, ref)
   y <- pewit:::grouping(x, singlehit = TRUE, type = 'Domain')
 
   expect_true(all(sapply(y, class)=='data.frame'))
 
-  y_dims <- all(vapply(dom.sing, function(z){
+  y_dims <- all(vapply(y, function(z){
     identical(dim(z), c(1L, 10L))
   }, FUN.VALUE = NA))
   expect_true(y_dims)
@@ -40,7 +35,7 @@ test_that('single hit grouping works', {
 
 
 test_that('multiple hit grouping works',{
-
+  x <- pewit:::outhmmsearch(example_domtblout_file, ref)
   y <- pewit:::grouping(x, singlehit = FALSE)
 
   expect_true(all(sapply(y, class)=='data.frame'))
@@ -96,11 +91,7 @@ test_that('removing overlaping domains works',{
 
 
 
-example_tblout_tgz <- system.file('testdata', 'example_tblout.tar.gz', package = 'pewit')
-untar(example_tblout_tgz, exdir = tempdir())
-example_tblout_file <- list.files(path = tempdir(),
-                                  pattern = '^example_tblout.tab$',
-                                  full.names = TRUE)
+example_tblout_file <- system.file('testdata', 'example_tblout.tab', package = 'pewit')
 
 test_that('outphmmer works', {
   x <- pewit:::outphmmer(example_tblout_file)
@@ -110,12 +101,5 @@ test_that('outphmmer works', {
                    .Names = c("Query","Hit", "Evalue", "Score"))
   expect_identical(sapply(x, class), xcl)
 })
-
-
-
-
-file.remove(example_domtblout_file)
-file.remove(example_tblout_file)
-
 
 

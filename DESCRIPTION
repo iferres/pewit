@@ -1,18 +1,29 @@
 Package: pewit
 Type: Package
 Title: Microbial Pan-Genomics in R
-Version: 0.1
+Version: 0.1.1
 Date: 2017-02-16
 Author: Ignacio Ferres and Gregorio Iraola
 Maintainer: <iferres@pasteur.edu.uy>
+Depends: 
+  DECIPHER,
+  pagoo
 Imports:
-  foreach,
-  doParallel,
   parallel,
   ape,
-  seqinr,
-  phangorn
-Description: Describir
+  phangorn,
+  reshape2,
+  S4Vectors,
+  Biostrings
+Remotes:
+  github::iferres/pagoo
+Suggests:
+  testthat
+Description: This package provides a function for reconstructing a bacterial
+  pangenome from a set of microbial genomes in gff3 format, and using a local 
+  copy of Pfam-A database. It attempts to group proteins with equal domain
+  architecture, and then applies a tree prunning algorithm to split true
+  orthologue sequences from paraogues.
 License: GPL-3 | file LICENSE
 LazyData: TRUE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
