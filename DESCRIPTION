@@ -1,7 +1,7 @@
 Package: pewit
 Type: Package
 Title: Microbial Pan-Genomics in R
-Version: 0.1.1
+Version: 1.0.0
 Date: 2017-02-16
 Author: Ignacio Ferres and Gregorio Iraola
 Maintainer: <iferres@pasteur.edu.uy>
