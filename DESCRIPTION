@@ -6,6 +6,7 @@ Date: 2017-02-16
 Author: Ignacio Ferres and Gregorio Iraola
 Maintainer: <iferres@pasteur.edu.uy>
 Depends: 
+  R (>= 3.3.1),
   DECIPHER,
   pagoo
 Imports:
