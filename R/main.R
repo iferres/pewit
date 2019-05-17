@@ -259,7 +259,10 @@ pangenome <- function(gffs,
     x
   }))
 
+  group_meta <- unique(DF[, c('group', 'Pfam_Arch')])
+
   pagoo_object <- PgR6MS$new(DF = DF,
+                             group_meta = group_meta,
                              sep = sep,
                              sequences = seqs)
 
