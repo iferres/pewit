@@ -15,8 +15,8 @@ Imports:
   reshape2
 Remotes:
   github::iferres/pagoo,
-  bioc::3.9/S4Vectors,
-  bioc::3.9/Biostrings
+  bioc::3.3/S4Vectors,
+  bioc::3.3/Biostrings
 Suggests:
   testthat
 Description: This package provides a function for reconstructing a bacterial
