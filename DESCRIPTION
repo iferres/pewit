@@ -12,11 +12,11 @@ Imports:
   parallel,
   ape,
   phangorn,
-  reshape2,
-  S4Vectors,
-  Biostrings
+  reshape2
 Remotes:
-  github::iferres/pagoo
+  github::iferres/pagoo,
+  bioc::3.9/S4Vectors,
+  bioc::3.9/Biostrings
 Suggests:
   testthat
 Description: This package provides a function for reconstructing a bacterial
