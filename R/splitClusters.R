@@ -18,7 +18,7 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
 
   if (verbose){
     lpre <- length(preclusters)
-    lpos <- length(unique(splited$CLUSTER))
+    lpos <- length(unique(splited_df$CLUSTER))
     mssg <- paste(lpre, 'pre-clusters splited into', lpos, 'final groups of orthologues.')
     message(mssg)
   }
