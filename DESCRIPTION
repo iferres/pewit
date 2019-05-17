@@ -12,7 +12,9 @@ Imports:
   parallel,
   ape,
   phangorn,
-  reshape2
+  reshape2,
+  S4Vectors,
+  Biostrings
 Remotes:
   github::iferres/pagoo,
   bioc::3.3/S4Vectors,
