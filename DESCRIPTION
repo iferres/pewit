@@ -18,8 +18,9 @@ Imports:
   Biostrings
 Remotes:
   github::iferres/pagoo,
-  bioc::3.3/S4Vectors,
-  bioc::3.3/Biostrings
+  bioc::release/S4Vectors,
+  bioc::release/Biostrings,
+  bioc::release/DECIPHER
 Suggests:
   testthat
 Description: This package provides a function for reconstructing a bacterial
