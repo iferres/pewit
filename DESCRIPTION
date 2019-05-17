@@ -6,6 +6,7 @@ Date: 2017-02-16
 Author: Ignacio Ferres and Gregorio Iraola
 Maintainer: <iferres@pasteur.edu.uy>
 Depends: 
+  R (>= 3.3.1),
   DECIPHER,
   pagoo
 Imports:
@@ -16,7 +17,10 @@ Imports:
   S4Vectors,
   Biostrings
 Remotes:
-  github::iferres/pagoo
+  github::iferres/pagoo,
+  bioc::release/S4Vectors,
+  bioc::release/Biostrings,
+  bioc::release/DECIPHER
 Suggests:
   testthat
 Description: This package provides a function for reconstructing a bacterial
