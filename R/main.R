@@ -178,6 +178,7 @@ pangenome <- function(gffs,
   tap <- tapply(names(fastas), aa_factor, c, simplify = FALSE)[unique(aa_factor)]
   attr(tap, 'dim') <- NULL
   mcols(faas) <- List(tap)
+  rm(tap)
 
 
   lfs <- length(fastas)
@@ -189,16 +190,8 @@ pangenome <- function(gffs,
   }
 
   # Apply minhash algorithm to cluster highly similar sequences
-  # Take largest as representative sequence
-  faas <- faas[order(elementNROWS(faas), decreasing = TRUE)]
-  minclus <- minhash_clust_k4(faas, verbose = verbose)
-  mminclu <- melt(minclus)
-  mminclu$uniques <- as.list(mcols(faas[mminclu$value])$X)
-  fastclu <- lapply(split(mminclu$uniques, f = mminclu$L1), unlist)
-  names(fastclu) <- NULL
-  reps <- sapply(fastclu, '[', 1)
-  mcols(faas[reps])[[1]] <- List(fastclu)
-  faas <- faas[reps]
+  faas <- fast_clust(faas = faas, verbose = verbose)
+
 
   if (!any(sapply(list(hmm_pfam, dat_pfam), is.null))){
 

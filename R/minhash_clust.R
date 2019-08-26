@@ -1,4 +1,25 @@
 #' @importFrom reshape2 melt
+#' @importFrom S4Vectors elementNROWS mcols mcols<- List
+fast_clust <- function(faas, verbose = TRUE){
+  # Take largest as representative sequence
+  faas <- faas[order(elementNROWS(faas), decreasing = TRUE)]
+  minclus <- minhash_clust_k4(faas, verbose = verbose)
+  mminclu <- melt(minclus)
+  mminclu$uniques <- as.list(mcols(faas[mminclu$value])$X)
+  fastclu <- lapply(split(mminclu$uniques, f = mminclu$L1), unlist)
+  rm(minclus)
+  rm(mminclu)
+  names(fastclu) <- NULL
+  reps <- sapply(fastclu, '[', 1) # Representative
+  mcols(faas[reps])[[1]] <- List(fastclu) #
+  faas <- faas[reps]
+  return(faas)
+}
+
+
+
+
+#' @importFrom reshape2 melt
 #' @import textreuse minhash_generator
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
 
