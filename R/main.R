@@ -180,18 +180,16 @@ pangenome <- function(gffs,
   mcols(faas) <- List(tap)
   rm(tap)
 
+  # Apply minhash algorithm to cluster highly similar sequences
+  faas <- fast_clust(faas = faas, verbose = verbose)
 
   lfs <- length(fastas)
   lfa <- length(faas)
   if(lfs!=lfa & verbose){
     redundant <- lfs - lfa
-    mssg <- paste('  ', redundant, 'out of', lfs, 'sequences are redundant at amino acid level.')
+    mssg <- paste('  ', redundant, 'out of', lfs, 'sequences are highly redundant at amino acid level.')
     message(mssg)
   }
-
-  # Apply minhash algorithm to cluster highly similar sequences
-  faas <- fast_clust(faas = faas, verbose = verbose)
-
 
   if (!any(sapply(list(hmm_pfam, dat_pfam), is.null))){
 

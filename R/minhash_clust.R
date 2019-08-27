@@ -23,9 +23,6 @@ fast_clust <- function(faas, verbose = TRUE){
 #' @importFrom textreuse minhash_generator
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
 
-  if (verbose){
-    message('Generating minhash function.')
-  }
   minhash <- minhash_generator(n = n)
 
   if (verbose){
@@ -54,7 +51,7 @@ minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TR
   left <- ln
 
   if (verbose){
-    message('MinHash clustering..')
+    message('Clustering highly similar sequences using MinHash algorithm.')
   }
   while (left) {
     x <- lp[[1]]
