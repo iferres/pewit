@@ -107,6 +107,7 @@ clusterOrphans <- function(faas, n_threads, sep = '___', verbose = TRUE) {
 # author Ignacio Ferres
 outphmmer <- function(pouti) {
   rl <- readLines(pouti)
+  file.remove(pouti)
   rl <- rl[which(!grepl("^\\#", rl))]
   rl <- gsub("[ ]+", " ", rl)
   lst <- strsplit(rl, " ")

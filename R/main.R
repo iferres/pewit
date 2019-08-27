@@ -169,20 +169,25 @@ pangenome <- function(gffs,
   fastas <- unlist(DNAStringSetList(fastas))
   mcols(fastas) <- mcls
   names(fastas) <- paste(mcls$organism, names(fastas), sep = sep)
+  # Translate
   faas <- translate(fastas, if.fuzzy.codon = 'solve')
+  # Avoid redundant sequences
   aa_factor <- as.integer(factor(as.character(faas)))
   mcols(fastas)$aa_factor <- aa_factor
   faas <- unique(faas)
   tap <- tapply(names(fastas), aa_factor, c, simplify = FALSE)[unique(aa_factor)]
   attr(tap, 'dim') <- NULL
   mcols(faas) <- List(tap)
+  rm(tap)
 
+  # Apply minhash algorithm to cluster highly similar sequences
+  faas <- fast_clust(faas = faas, verbose = verbose)
 
   lfs <- length(fastas)
   lfa <- length(faas)
   if(lfs!=lfa & verbose){
     redundant <- lfs - lfa
-    mssg <- paste('  ', redundant, 'out of', lfs, 'sequences are redundant at amino acid level.')
+    mssg <- paste('  ', redundant, 'out of', lfs, 'sequences are highly redundant at amino acid level.')
     message(mssg)
   }
 
