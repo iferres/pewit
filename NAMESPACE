@@ -3,6 +3,7 @@
 export(pangenome)
 import(DECIPHER)
 import(pagoo)
+importFrom(BiocGenerics,NROW)
 importFrom(Biostrings,DNAStringSet)
 importFrom(Biostrings,DNAStringSetList)
 importFrom(Biostrings,reverseComplement)

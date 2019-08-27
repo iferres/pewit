@@ -9,6 +9,7 @@
 # author Ignacio Ferres
 #' @importFrom parallel mclapply
 #' @importFrom reshape2 melt
+#' @importFrom BiocGenerics NROW
 domainSearch <- function(faas,
                          hmm_pfam,
                          dat_pfam,
@@ -21,8 +22,10 @@ domainSearch <- function(faas,
   ref <- processPfam_A_Dat(datPfam = dat_pfam)
 
   if (verbose) message("   Preparing HMMSEARCH.")
-  # Split indices and write fastas to distribute among threads with hmmscan
-  temps <- splitAndWriteFastas(faas = faas, n_threads = n_threads)
+  # Split indices and write fastas to distribute among threads with hmmsearch
+  # Shuffle them first to distribute computing power.
+  temps <- splitAndWriteFastas(faas = sample(faas, NROW(faas), replace = FALSE),
+                               n_threads = n_threads)
 
   # Deprecated: #Run hmmscan (HMMER) cat('Running HMMSCAN against Pfam-A database
   # (this can take a while)..') registerDoParallel(cores = n_threads)

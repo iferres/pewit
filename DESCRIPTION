@@ -14,11 +14,13 @@ Imports:
   ape,
   phangorn,
   reshape2,
+  BiocGenerics,
   S4Vectors,
   Biostrings,
   textreuse
 Remotes:
   github::iferres/pagoo,
+  bioc::release/BiocGenerics,
   bioc::release/S4Vectors,
   bioc::release/Biostrings,
   bioc::release/DECIPHER
