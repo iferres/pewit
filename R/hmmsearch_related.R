@@ -33,7 +33,7 @@ runHmmsearch <- function(fasta, hmm, pfam = FALSE, n_threads = 1L) {
 # author Ignacio Ferres
 outhmmsearch <- function(pouti, ref) {
   rl <- readLines(pouti)
-  file.remove(pouti)
+  # file.remove(pouti) # If uncomment, fails. Looking for pouti in another place maybe??
   rl <- rl[which(!grepl("^\\#", rl))]
   rl <- gsub("[ ]+", " ", rl)
   lst <- strsplit(rl, " ")
