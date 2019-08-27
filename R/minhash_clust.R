@@ -20,7 +20,7 @@ fast_clust <- function(faas, verbose = TRUE){
 
 
 #' @importFrom reshape2 melt
-#' @import textreuse minhash_generator
+#' @importFrom textreuse minhash_generator
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
 
   if (verbose){
