@@ -15,7 +15,8 @@ Imports:
   phangorn,
   reshape2,
   S4Vectors,
-  Biostrings
+  Biostrings,
+  textreuse
 Remotes:
   github::iferres/pagoo,
   bioc::release/S4Vectors,
