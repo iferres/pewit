@@ -213,11 +213,11 @@ minhash_dist <- function(x, k, s, type = 'dna'){
   minhash <- minhash_generator(200)
   mhs <- mapply(compute_minhash,
                 x,
-                minhash_fun = minhash,
-                elementNROWS(x),
-                k = k,
-                s = s,
-                type = type,
+                length = elementNROWS(x),
+                MoreArgs = list(minhash_fun = minhash,
+                                k = k,
+                                s = s,
+                                type = type),
                 SIMPLIFY = F)
 
   n <- length(x)
