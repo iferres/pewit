@@ -1,11 +1,16 @@
 #' @importFrom parallel mclapply
 #' @importFrom S4Vectors split
 #' @importFrom reshape2 melt
-splitPreClusters <- function(fastas, n_threads, sep, verbose){
+splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verbose){
 
   preclusters <- split(fastas, mcols(fastas)$Arch)
 
-  splited <- mclapply(preclusters, splitCluster, sep = sep, verbose = verbose, mc.cores = n_threads)
+  splited <- mclapply(preclusters,
+                      splitCluster,
+                      sep = sep,
+                      minhash_split = minhash_split,
+                      verbose = verbose,
+                      mc.cores = n_threads)
   attr(splited, 'varname') <- 'Arch'
 
   splited_df <- melt(splited, id.vars=c('Gene', 'NODE'))
@@ -32,7 +37,7 @@ splitPreClusters <- function(fastas, n_threads, sep, verbose){
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 #' @importFrom stats as.dist
-splitCluster <- function(x, sep, verbose = TRUE){
+splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
   mcls <- mcols(x)
 
@@ -54,8 +59,13 @@ splitCluster <- function(x, sep, verbose = TRUE){
     if (any(duplicated(mcls$organism))){
 
       # Align, compute distance, compute nj tree.
-      ali <- AlignTranslation(x, verbose = FALSE)
-      dm <- DistanceMatrix(ali, verbose = FALSE)
+      if (!minhash_split){
+        ali <- AlignTranslation(x, verbose = FALSE)
+        dm <- DistanceMatrix(ali, verbose = FALSE)
+      }else{
+        dm <- minhash_dist(x, k = 16, s = 1, type = 'dna')
+      }
+
       tree <- midpoint(bionjs(as.dist(dm)))
 
       # Determine recent paralogues, prune
@@ -195,4 +205,51 @@ tip2node_len <- function(phy, tip, node){
 
 Vtip2node_len <- Vectorize(tip2node_len, vectorize.args = 'tip')
 
+
+#' @importFrom textreuse minhash_generator
+#' @importFrom S4Vectors elementNROWS
+minhash_dist <- function(x, k, s, type = 'dna'){
+
+  minhash <- minhash_generator(200)
+  mhs <- mapply(compute_minhash,
+                x,
+                minhash_fun = minhash,
+                elementNROWS(x),
+                k = k,
+                s = s,
+                type = type,
+                SIMPLIFY = F)
+
+  n <- length(x)
+  d <- vector('numeric', length = (n * n/2) - n/2)
+  y <- 1L
+  for (i in 1:(n-1)){
+    for (j in (i+1):n){
+      d[y] <- jaccard_dissimilarity(mhs[[i]], mhs[[j]])
+      y <- y + 1L
+    }
+  }
+
+  attr(d, 'class') <- 'dist'
+  attr(d, 'Labels') <- names(mhs)
+  attr(d, 'Size') <- n
+  attr(d, 'Diag') <- FALSE
+  attr(d, 'Upper') <- FALSE
+  d
+}
+
+#' @importFrom Biostrings DNAStringSet AAStringSet
+compute_minhash <- function(x, minhash_fun = NULL,length, k, s, type = 'dna'){
+  if (type=='dna'){
+    dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
+  }else{
+    dss <- AAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
+  }
+  minhash_fun(as.character(dss))
+}
+
+
+jaccard_dissimilarity <- function(a, b){
+  1 - length(intersect(a, b)) / length(unique.default(c(a, b)))
+}
 

@@ -5,7 +5,8 @@
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
 pangenome(gffs, hmm_pfam, dat_pfam, n_threads = 1,
-  group_prefix = "group", sep = "___", verbose = TRUE)
+  minhash_split = FALSE, group_prefix = "group", sep = "___",
+  verbose = TRUE)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 file paths as retrieved by prokka (Seeman,
@@ -20,6 +21,10 @@ of \code{hmm_pfam} or \code{dat_pfam} is left \code{NULL}, then the pfam step
 is skipped and sequences will be preclustered by \code{phmmer} and \code{mcl}.}
 
 \item{n_threads}{\code{integer}. The number of threads to use.}
+
+\item{minhash_split}{\code{logical}. Whether to use fast minhash distantance
+calculation instead of alignment in precluster spliting step. Recomended
+when working with big datasets (> 50 genomes). Default is \code{FALSE}.}
 
 \item{group_prefix}{\code{character}. The prefix you want to use to name the
 cluster of orthologues. Default is "group". Cluster names will be formed by
