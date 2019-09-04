@@ -238,7 +238,7 @@ minhash_dist <- function(x, k, s){
   d
 }
 
-#' @importFrom Biostrings DNAStringSet AAStringSet
+#' @importFrom Biostrings DNAStringSet
 compute_minhash <- function(x, minhash_fun = NULL,length, k, s){
   dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
   minhash_fun(as.character(dss))
