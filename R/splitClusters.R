@@ -63,7 +63,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         ali <- AlignTranslation(x, verbose = FALSE)
         dm <- DistanceMatrix(ali, verbose = FALSE)
       }else{
-        dm <- minhash_dist(x, k = 16, s = 1, type = 'dna')
+        dm <- minhash_dist(x, k = 16, s = 1)
       }
 
       tree <- midpoint(bionjs(as.dist(dm)))
@@ -208,7 +208,7 @@ Vtip2node_len <- Vectorize(tip2node_len, vectorize.args = 'tip')
 
 #' @importFrom textreuse minhash_generator
 #' @importFrom S4Vectors elementNROWS
-minhash_dist <- function(x, k, s, type = 'dna'){
+minhash_dist <- function(x, k, s){
 
   minhash <- minhash_generator(200)
   mhs <- mapply(compute_minhash,
@@ -239,12 +239,8 @@ minhash_dist <- function(x, k, s, type = 'dna'){
 }
 
 #' @importFrom Biostrings DNAStringSet AAStringSet
-compute_minhash <- function(x, minhash_fun = NULL,length, k, s, type = 'dna'){
-  if (type=='dna'){
-    dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
-  }else{
-    dss <- AAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
-  }
+compute_minhash <- function(x, minhash_fun = NULL,length, k, s){
+  dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
   minhash_fun(as.character(dss))
 }
 
