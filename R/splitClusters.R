@@ -216,8 +216,7 @@ minhash_dist <- function(x, k, s){
                 length = elementNROWS(x),
                 MoreArgs = list(minhash_fun = minhash,
                                 k = k,
-                                s = s,
-                                type = type),
+                                s = s),
                 SIMPLIFY = F)
 
   n <- length(x)
