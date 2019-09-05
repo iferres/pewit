@@ -149,6 +149,8 @@ pangenome <- function(gffs,
   # untar(tarfile = tgz, exdir = tempdir())
   # gffs <- list.files(path = tempdir(), pattern = '[.]gff$', full.names = TRUE)
 
+  time_st <- Sys.time()
+
   if (verbose) message('Extracting sequences from gff files.')
   fastas <- mclapply(gffs,function(x){
     extractSeqsFromGff3(infile = x)
@@ -275,8 +277,13 @@ pangenome <- function(gffs,
                              sep = sep,
                              sequences = seqs)
 
-  if (verbose) message('FINISH!
+  time_en <- Sys.time()
+
+  if (verbose) {
+  message('FINISH!
 Returning an object of class "PgR6MS" (pagoo package, R6 class system)')
+    message(capture.output(time_en - time_st))
+    }
   return(pagoo_object)
 
 }
