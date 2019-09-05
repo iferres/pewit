@@ -33,7 +33,7 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 
 
 #' @import DECIPHER
-#' @importFrom phangorn midpoint Descendants
+#' @importFrom phangorn midpoint Descendants Ancestor
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 #' @importFrom stats as.dist
@@ -62,30 +62,36 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
       if (!minhash_split){
         ali <- AlignTranslation(x, verbose = FALSE)
         dm <- DistanceMatrix(ali, verbose = FALSE)
+        d <- as.dist(dm)
       }else{
-        dm <- minhash_dist(x, k = 16, s = 1)
+        d <- minhash_dist(x, k = 16, s = 1)
       }
 
-      tree <- midpoint(bionjs(as.dist(dm)))
+      tree <- midpoint(bionjs(d))
+      tiplab <- tree$tip.label
+      trorgs <- sapply(strsplit(tiplab, sep), '[', 1)
 
-      # Determine recent paralogues, prune
-      wh_rec <- recent_par_nodes(phy = tree, sep = sep)
-      tree2 <- tree
-      paralogs <- c()
-      if (length(wh_rec)){
-        while(length(wh_rec)>0){
-          # Compute descendants tips for every node
-          alldes <- Descendants(tree2, type = 'tips')
-          names(alldes) <- paste('NODE', seq_along(alldes), sep = '_')
-          node <- wh_rec[1]
-          tps <- tree2$tip.label[alldes[[node]]]
-          pars <- Vtip2node_len(tree2, tps, node)
-          pmin <- which.min(pars)
-          par_rm <- names(pars[-pmin])
-          paralogs <- c(paralogs, par_rm)
-          tree2 <- drop.tip(tree2, par_rm)
-          wh_rec <- recent_par_nodes(phy = tree2, sep = sep)
+      nodes_recpar <- c()
+      for (i in seq_along(tiplab)){
+        nd <- NULL
+        anc <- Ancestors(tree, i, type = 'parent')
+        dec <- Descendants(tree, node = anc)[[1]]
+        while(all(trorgs[i]==trorgs[dec])){
+          nd <- anc
+          anc <- Ancestors(tree, anc, type = 'parent')
+          dec <- Descendants(tree, node = anc)[[1]]
         }
+        nodes_recpar <- c(nodes_recpar, nd)
+      }
+      nodes_recpar <- unique(nodes_recpar)
+
+      par_list <- Descendants(tree, node = nodes_recpar)
+      names(par_list) <- lapply(par_list, function(x) tiplab[x[1]])
+      par_list <- lapply(par_list, function(x) tiplab[x[-1]])
+      paralogs <- unlist(par_list)
+      tree2 <- tree
+      for (i in seq_along(paralogs)){
+        tree2 <- drop.tip(tree2, tip = paralogs[i])
       }
 
       # Compute descendants tips for every node
@@ -132,20 +138,14 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
       # If recent paralogues exists, add them to result
       if (length(paralogs)){
-        # Cophenetic distances between tips
-        coph <- cophenetic.phylo(tree)
-        # Only keep non-paralogue columns
-        coph <- coph[ , as.character(df$Gene), drop = FALSE]
-        glist <- colnames(coph)
-        # Look for min distance between paralog and all the non-paralog. Return
-        # cluster name of closer tip.
-        reloc <- vapply(paralogs, function(y){
-          idx <- which.min(coph[y, , drop = TRUE])
-          df[which(df$Gene == names(idx)), 2, drop = TRUE]
-        }, FUN.VALUE = NA_character_, USE.NAMES = TRUE)
-        dfpar <- data.frame(Gene = names(reloc), NODE = reloc, row.names = NULL)
-        df <- rbind(df, dfpar)
 
+        dfpar <- lapply(names(par_list), function(x){
+          NODE <- df$NODE[which(df$Gene == x)]
+          data.frame(Gene = par_list[[x]], NODE = NODE)
+        })
+
+        dfpar <- do.call(rbind, dfpar)
+        df <- rbind(df, dfpar)
       }
 
       #else (aren't duplicated organisms, so they are a single orthologous group)
@@ -163,47 +163,47 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
   return(df)
 }
 
-#' @importFrom ape subtrees
-recent_par_nodes <- function(phy, sep = '___'){
-  subtrees <- subtrees(phy)
-  names(subtrees) <- as.character(sapply(subtrees, '[[', 'name'))
-  rcnt <- vapply(subtrees, function(y){
-    orgs <- sapply(strsplit(y$tip.label, sep), '[', 1)
-    uorgs <- unique(orgs)
-    if (length(orgs) > 1 & length(uorgs) == 1){
-      TRUE
-    }else{
-      FALSE
-    }
-  }, FUN.VALUE = NA)
-  as.integer(names(which(rcnt)))
-}
-
-
-
-
-tip2node_len <- function(phy, tip, node){
-  edge <- phy$edge
-  elen <- phy$edge.length
-  elen[elen<0] <- abs(elen[elen<0])
-  wtip <- which(phy$tip.label==tip)
-  len <- c()
-  t1 <- wtip
-  rw <- which(edge[, 2]==t1)[1]
-  t2 <- edge[rw, 1]
-  while(t2!=node){
-    len <- c(len, elen[rw])
-    #next...
-    edge <- edge[-rw, ]
-    elen <- elen[-rw]
-    t1 <- t2
-    rw <- which(edge[, 2]==t1)[1]
-    t2 <- edge[rw, 1]
-  }
-  sum(len)
-}
-
-Vtip2node_len <- Vectorize(tip2node_len, vectorize.args = 'tip')
+# #' @importFrom ape subtrees
+# recent_par_nodes <- function(phy, sep = '___'){
+#   subtrees <- subtrees(phy)
+#   names(subtrees) <- as.character(sapply(subtrees, '[[', 'name'))
+#   rcnt <- vapply(subtrees, function(y){
+#     orgs <- sapply(strsplit(y$tip.label, sep), '[', 1)
+#     uorgs <- unique(orgs)
+#     if (length(orgs) > 1 & length(uorgs) == 1){
+#       TRUE
+#     }else{
+#       FALSE
+#     }
+#   }, FUN.VALUE = NA)
+#   as.integer(names(which(rcnt)))
+# }
+#
+#
+#
+#
+# tip2node_len <- function(phy, tip, node){
+#   edge <- phy$edge
+#   elen <- phy$edge.length
+#   elen[elen<0] <- abs(elen[elen<0])
+#   wtip <- which(phy$tip.label==tip)
+#   len <- c()
+#   t1 <- wtip
+#   rw <- which(edge[, 2]==t1)[1]
+#   t2 <- edge[rw, 1]
+#   while(t2!=node){
+#     len <- c(len, elen[rw])
+#     #next...
+#     edge <- edge[-rw, ]
+#     elen <- elen[-rw]
+#     t1 <- t2
+#     rw <- which(edge[, 2]==t1)[1]
+#     t2 <- edge[rw, 1]
+#   }
+#   sum(len)
+# }
+#
+# Vtip2node_len <- Vectorize(tip2node_len, vectorize.args = 'tip')
 
 
 #' @importFrom textreuse minhash_generator
