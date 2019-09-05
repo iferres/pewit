@@ -33,7 +33,7 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 
 
 #' @import DECIPHER
-#' @importFrom phangorn midpoint Descendants Ancestor
+#' @importFrom phangorn midpoint Descendants Ancestors
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 #' @importFrom stats as.dist
