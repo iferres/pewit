@@ -25,6 +25,9 @@
 #'  of \code{hmm_pfam} or \code{dat_pfam} is left \code{NULL}, then the pfam step
 #'  is skipped and sequences will be preclustered by \code{phmmer} and \code{mcl}.
 #' @param n_threads \code{integer}. The number of threads to use.
+#' @param minhash_split \code{logical}. Whether to use fast minhash distantance
+#' calculation instead of alignment in precluster spliting step. Recomended
+#' when working with big datasets (> 50 genomes). Default is \code{FALSE}.
 #' @param group_prefix \code{character}. The prefix you want to use to name the
 #' cluster of orthologues. Default is "group". Cluster names will be formed by
 #' \code{paste}ing this prefix to a number identifiying each cluster, in the
@@ -120,6 +123,7 @@ pangenome <- function(gffs,
                       hmm_pfam,
                       dat_pfam,
                       n_threads = 1,
+                      minhash_split = FALSE,
                       group_prefix = 'group',
                       sep = '___',
                       verbose = TRUE){
@@ -144,6 +148,8 @@ pangenome <- function(gffs,
   # tgz <- system.file('extdata', 'Hinfluenzae_example.tar.gz', package = 'pewit2')
   # untar(tarfile = tgz, exdir = tempdir())
   # gffs <- list.files(path = tempdir(), pattern = '[.]gff$', full.names = TRUE)
+
+  time_st <- Sys.time()
 
   if (verbose) message('Extracting sequences from gff files.')
   fastas <- mclapply(gffs,function(x){
@@ -224,7 +230,7 @@ pangenome <- function(gffs,
   mcols(fastas[df$Gid])$Arch <- df$Arch
 
   if (verbose) message('Resolving coarse clusters.')
-  fastas <- splitPreClusters(fastas, n_threads, sep, verbose)
+  fastas <- splitPreClusters(fastas, minhash_split = minhash_split, n_threads, sep, verbose)
   mcls <- mcols(fastas)
 
   if (verbose) message('Preparing output.')
@@ -264,15 +270,21 @@ pangenome <- function(gffs,
     x
   }))
 
-  group_meta <- unique(DF[, c('group', 'Pfam_Arch')])
+  group_meta <- DF[, c('group', 'Pfam_Arch')]
+  group_meta <- unique(unlist(split(group_meta, group_meta$group)))
 
   pagoo_object <- PgR6MS$new(DF = DF,
                              group_meta = group_meta,
                              sep = sep,
                              sequences = seqs)
 
-  if (verbose) message('FINISH!
+  time_en <- Sys.time()
+
+  if (verbose) {
+  message('FINISH!
 Returning an object of class "PgR6MS" (pagoo package, R6 class system)')
+    message(capture.output(time_en - time_st))
+    }
   return(pagoo_object)
 
 }
