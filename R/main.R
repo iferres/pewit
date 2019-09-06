@@ -270,7 +270,8 @@ pangenome <- function(gffs,
     x
   }))
 
-  group_meta <- unique(DF[, c('group', 'Pfam_Arch')])
+  group_meta <- DF[, c('group', 'Pfam_Arch')]
+  group_meta <- unique(unlist(split(group_meta, group_meta$group)))
 
   pagoo_object <- PgR6MS$new(DF = DF,
                              group_meta = group_meta,
