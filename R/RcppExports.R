@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 compute_kmers <- function(seq, k) {
-    .Call('_pewit_compute_kmers', PACKAGE = 'pewit', seq, k)
+    .Call(`_pewit_compute_kmers`, seq, k)
 }
 

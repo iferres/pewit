@@ -233,7 +233,6 @@ minhash_dist <- function(x, k){
 }
 
 compute_minhash <- function(x, minhash_fun = NULL, k =16){
-  x <- as.character(x)
   kmers <- compute_kmers(x, k)
   minhash_fun(kmers)
 }
