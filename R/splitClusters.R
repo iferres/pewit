@@ -212,10 +212,8 @@ minhash_dist <- function(x, k){
 
   minhash_fun <- minhash_generator(200)
   xc <- as.character(x)
-  lns <- elementNROWS(x)
   mhs <- mapply(compute_minhash,
                 xc,
-                ln = lns,
                 MoreArgs = list(minhash_fun = minhash_fun,
                                 k = k),
                 SIMPLIFY = F)
