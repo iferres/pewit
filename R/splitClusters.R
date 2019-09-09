@@ -213,7 +213,7 @@ minhash_dist <- function(x, k, s){
   minhash <- minhash_generator(200)
   mhs <- mapply(compute_minhash,
                 x,
-                length = elementNROWS(x),
+                ln = elementNROWS(x),
                 MoreArgs = list(minhash_fun = minhash,
                                 k = k,
                                 s = s),
@@ -224,7 +224,7 @@ minhash_dist <- function(x, k, s){
   y <- 1L
   for (i in 1:(n-1)){
     for (j in (i+1):n){
-      d[y] <- jaccard_dissimilarity(mhs[[i]], mhs[[j]])
+      d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
       y <- y + 1L
     }
   }
@@ -238,13 +238,24 @@ minhash_dist <- function(x, k, s){
 }
 
 #' @importFrom Biostrings DNAStringSet
-compute_minhash <- function(x, minhash_fun = NULL,length, k, s){
-  dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
+compute_minhash <- function(x, minhash_fun = NULL,ln, k, s){
+  dss <- DNAStringSet(x, seq(1L, ln - k + 1L, s), seq(k, ln, s))
   minhash_fun(as.character(dss))
 }
 
 
 jaccard_dissimilarity <- function(a, b){
-  1 - length(intersect(a, b)) / length(unique.default(c(a, b)))
+  1 - length(intersect2(a, b)) / length(unique2(c(a, b)))
 }
 
+
+
+unique2 <- function(x){
+  .Internal(unique(x, incomparables = FALSE, fromLast = FALSE, nmax = NA))
+}
+
+
+intersect2 <- function(x, y){
+  m <- match(x, y, 0L)
+  unique2(.subset(y, m))
+}
