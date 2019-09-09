@@ -212,11 +212,7 @@ minhash_dist <- function(x, k){
 
   minhash_fun <- minhash_generator(200)
   xc <- as.character(x)
-  mhs <- mapply(compute_minhash,
-                xc,
-                MoreArgs = list(minhash_fun = minhash_fun,
-                                k = k),
-                SIMPLIFY = F)
+  mhs <- lapply(xc, compute_minhash, k = k, minhash_fun = minhash_fun)
 
   n <- length(x)
   d <- vector('numeric', length = (n * n/2) - n/2)
@@ -236,10 +232,9 @@ minhash_dist <- function(x, k){
   d
 }
 
-#' @importFrom Biostrings DNAStringSet
 compute_minhash <- function(x, minhash_fun = NULL, k =16){
   x <- as.character(x)
-  kmers <- compute_kmers(x)
+  kmers <- compute_kmers(x, k)
   minhash_fun(kmers)
 }
 
