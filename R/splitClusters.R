@@ -64,7 +64,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         dm <- DistanceMatrix(ali, verbose = FALSE)
         d <- as.dist(dm)
       }else{
-        d <- minhash_dist(x, k = 16, s = 1)
+        d <- minhash_dist(x, k = 16)
       }
 
       tree <- midpoint(bionjs(d))
@@ -208,15 +208,16 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
 #' @importFrom textreuse minhash_generator
 #' @importFrom S4Vectors elementNROWS
-minhash_dist <- function(x, k, s){
+minhash_dist <- function(x, k){
 
-  minhash <- minhash_generator(200)
+  minhash_fun <- minhash_generator(200)
+  xc <- as.character(x)
+  lns <- elementNROWS(x)
   mhs <- mapply(compute_minhash,
-                x,
-                ln = elementNROWS(x),
-                MoreArgs = list(minhash_fun = minhash,
-                                k = k,
-                                s = s),
+                xc,
+                ln = lns,
+                MoreArgs = list(minhash_fun = minhash_fun,
+                                k = k),
                 SIMPLIFY = F)
 
   n <- length(x)
@@ -238,24 +239,19 @@ minhash_dist <- function(x, k, s){
 }
 
 #' @importFrom Biostrings DNAStringSet
-compute_minhash <- function(x, minhash_fun = NULL,ln, k, s){
-  dss <- DNAStringSet(x, seq(1L, ln - k + 1L, s), seq(k, ln, s))
-  minhash_fun(as.character(dss))
+compute_minhash <- function(x, minhash_fun = NULL, k =16){
+  x <- as.character(x)
+  kmers <- compute_kmers(x)
+  minhash_fun(kmers)
 }
 
 
 jaccard_dissimilarity <- function(a, b){
-  1 - length(intersect2(a, b)) / length(unique2(c(a, b)))
-}
-
-
-
-unique2 <- function(x){
-  .Internal(unique(x, incomparables = FALSE, fromLast = FALSE, nmax = NA))
+  1 - length(intersect2(a, b)) / length(unique.default(c(a, b)))
 }
 
 
 intersect2 <- function(x, y){
   m <- match(x, y, 0L)
-  unique2(.subset(y, m))
+  unique.default(.subset(y, m))
 }
