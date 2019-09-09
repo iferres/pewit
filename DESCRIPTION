@@ -17,7 +17,8 @@ Imports:
   BiocGenerics,
   S4Vectors,
   Biostrings,
-  textreuse
+  textreuse, 
+  Rcpp
 Remotes:
   github::iferres/pagoo,
   bioc::release/BiocGenerics,
@@ -26,6 +27,7 @@ Remotes:
   bioc::release/DECIPHER
 Suggests:
   testthat
+LinkingTo: Rcpp
 Description: This package provides a function for reconstructing a bacterial
   pangenome from a set of microbial genomes in gff3 format, and using a local 
   copy of Pfam-A database. It attempts to group proteins with equal domain
