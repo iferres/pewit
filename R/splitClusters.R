@@ -213,23 +213,41 @@ minhash_dist <- function(x, k){
   minhash_fun <- minhash_generator(200)
   xc <- as.character(x)
   mhs <- lapply(xc, compute_minhash, k = k, minhash_fun = minhash_fun)
-
   n <- length(x)
-  d <- vector('numeric', length = (n * n/2) - n/2)
-  y <- 1L
-  for (i in 1:(n-1)){
-    for (j in (i+1):n){
-      d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
-      y <- y + 1L
+
+  if (n>70){
+
+    d <- lsh_candidates(mhs)
+    y <- 1L
+    for (i in 1:(n-1)){
+      for (j in (i+1):n){
+        if (.subset2(d, y) == 0L){
+          d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
+        }
+        y <- y + 1L
+      }
     }
+
+  }else{
+
+    d <- vector('numeric', length = (n * n-1L) / 2)
+    y <- 1L
+    for (i in 1:(n-1)){
+      for (j in (i+1):n){
+        d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
+        y <- y + 1L
+      }
+    }
+
+    attr(d, 'class') <- 'dist'
+    attr(d, 'Labels') <- names(mhs)
+    attr(d, 'Size') <- n
+    attr(d, 'Diag') <- FALSE
+    attr(d, 'Upper') <- FALSE
+
   }
 
-  attr(d, 'class') <- 'dist'
-  attr(d, 'Labels') <- names(mhs)
-  attr(d, 'Size') <- n
-  attr(d, 'Diag') <- FALSE
-  attr(d, 'Upper') <- FALSE
-  d
+  return(d)
 }
 
 compute_minhash <- function(x, minhash_fun = NULL, k =16){
@@ -237,6 +255,34 @@ compute_minhash <- function(x, minhash_fun = NULL, k =16){
   minhash_fun(kmers)
 }
 
+
+#' @importFrom parallel splitIndices
+#' @importFrom digest digest
+lsh_candidates <- function(mhs){
+  n <- 200L
+  ln <- length(mhs)
+  # Determine sensitivity
+  prop_diff <- length(unique(unlist(mhs))) / (n * ln)
+  b <- ifelse(prop_diff > .5, 50L, 40L)
+  bix <- splitIndices(n, b)
+  Mhs <- t(do.call(rbind, mhs))
+  bands <- lapply(bix, function(x) Mhs[x, ])
+  cna <- dimnames(Mhs)[[2]]
+  mres <- matrix(1L,
+                 nrow = ln,
+                 ncol = ln,
+                 dimnames = list(cna, cna))
+  lapply(bands, function(y){
+    ap <- apply(y, 2, digest)
+    un <- unname(split(cna, ap))
+    lapply(un, function(x) {
+      mres[x, x] <<- 0L
+    })
+  })
+
+  mres[upper.tri(mres, diag = T)] <- NA
+  as.dist(mres)
+}
 
 jaccard_dissimilarity <- function(a, b){
   1 - length(intersect2(a, b)) / length(unique.default(c(a, b)))
