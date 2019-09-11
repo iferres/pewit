@@ -40,7 +40,7 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
   ntips <- length(x)
-  fc <- as.integer(as.factor(x))
+  fc <- as.integer(as.factor(as.character(x)))
   anydup <- any(table(fc)>1)
   if (anydup){
     xl <- split(names(x), fc)
