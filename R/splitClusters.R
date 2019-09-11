@@ -43,7 +43,9 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
   if (verbose){
     arch <- strsplit(mcls$Arch[1], ';')[[1]]
-    mssg <- paste('   Resolving structure: ', paste(paste0('[', arch, ']'), collapse = ' '))
+    mssg <- paste('   Resolving precluster tree: ',
+                  paste(paste0('[', arch, ']'), collapse = ' '),
+                  '(',length(x), 'tips )')
     message(mssg)
   }
 
@@ -57,6 +59,14 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
   }else if (length(x)>2){
 
     if (any(duplicated(mcls$organism))){
+
+      fc <- as.integer(as.factor(x))
+      anydup <- any(table(fc)>1)
+      if (anydup){
+        xl <- split(names(x), fc)
+        x2 <- x
+        x <- x[sapply(xl, '[', 1)]
+      }
 
       # Align, compute distance, compute nj tree.
       if (!minhash_split){
@@ -148,6 +158,16 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         df <- rbind(df, dfpar)
       }
 
+      if (anydup){
+        xl <- xl[which(sapply(xl, length)>1)]
+        dfdup <- lapply(xl, function(x){
+          NODE <- df$NODE[which(df$Gene == x[1])]
+          data.frame(Gene = x[-1], NODE = NODE)
+        })
+        dfdup <- do.call(rbind, dfdup)
+        df <- rbind(df, dfdup)
+      }
+
       #else (aren't duplicated organisms, so they are a single orthologous group)
     }else{
       df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
@@ -207,13 +227,18 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
 
 #' @importFrom textreuse minhash_generator
-#' @importFrom S4Vectors elementNROWS
 minhash_dist <- function(x, k){
 
-  minhash_fun <- minhash_generator(200)
   xc <- as.character(x)
+  # dup <- any(duplicated(x))
+  # if (dup){
+  #   xcn <- split(names(xc), as.integer(as.factor(xc)))
+  #   xc <- xc[sapply(xcn, '[', 1)]
+  # }
+
+  minhash_fun <- minhash_generator(200)
   mhs <- lapply(xc, compute_minhash, k = k, minhash_fun = minhash_fun)
-  n <- length(x)
+  n <- length(xc)
 
   if (n>70){
 
@@ -239,13 +264,21 @@ minhash_dist <- function(x, k){
       }
     }
 
-    attr(d, 'class') <- 'dist'
-    attr(d, 'Labels') <- names(mhs)
-    attr(d, 'Size') <- n
-    attr(d, 'Diag') <- FALSE
-    attr(d, 'Upper') <- FALSE
-
   }
+
+  attr(d, 'class') <- 'dist'
+  attr(d, 'Labels') <- names(mhs)
+  attr(d, 'Size') <- n
+  attr(d, 'Diag') <- FALSE
+  attr(d, 'Upper') <- FALSE
+
+  # if (dup){
+  #   m <- as.matrix(d)
+  #   ln <- unname(sapply(xcn, length, USE.NAMES = F))
+  #   du <- which(ln>1, useNames = F)
+  #
+  #   d <- as.dist(m)
+  # }
 
   return(d)
 }
