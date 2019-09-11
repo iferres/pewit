@@ -39,11 +39,22 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 #' @importFrom stats as.dist
 splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
+  ntips <- length(x)
+  fc <- as.integer(as.factor(as.character(x)))
+  anydup <- any(table(fc)>1)
+  if (anydup){
+    xl <- split(names(x), fc)
+    x2 <- x
+    x <- x[sapply(xl, '[', 1)]
+  }
+
   mcls <- mcols(x)
 
   if (verbose){
     arch <- strsplit(mcls$Arch[1], ';')[[1]]
-    mssg <- paste('   Resolving structure: ', paste(paste0('[', arch, ']'), collapse = ' '))
+    mssg <- paste('   Resolving precluster tree: ',
+                  paste(paste0('[', arch, ']'), collapse = ' '),
+                  '(',ntips, 'tips )')
     message(mssg)
   }
 
@@ -64,7 +75,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         dm <- DistanceMatrix(ali, verbose = FALSE)
         d <- as.dist(dm)
       }else{
-        d <- minhash_dist(x, k = 16, s = 1)
+        d <- minhash_dist(x, k = 16)
       }
 
       tree <- midpoint(bionjs(d))
@@ -159,6 +170,16 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
     df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
   }
 
+  if (anydup){
+    xl <- xl[which(sapply(xl, length)>1)]
+    dfdup <- lapply(xl, function(x){
+      NODE <- df$NODE[which(df$Gene == x[1])]
+      data.frame(Gene = x[-1], NODE = NODE)
+    })
+    dfdup <- do.call(rbind, dfdup)
+    df <- rbind(df, dfdup)
+  }
+
   # attr(splited, 'varname') <- 'Arch'
   return(df)
 }
@@ -207,26 +228,43 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
 
 #' @importFrom textreuse minhash_generator
-#' @importFrom S4Vectors elementNROWS
-minhash_dist <- function(x, k, s){
+minhash_dist <- function(x, k){
 
-  minhash <- minhash_generator(200)
-  mhs <- mapply(compute_minhash,
-                x,
-                length = elementNROWS(x),
-                MoreArgs = list(minhash_fun = minhash,
-                                k = k,
-                                s = s),
-                SIMPLIFY = F)
+  xc <- as.character(x)
+  # dup <- any(duplicated(x))
+  # if (dup){
+  #   xcn <- split(names(xc), as.integer(as.factor(xc)))
+  #   xc <- xc[sapply(xcn, '[', 1)]
+  # }
 
-  n <- length(x)
-  d <- vector('numeric', length = (n * n/2) - n/2)
-  y <- 1L
-  for (i in 1:(n-1)){
-    for (j in (i+1):n){
-      d[y] <- jaccard_dissimilarity(mhs[[i]], mhs[[j]])
-      y <- y + 1L
+  minhash_fun <- minhash_generator(200)
+  mhs <- lapply(xc, compute_minhash, k = k, minhash_fun = minhash_fun)
+  n <- length(xc)
+
+  if (n>70){
+
+    d <- lsh_candidates(mhs)
+    y <- 1L
+    for (i in 1:(n-1)){
+      for (j in (i+1):n){
+        if (.subset2(d, y) == 0L){
+          d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
+        }
+        y <- y + 1L
+      }
     }
+
+  }else{
+
+    d <- vector('numeric', length = (n * n-1L) / 2)
+    y <- 1L
+    for (i in 1:(n-1)){
+      for (j in (i+1):n){
+        d[y] <- jaccard_dissimilarity(.subset2(mhs,i), .subset2(mhs,j))
+        y <- y + 1L
+      }
+    }
+
   }
 
   attr(d, 'class') <- 'dist'
@@ -234,17 +272,58 @@ minhash_dist <- function(x, k, s){
   attr(d, 'Size') <- n
   attr(d, 'Diag') <- FALSE
   attr(d, 'Upper') <- FALSE
-  d
+
+  # if (dup){
+  #   m <- as.matrix(d)
+  #   ln <- unname(sapply(xcn, length, USE.NAMES = F))
+  #   du <- which(ln>1, useNames = F)
+  #
+  #   d <- as.dist(m)
+  # }
+
+  return(d)
 }
 
-#' @importFrom Biostrings DNAStringSet
-compute_minhash <- function(x, minhash_fun = NULL,length, k, s){
-  dss <- DNAStringSet(x, seq(1L, length - k + 1L, s), seq(k, length, s))
-  minhash_fun(as.character(dss))
+compute_minhash <- function(x, minhash_fun = NULL, k =16){
+  kmers <- compute_kmers(x, k)
+  minhash_fun(kmers)
 }
 
+
+#' @importFrom parallel splitIndices
+#' @importFrom digest digest
+lsh_candidates <- function(mhs){
+  n <- 200L
+  ln <- length(mhs)
+  # Determine sensitivity
+  prop_diff <- length(unique(unlist(mhs))) / (n * ln)
+  b <- ifelse(prop_diff > .5, 50L, 40L)
+  bix <- splitIndices(n, b)
+  Mhs <- t(do.call(rbind, mhs))
+  bands <- lapply(bix, function(x) Mhs[x, ])
+  cna <- dimnames(Mhs)[[2]]
+  mres <- matrix(1L,
+                 nrow = ln,
+                 ncol = ln,
+                 dimnames = list(cna, cna))
+  lapply(bands, function(y){
+    ap <- apply(y, 2, digest)
+    un <- unname(split(cna, ap))
+    lapply(un, function(x) {
+      mres[x, x] <<- 0L
+    })
+  })
+
+  mres[upper.tri(mres, diag = T)] <- NA
+  as.dist(mres)
+}
 
 jaccard_dissimilarity <- function(a, b){
-  1 - length(intersect(a, b)) / length(unique.default(c(a, b)))
+  1 - length(intersect2(a, b)) / length(unique.default(c(a, b)))
 }
 
+
+intersect2 <- function(x, y){
+  m <- match(x, y, 0L)
+  unique.default(.subset(y, m))
+}

@@ -117,6 +117,7 @@
 #' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS
 #' @importFrom Biostrings DNAStringSetList translate
 #' @importFrom reshape2 melt
+#' @importFrom utils capture.output
 #' @import pagoo
 #' @export
 pangenome <- function(gffs,
