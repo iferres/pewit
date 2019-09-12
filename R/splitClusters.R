@@ -33,7 +33,7 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 
 
 #' @import DECIPHER
-#' @importFrom phangorn midpoint Descendants Ancestors
+#' @importFrom phangorn midpoint Descendants Ancestors add.tips
 #' @importFrom ape bionjs cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 #' @importFrom stats as.dist
@@ -42,11 +42,11 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
   ntips <- length(x)
   fc <- as.integer(as.factor(as.character(x)))
   anydup <- any(table(fc)>1)
-  if (anydup){
-    xl <- split(names(x), fc)
-    x2 <- x
-    x <- x[sapply(xl, '[', 1)]
-  }
+  # if (anydup){
+  #   xl <- split(names(x), fc)
+  #   x2 <- x
+  #   x <- x[sapply(xl, '[', 1)]
+  # }
 
   mcls <- mcols(x)
 
@@ -69,6 +69,12 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
     if (any(duplicated(mcls$organism))){
 
+      if (anydup){
+        xl <- split(names(x), fc)
+        x2 <- x
+        x <- x[sapply(xl, '[', 1)]
+      }
+
       # Align, compute distance, compute nj tree.
       if (!minhash_split){
         ali <- AlignTranslation(x, verbose = FALSE)
@@ -79,9 +85,30 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
       }
 
       tree <- midpoint(bionjs(d))
+
+      #Adds duplicated sequences to tips (if any), except recent paralogues
+      if (anydup){
+        xl <- xl[which(sapply(xl, length)>1)]
+        for(i in seq_along(xl)){
+          merged <- xl[[i]]
+          trorgs <- sapply(strsplit(merged, sep), '[', 1)
+          tbl <- table(trorgs)
+          wt_rec_par <- names(which(tbl>1))
+          tips_recpar <- lapply(wt_rec_par, function(x) merged[which(trorgs==x)[-1]])
+          names(tips_recpar) <- sapply(wt_rec_par, function(x) merged[which(trorgs==x)[1]])
+          if (length(tips_recpar)){
+            merged <- merged[-which(merged %in% unlist(tips_recpar))]
+          }
+          tree <- add.tips(tree,
+                           tips = merged[-1],
+                           where = which(tree$tip.label==merged[1]))
+        }
+      }
+
       tiplab <- tree$tip.label
       trorgs <- sapply(strsplit(tiplab, sep), '[', 1)
 
+      # Detect recent paralogues
       nodes_recpar <- c()
       for (i in seq_along(tiplab)){
         nd <- NULL
@@ -101,6 +128,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
       par_list <- lapply(par_list, function(x) tiplab[x[-1]])
       paralogs <- unlist(par_list)
       tree2 <- tree
+      # Drop recent paralogues
       for (i in seq_along(paralogs)){
         tree2 <- drop.tip(tree2, tip = paralogs[i])
       }
@@ -159,6 +187,15 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         df <- rbind(df, dfpar)
       }
 
+      if (length(tips_recpar)){
+        dfpar <- lapply(names(tips_recpar), function(x){
+          NODE <- df$NODE[which(df$Gene == x)]
+          data.frame(Gene = tips_recpar[[x]], NODE = NODE)
+        })
+        dfpar <- do.call(rbind, dfpar)
+        df <- rbind(df, dfpar)
+      }
+
       #else (aren't duplicated organisms, so they are a single orthologous group)
     }else{
       df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
@@ -170,15 +207,15 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
     df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
   }
 
-  if (anydup){
-    xl <- xl[which(sapply(xl, length)>1)]
-    dfdup <- lapply(xl, function(x){
-      NODE <- df$NODE[which(df$Gene == x[1])]
-      data.frame(Gene = x[-1], NODE = NODE)
-    })
-    dfdup <- do.call(rbind, dfdup)
-    df <- rbind(df, dfdup)
-  }
+  # if (anydup){
+  #   xl <- xl[which(sapply(xl, length)>1)]
+  #   dfdup <- lapply(xl, function(x){
+  #     NODE <- df$NODE[which(df$Gene == x[1])]
+  #     data.frame(Gene = x[-1], NODE = NODE)
+  #   })
+  #   dfdup <- do.call(rbind, dfdup)
+  #   df <- rbind(df, dfdup)
+  # }
 
   # attr(splited, 'varname') <- 'Arch'
   return(df)
