@@ -75,125 +75,110 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
         x <- x[sapply(xl, '[', 1)]
       }
 
-      # Align, compute distance, compute nj tree.
-      if (!minhash_split){
-        ali <- AlignTranslation(x, verbose = FALSE)
-        dm <- DistanceMatrix(ali, verbose = FALSE)
-        d <- as.dist(dm)
-      }else{
-        d <- minhash_dist(x, k = 16)
-      }
+      if (length(x)>2){
+        # Align, compute distance, compute nj tree.
+        if (!minhash_split){
+          ali <- AlignTranslation(x, verbose = FALSE)
+          dm <- DistanceMatrix(ali, verbose = FALSE)
+          d <- as.dist(dm)
+        }else{
+          d <- minhash_dist(x, k = 16)
+        }
 
-      tree <- midpoint(bionjs(d))
+        tree <- midpoint(bionjs(d))
 
-      #Adds duplicated sequences to tips (if any), except recent paralogues
-      if (anydup){
-        xl <- xl[which(sapply(xl, length)>1)]
-        for(i in seq_along(xl)){
-          merged <- xl[[i]]
-          trorgs <- sapply(strsplit(merged, sep), '[', 1)
-          tbl <- table(trorgs)
-          wt_rec_par <- names(which(tbl>1))
-          tips_recpar <- lapply(wt_rec_par, function(x) merged[which(trorgs==x)[-1]])
-          names(tips_recpar) <- sapply(wt_rec_par, function(x) merged[which(trorgs==x)[1]])
-          if (length(tips_recpar)){
-            merged <- merged[-which(merged %in% unlist(tips_recpar))]
+        #Adds duplicated sequences to tips (if any), except recent paralogues
+        if (anydup){
+          xl <- xl[which(sapply(xl, length)>1)]
+          tp_dup_rec <- list()
+          for(i in seq_along(xl)){
+            merged <- xl[[i]]
+            trorgs <- sapply(strsplit(merged, sep), '[', 1)
+            tbl <- table(trorgs)
+            wt_rec_par <- names(which(tbl>1))
+            tips_recpar <- lapply(wt_rec_par, function(x) merged[which(trorgs==x)[-1]])
+            names(tips_recpar) <- sapply(wt_rec_par, function(x) merged[which(trorgs==x)[1]])
+            tp_dup_rec <- append(tp_dup_rec, tips_recpar)
+            if (length(tips_recpar)){
+              merged <- merged[-which(merged %in% unlist(tips_recpar))]
+            }
+            tree <- add.tips(tree,
+                             tips = merged[-1],
+                             where = which(tree$tip.label==merged[1]))
           }
-          tree <- add.tips(tree,
-                           tips = merged[-1],
-                           where = which(tree$tip.label==merged[1]))
         }
-      }
 
-      tiplab <- tree$tip.label
-      trorgs <- sapply(strsplit(tiplab, sep), '[', 1)
+        tiplab <- tree$tip.label
+        trorgs <- sapply(strsplit(tiplab, sep), '[', 1)
 
-      # Detect recent paralogues
-      nodes_recpar <- c()
-      for (i in seq_along(tiplab)){
-        nd <- NULL
-        anc <- Ancestors(tree, i, type = 'parent')
-        dec <- Descendants(tree, node = anc)[[1]]
-        while(all(trorgs[i]==trorgs[dec])){
-          nd <- anc
-          anc <- Ancestors(tree, anc, type = 'parent')
+        # Detect recent paralogues
+        nodes_recpar <- c()
+        for (i in seq_along(tiplab)){
+          nd <- NULL
+          anc <- Ancestors(tree, i, type = 'parent')
           dec <- Descendants(tree, node = anc)[[1]]
+          while(all(trorgs[i]==trorgs[dec])){
+            nd <- anc
+            anc <- Ancestors(tree, anc, type = 'parent')
+            dec <- Descendants(tree, node = anc)[[1]]
+          }
+          nodes_recpar <- c(nodes_recpar, nd)
         }
-        nodes_recpar <- c(nodes_recpar, nd)
-      }
-      nodes_recpar <- unique(nodes_recpar)
+        nodes_recpar <- unique(nodes_recpar)
 
-      par_list <- Descendants(tree, node = nodes_recpar)
-      names(par_list) <- lapply(par_list, function(x) tiplab[x[1]])
-      par_list <- lapply(par_list, function(x) tiplab[x[-1]])
-      paralogs <- unlist(par_list)
-      tree2 <- tree
-      # Drop recent paralogues
-      for (i in seq_along(paralogs)){
-        tree2 <- drop.tip(tree2, tip = paralogs[i])
-      }
+        par_list <- Descendants(tree, node = nodes_recpar)
+        names(par_list) <- lapply(par_list, function(x) tiplab[x[1]])
+        par_list <- lapply(par_list, function(x) tiplab[x[-1]])
+        paralogs <- unlist(par_list)
+        tree2 <- tree
+        # Drop recent paralogues
+        for (i in seq_along(paralogs)){
+          tree2 <- drop.tip(tree2, tip = paralogs[i])
+        }
 
-      # Compute descendants tips for every node
-      alldes <- Descendants(tree2, type = 'tips')
-      names(alldes) <- paste('NODE', seq_along(alldes), sep = '_')
+        df <- detect_OGs(tree = tree2, sep = sep)
 
-      # Which nodes have repeated organisms?
-      rep_orgs <- which(vapply(alldes, function(y){
-        orgs <- vapply(strsplit(tree2$tip.label[y], sep), '[', 1,
-                       FUN.VALUE = NA_character_)
-        any(duplicated(orgs))
-      }, FUN.VALUE = NA))
+        # If recent paralogues exists, add them to result
+        if (length(paralogs)){
 
-      # If more than 1 clade (length rep_orgs > 0)...
-      if (length(rep_orgs)){
-        # Remove nodes with repeated organisms (they are not orthologues)
-        ogs <- alldes[-rep_orgs]
+          dfpar <- lapply(names(par_list), function(x){
+            NODE <- df$NODE[which(df$Gene == x)]
+            data.frame(Gene = par_list[[x]], NODE = NODE)
+          })
 
-        # Compute containment matrix (if each node is contained in another node)
-        in_mat <- sapply(ogs, function(y){
-          sapply(ogs, function(z){
-            all(y%in%z)
-          }, USE.NAMES = TRUE)
-        }, USE.NAMES = TRUE)
+          dfpar <- do.call(rbind, dfpar)
+          df <- rbind(df, dfpar)
+        }
 
-        # Sum. Those which sum == 1 are those which only contain themselves. Those
-        # are true orthologues. Extract tip labels.
-        true_ogs <- lapply(ogs[colSums(in_mat)==1], function(y){
-          tree2$tip.label[y]
+        if (exists('tps_dup_rec')){
+          if (length(tps_dup_rec)){
+            dfpar <- lapply(names(tps_dup_rec), function(x){
+              NODE <- df$NODE[which(df$Gene == x)]
+              data.frame(Gene = tps_dup_rec[[x]], NODE = NODE)
+            })
+            dfpar <- do.call(rbind, dfpar)
+            df <- rbind(df, dfpar)
+          }
+        }
+
+      }else if(length(x)==2){
+
+        orgs <- lapply(xl, function(i){
+          spl <- strsplit(i, sep)
+          sapply(spl, '[', 1)
         })
-        attr(true_ogs, 'varname') <- 'NODE'
 
-        # ... else (if only a single clan exists)..
+        if (any(orgs[[1]] %in% orgs[[2]])){
+          df1 <- data.frame(Gene = xl[[1]], NODE = 'NODE_1')
+          df2 <- data.frame(Gene = xl[[2]], NODE = 'NODE_2')
+          df <- rbind(df1, df2)
+        }else{
+          df <- data.frame(Gene = unlist(unname(xl)), NODE = 'NODE_1')
+        }
+
       }else{
-
-        true_ogs <- list(NODE_1 = tree2$tip.label)
-        attr(true_ogs, 'varname') <- 'NODE'
-
-      }
-
-      # Melt list into long-formatted data.frame
-      df <- melt(true_ogs, value.name = 'Gene')
-      df[] <- lapply(df, as.character)
-
-      # If recent paralogues exists, add them to result
-      if (length(paralogs)){
-
-        dfpar <- lapply(names(par_list), function(x){
-          NODE <- df$NODE[which(df$Gene == x)]
-          data.frame(Gene = par_list[[x]], NODE = NODE)
-        })
-
-        dfpar <- do.call(rbind, dfpar)
-        df <- rbind(df, dfpar)
-      }
-
-      if (length(tips_recpar)){
-        dfpar <- lapply(names(tips_recpar), function(x){
-          NODE <- df$NODE[which(df$Gene == x)]
-          data.frame(Gene = tips_recpar[[x]], NODE = NODE)
-        })
-        dfpar <- do.call(rbind, dfpar)
-        df <- rbind(df, dfpar)
+        # else (all sequences are equal)
+        df <- data.frame(Gene = unlist(xl, use.names = F), NODE = 'NODE_1', row.names = NULL)
       }
 
       #else (aren't duplicated organisms, so they are a single orthologous group)
@@ -207,17 +192,6 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
     df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
   }
 
-  # if (anydup){
-  #   xl <- xl[which(sapply(xl, length)>1)]
-  #   dfdup <- lapply(xl, function(x){
-  #     NODE <- df$NODE[which(df$Gene == x[1])]
-  #     data.frame(Gene = x[-1], NODE = NODE)
-  #   })
-  #   dfdup <- do.call(rbind, dfdup)
-  #   df <- rbind(df, dfdup)
-  # }
-
-  # attr(splited, 'varname') <- 'Arch'
   return(df)
 }
 
@@ -262,6 +236,54 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 # }
 #
 # Vtip2node_len <- Vectorize(tip2node_len, vectorize.args = 'tip')
+
+
+#' @importFrom phangorn Descendants
+#' @importFrom reshape2 melt
+detect_OGs <- function(tree, sep){
+  # Compute descendants tips for every node
+  alldes <- Descendants(tree, type = 'tips')
+  names(alldes) <- paste('NODE', seq_along(alldes), sep = '_')
+
+  # Which nodes have repeated organisms?
+  rep_orgs <- which(vapply(alldes, function(y){
+    orgs <- vapply(strsplit(tree$tip.label[y], sep), '[', 1,
+                   FUN.VALUE = NA_character_)
+    any(duplicated(orgs))
+  }, FUN.VALUE = NA))
+
+  # If more than 1 clade (length rep_orgs > 0)...
+  if (length(rep_orgs)){
+    # Remove nodes with repeated organisms (they are not orthologues)
+    ogs <- alldes[-rep_orgs]
+
+    # Compute containment matrix (if each node is contained in another node)
+    in_mat <- sapply(ogs, function(y){
+      sapply(ogs, function(z){
+        all(y%in%z)
+      }, USE.NAMES = TRUE)
+    }, USE.NAMES = TRUE)
+
+    # Sum. Those which sum == 1 are those which only contain themselves. Those
+    # are true orthologues. Extract tip labels.
+    true_ogs <- lapply(ogs[colSums(in_mat)==1], function(y){
+      tree$tip.label[y]
+    })
+    attr(true_ogs, 'varname') <- 'NODE'
+
+    # ... else (if only a single clan exists)..
+  }else{
+
+    true_ogs <- list(NODE_1 = tree$tip.label)
+    attr(true_ogs, 'varname') <- 'NODE'
+
+  }
+
+  # Melt list into long-formatted data.frame
+  df <- melt(true_ogs, value.name = 'Gene')
+  df[] <- lapply(df, as.character)
+  df
+}
 
 
 #' @importFrom textreuse minhash_generator
