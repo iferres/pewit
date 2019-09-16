@@ -150,11 +150,11 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
           df <- rbind(df, dfpar)
         }
 
-        if (exists('tps_dup_rec')){
-          if (length(tps_dup_rec)){
-            dfpar <- lapply(names(tps_dup_rec), function(x){
+        if (exists('tp_dup_rec')){
+          if (length(tp_dup_rec)){
+            dfpar <- lapply(names(tp_dup_rec), function(x){
               NODE <- df$NODE[which(df$Gene == x)]
-              data.frame(Gene = tps_dup_rec[[x]], NODE = NODE)
+              data.frame(Gene = tp_dup_rec[[x]], NODE = NODE)
             })
             dfpar <- do.call(rbind, dfpar)
             df <- rbind(df, dfpar)
@@ -192,6 +192,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
     df <- data.frame(Gene = names(x), NODE = 'NODE_1', row.names = NULL)
   }
 
+  if (ntips!=dim(df)[1]) stop('split failed')
   return(df)
 }
 
