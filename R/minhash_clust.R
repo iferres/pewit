@@ -18,7 +18,8 @@ fast_clust <- function(faas, verbose = TRUE){
 
 
 
-
+#' @importFrom parallel splitIndices
+#' @importFrom digest digest
 #' @importFrom reshape2 melt
 #' @importFrom textreuse minhash_generator
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
@@ -26,59 +27,77 @@ minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TR
   minhash <- minhash_generator(n = n)
 
   if (verbose){
-    message('Computing minhashes.')
+    message('Computing 4-mers and minhashes.')
   }
-  lp <- lapply(as.character(faas), function(x){
-    y <- strsplit(x, '')[[1]]
-    # k = 4
-    minhash(paste0(y[c(T, F, F, F)],
-                   y[c(F, T, F, F)] ,
-                   y[c(F, F, T, F)],
-                   y[c(F, F, F, T)] ))
+  lp <- list2env(lapply(as.character(faas), function(x){
+    minhash(compute_kmers(x, k=4L))
+  }), hash = TRUE)
+
+  bix <- splitIndices(n, 2L)
+
+  bands <- lapply(lp, function(x) {
+    vapply(bix, function(y){
+      digest(.subset(x, y))
+    }, FUN.VALUE = NA_character_)
   })
 
-  if (verbose){
-    message('Generating minhashes-to-sequences hash table.')
-  }
-  ints <- melt(lp)
-  ee <- list2env(split(ints$L1, ints$value), hash = TRUE)
-  rm(ints)
+  # bands <- do.call(rbind, bands)
+  ml <- melt(do.call(rbind, bands))
+  dml <- dim(ml)
+  mlx_1 <- seq.int(1L, dml[[1]]/2)
+  mlx_2 <- seq.int((dml[[1]]/2) + 1L, dml[[1]])
 
-  cutoff <- cutoff
+  ee1 <- list2env(split(as.character(ml$Var1[mlx_1]), ml$value[mlx_1], drop = TRUE), hash = TRUE)
+  ee2 <- list2env(split(as.character(ml$Var1[mlx_2]), ml$value[mlx_2], drop = TRUE), hash = TRUE)
+  rm(list = c('ml', 'mlx_1', 'mlx_2'))
+
   res <- list()
   i <- 1L
-  ln <- length(lp)
-  left <- ln
+  # left <- dim(bands)[[1]]
+  left <- length(bands)
+  oln <- left
+  while (left>0){
+    # bn <- dimnames(bands)[[1]]
+    # x <- bands[1L, ]
+    bn <- names(bands)
+    x <- bands[[1]]
 
-  if (verbose){
-    message('Clustering highly similar sequences using MinHash algorithm.')
-  }
-  while (left) {
-    x <- lp[[1]]
-    an <- unique(unlist(lapply(as.character(x), function(y) ee[[y]]), use.names = FALSE))
-    an <- an[which(an %in% names(lp))]
+    candi <- unique(c(ee1[[x[1]]], ee2[[x[2]]]))
+    candix <- match(candi, bn, nomatch = NA)
+    nas <- is.na(candix)
+    candi <- candi[!nas]
+    candix <- candix[!nas]
 
-    if (length(an)){
-      mch <- an[-1L]
-      hsh <- .subset(lp, mch)
-      jdis <- jaccard_similarity_V(x, hsh)
-      nms <- c(names(lp[1]), names(which(jdis>=cutoff)))
-      res[[i]] <- nms
+    ln <- length(candi)
+    if (ln>1){
+      r1 <- .subset2(lp, candi[1])
+      r2 <- lapply(setNames(candi[-1], candi[-1]), function(x) lp[[x]])
+      jsim <- jaccard_similarity_V(r1, r2)
+      hits <- c(candi[1], names(which(jsim>=cutoff)))
+      rmix <- candix[match(hits, candi)]
+      # bands <- bands[-rmix, , drop=FALSE]
+      # bands <- bands[-rmix]
+      bands <- .subset(bands, -rmix)
+      res[[i]] <- hits
     }else{
-      nms <- names(lp[1])
-      res[[i]] <- nms
+      hits <- candi
+      # bands <- bands[-1L, ,drop=FALSE]
+      bands <- bands[-1]
+      res[[i]] <- hits
     }
 
-    lp <- lp[!names(lp)%in%nms]
+    # left <- dim(bands)[[1]]
+    left <- length(bands)
     i <- i + 1L
-    left <- length(lp)
 
     if (verbose){
-      pcnt <- round(left * 100 / ln)
-      message(paste(pcnt, '%'), appendLF = FALSE)
-      message(paste0(rep('\r', nchar(pcnt) + 3), collapse = ''),appendLF = FALSE)
+      pcnt2 <- if (exists('pcnt')) pcnt else 101
+      pcnt <- round(left * 100 / oln)
+      if (pcnt<pcnt2){
+        message(paste(pcnt, '%'), appendLF = FALSE)
+        message(paste0(rep('\r', nchar(pcnt) + 6), collapse = ''), appendLF = FALSE)
+      }
     }
-
   }
 
   return(res)
@@ -93,5 +112,5 @@ jaccard_similarity <- function(a, b){
 }
 
 # Vectorizacion
-jaccard_similarity_V <- Vectorize(jaccard_similarity, 'b', SIMPLIFY = FALSE)
+jaccard_similarity_V <- Vectorize(jaccard_similarity, 'b', SIMPLIFY = TRUE)
 
