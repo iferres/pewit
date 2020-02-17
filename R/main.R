@@ -241,11 +241,11 @@ pangenome <- function(gffs,
   # Group name
   groups <- mcls$Cluster
   wdth <- nchar(max(groups))
-  DF$group <- paste0(group_prefix,
-                     formatC(groups,
-                             width = wdth,
-                             format = 'd',
-                             flag = '0'))
+  DF$cluster <- paste0(group_prefix,
+                       formatC(groups,
+                               width = wdth,
+                               format = 'd',
+                               flag = '0'))
   # Organism
   DF$org <- mcls$organism
   # Gene name (as annotated)
@@ -271,11 +271,12 @@ pangenome <- function(gffs,
     x
   }))
 
-  group_meta <- DF[, c('group', 'Pfam_Arch')]
-  group_meta <- unique(unlist(split(group_meta, group_meta$group)))
+  cluster_meta <- DF[, c('group', 'Pfam_Arch')]
+  cluster_meta <- unique(unlist(split(group_meta, group_meta$group)))
+  colnames(cluster_meta) <- c("cluster", "Pfam_Arch")
 
-  pagoo_object <- PgR6MS$new(DF = DF,
-                             group_meta = group_meta,
+  pagoo_object <- PgR6MS$new(data = DF,
+                             cluster_meta = group_meta,
                              sep = sep,
                              sequences = seqs)
 
