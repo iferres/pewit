@@ -34,7 +34,7 @@ splitPreClusters <- function(fastas, n_threads, sep, minhash_split = FALSE, verb
 
 #' @import DECIPHER
 #' @importFrom phangorn midpoint Descendants Ancestors add.tips
-#' @importFrom ape bionjs cophenetic.phylo drop.tip
+#' @importFrom ape bionjs bionj cophenetic.phylo drop.tip
 #' @importFrom reshape2 melt
 #' @importFrom stats as.dist
 splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
@@ -85,7 +85,10 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
           d <- minhash_dist(x, k = 16)
         }
 
-        tree <- midpoint(bionjs(d))
+        tree <- try(midpoint(bionjs(d)))
+        if (class(tree)=='try-error'){
+          tree <- midpoint(bionj(d))
+        }
 
         #Adds duplicated sequences to tips (if any), except recent paralogues
         if (anydup){

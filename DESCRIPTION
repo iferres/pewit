@@ -9,6 +9,7 @@ Depends:
   R (>= 3.3.1),
   DECIPHER,
   pagoo
+biocViews:
 Imports:
   parallel,
   ape,
@@ -18,13 +19,12 @@ Imports:
   S4Vectors,
   Biostrings,
   textreuse, 
-  Rcpp
+  Rcpp,
+  BiocGenerics,
+  S4Vectors,
+  Biostrings
 Remotes:
-  github::iferres/pagoo,
-  bioc::release/BiocGenerics,
-  bioc::release/S4Vectors,
-  bioc::release/Biostrings,
-  bioc::release/DECIPHER
+  github::iferres/pagoo
 Suggests:
   testthat
 LinkingTo: Rcpp
