@@ -271,12 +271,11 @@ pangenome <- function(gffs,
     x
   }))
 
-  cluster_meta <- DF[, c('group', 'Pfam_Arch')]
-  cluster_meta <- unique(unlist(split(group_meta, group_meta$group)))
-  colnames(cluster_meta) <- c("cluster", "Pfam_Arch")
+  cluster_meta <- DF[, c('cluster', 'Pfam_Arch')]
+  cluster_meta <- unique(unlist(split(cluster_meta, cluster_meta$cluster)))
 
   pagoo_object <- PgR6MS$new(data = DF,
-                             cluster_meta = group_meta,
+                             cluster_meta = cluster_meta,
                              sep = sep,
                              sequences = seqs)
 
