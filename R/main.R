@@ -277,7 +277,8 @@ pangenome <- function(gffs,
   pagoo_object <- PgR6MS$new(data = DF,
                              cluster_meta = cluster_meta,
                              sep = sep,
-                             sequences = seqs)
+                             sequences = seqs,
+                             verbose = verbose)
 
   time_en <- Sys.time()
 
