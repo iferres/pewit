@@ -35,7 +35,7 @@ PewitR6 <- R6Class('PewitR6',
                                              orient = TRUE){
 
                        # Compute
-                       group <- self$gene[[cluster]]
+                       group <- self$genes[[cluster]]
                        sep <- private$.sep
                        group$org <- sub(paste0(sep, ".+"), "", group$gid)
                        data <- private$.data
