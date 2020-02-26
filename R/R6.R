@@ -3,7 +3,7 @@
 #' @import pagoo
 #' @importFrom gggenes geom_gene_arrow theme_genes
 #' @importFrom S4Vectors List
-#' @importFrom ggplot2 ggplot aes theme element_blank
+#' @importFrom ggplot2 ggplot aes theme guides guide_legend
 #' @importFrom gggenes geom_gene_arrow theme_genes
 PewitR6 <- R6Class('PewitR6',
 
@@ -103,15 +103,16 @@ PewitR6 <- R6Class('PewitR6',
                        strand = strands,
                        gid = gids,
                        MoreArgs = list(orient = orient))
-                       names(mp) <- gids
 
                        df <- as.data.frame(unlist(List(mp)))
-
+                       df$geneName <- sub("", NA_character_, df$geneName)
+                       df$Pfam_Arch <- sub("^NOARCH_\\d+", NA_character_, df$Pfam_Arch)
                        df$direction <- ifelse(df$strand == "+", 1, -1)
+
                        ggplot(df, aes(xmin = from, xmax = to, y = org, fill = df[[fill]], forward = direction)) +
                          geom_gene_arrow() +
-                         theme_genes() #+
-                         #theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+                         theme_genes() +
+                         guides(fill = guide_legend(title = fill))
 
                      }
 
