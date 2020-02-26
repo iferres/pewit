@@ -1,3 +1,4 @@
+#' @name PewitR6
 #' @importFrom R6 R6Class
 #' @import pagoo
 #' @importFrom gggenes geom_gene_arrow theme_genes
