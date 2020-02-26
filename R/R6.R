@@ -107,8 +107,8 @@ PewitR6 <- R6Class('PewitR6',
                        df$direction <- ifelse(df$strand == "+", 1, -1)
                        ggplot(df, aes(xmin = from, xmax = to, y = org, fill = df[[fill]], forward = direction)) +
                          geom_gene_arrow() +
-                         theme_genes() +
-                         theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+                         theme_genes() #+
+                         #theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
                      }
 
