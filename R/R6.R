@@ -36,7 +36,8 @@ PewitR6 <- R6Class('PewitR6',
 
                        # Compute
                        group <- self$gene[[cluster]]
-                       group$org <- sub("__.+", "", group$gid)
+                       sep <- private$.sep
+                       group$org <- sub(paste0(sep, ".+"), "", group$gid)
                        data <- private$.data
                        ap <- apply(group, 1, function(x) {
                          contig <- data[which(data$org == x[["org"]] &
