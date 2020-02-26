@@ -31,8 +31,7 @@ PewitR6 <- R6Class('PewitR6',
 
                      gene_context = function(cluster,
                                              upstream = 2,
-                                             downstream = 2,
-                                             orient = TRUE){
+                                             downstream = 2){
 
                        # Compute
                        group <- self$genes[[cluster]]
@@ -59,26 +58,10 @@ PewitR6 <- R6Class('PewitR6',
                            contig2 <- contig[gixup:gixdown, ,drop=F]
                          }
 
-                         # orient
-                         if (orient & strand == "-"){
-                           contig2$from <- contig2$from * -1
-                           contig2$to <- contig2$to * -1
-                         }
-
-                         # center
-                         if (strand == "+"){
-                           dif <- as.integer(contig2$from[which(contig2$gid == x[["gid"]])])
-                         }else{
-                           dif <- as.integer(contig2$to[which(contig2$gid == x[["gid"]])])
-                         }
-                         contig2$from <- contig2$from - dif
-                         contig2$to <- contig2$to - dif
-
                          return(contig2)
                        })
 
-                       df <- unlist(List(ap))
-                       df
+                       return(List(ap))
 
                      },
 
@@ -88,7 +71,39 @@ PewitR6 <- R6Class('PewitR6',
                                                 fill = "cluster",
                                                 orient = TRUE){
 
-                       df <- as.data.frame(self$gene_context(cluster, upstream, downstream, orient))
+                       group <- self$genes[[cluster]]
+                       strands <- group$strand
+                       gids <- group$gid
+                       contexts <- self$gene_context(cluster, upstream, downstream)
+
+                       mp <- mapply(function(context, strand, gid, orient) {
+                         x2 <- context
+
+                         # orient
+                         if (orient & strand == "-"){
+                           x2$from <- context$from * -1
+                           x2$to <- context$to * -1
+                         }
+
+                         # center
+                         if (strand == "+"){
+                           dif <- as.integer(x2$from[which(x2$gid == gid)])
+                         }else{
+                           dif <- as.integer(x2$to[which(x2$gid == gid)])
+                         }
+                         x2$from <- x2$from - dif
+                         x2$to <- x2$to - dif
+
+                         return(x2)
+
+                       },
+                       context = contexts,
+                       strand = strands,
+                       gid = gids,
+                       MoreArgs = list(orient = orient))
+
+                       df <- as.data.frame(unlist(List(mp)))
+
                        df$direction <- ifelse(df$strand == "+", 1, -1)
                        ggplot(df, aes(xmin = from, xmax = to, y = org, fill = cluster, forward = direction)) +
                          geom_gene_arrow() +
