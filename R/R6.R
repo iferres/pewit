@@ -63,7 +63,7 @@ PewitR6 <- R6Class('PewitR6',
 
                        lst <- List(ap)
                        ulst <- unlist(lst)
-                       return(split(ulst, ulst$org))
+                       return(split(ulst, as.character(ulst$org)))
 
                      },
 
