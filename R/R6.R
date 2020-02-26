@@ -31,7 +31,7 @@ PewitR6 <- R6Class('PewitR6',
 
                      gene_context = function(cluster,
                                              upstream = 2,
-                                             downstram = 2,
+                                             downstream = 2,
                                              orient = TRUE){
 
                        # Compute
@@ -48,7 +48,7 @@ PewitR6 <- R6Class('PewitR6',
                          if (strand == "+"){
                            gixup <- gix - upstream
                            gixup <- ifelse(gixup < 1, 1, gixup)
-                           gixdown <- gix + downstram
+                           gixdown <- gix + downstream
                            gixdown <- ifelse (gixdown > dim(contig)[1], dim(contig)[1], gixdown)
                            contig2 <- contig[gixup:gixdown, ,drop=F]
                          }else{
@@ -83,12 +83,12 @@ PewitR6 <- R6Class('PewitR6',
                      },
 
                      gg_gene_context = function(cluster,
-                                                upstram = 2,
-                                                downstram = 2,
+                                                upstream = 2,
+                                                downstream = 2,
                                                 fill = "cluster",
                                                 orient = TRUE){
 
-                       df <- as.data.frame(self$gene_context(cluster, upstram, downstram, orient))
+                       df <- as.data.frame(self$gene_context(cluster, upstream, downstream, orient))
                        df$direction <- ifelse(df$strand == "+", 1, -1)
                        ggplot2(df, aes(xmin = from, xmax = to, y = org, fill = cluster, forward = direction)) +
                          geom_gene_arrow() +
