@@ -61,9 +61,10 @@ PewitR6 <- R6Class('PewitR6',
                          return(contig2)
                        })
 
-                       lst <- List(ap)
-                       ulst <- unlist(lst)
-                       return(split(ulst, as.character(ulst$org)))
+                       names(ap) <- group$gid
+                       lst <- SplitDataFrameList(ap)
+
+                       return(lst)
 
                      },
 
