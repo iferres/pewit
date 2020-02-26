@@ -4,9 +4,16 @@
 \alias{pangenome}
 \title{Compute the pangenome of a set of related organisms.}
 \usage{
-pangenome(gffs, hmm_pfam, dat_pfam, n_threads = 1,
-  minhash_split = FALSE, group_prefix = "group", sep = "___",
-  verbose = TRUE)
+pangenome(
+  gffs,
+  hmm_pfam,
+  dat_pfam,
+  n_threads = 1,
+  minhash_split = FALSE,
+  group_prefix = "group",
+  sep = "___",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{gffs}{A \code{vector} of gff3 file paths as retrieved by prokka (Seeman,
