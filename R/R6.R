@@ -61,7 +61,9 @@ PewitR6 <- R6Class('PewitR6',
                          return(contig2)
                        })
 
-                       return(List(ap))
+                       lst <- List(ap)
+                       ulst <- unlist(lst)
+                       return(split(ulst, ulst$org))
 
                      },
 
@@ -101,6 +103,7 @@ PewitR6 <- R6Class('PewitR6',
                        strand = strands,
                        gid = gids,
                        MoreArgs = list(orient = orient))
+                       names(mp) <- gids
 
                        df <- as.data.frame(unlist(List(mp)))
 
