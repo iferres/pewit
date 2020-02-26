@@ -105,7 +105,7 @@ PewitR6 <- R6Class('PewitR6',
                        MoreArgs = list(orient = orient))
 
                        df <- as.data.frame(unlist(List(mp)))
-                       df$geneName <- sub("", NA_character_, df$geneName)
+                       df$geneName <- sub("^$", NA_character_, df$geneName)
                        df$Pfam_Arch <- sub("^NOARCH_\\d+", NA_character_, df$Pfam_Arch)
                        df$direction <- ifelse(df$strand == "+", 1, -1)
 
