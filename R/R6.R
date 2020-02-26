@@ -90,7 +90,7 @@ PewitR6 <- R6Class('PewitR6',
 
                        df <- as.data.frame(self$gene_context(cluster, upstream, downstream, orient))
                        df$direction <- ifelse(df$strand == "+", 1, -1)
-                       ggplot2(df, aes(xmin = from, xmax = to, y = org, fill = cluster, forward = direction)) +
+                       ggplot(df, aes(xmin = from, xmax = to, y = org, fill = cluster, forward = direction)) +
                          geom_gene_arrow() +
                          theme_genes() +
                          theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
