@@ -16,6 +16,7 @@ PewitR6 <- R6Class('PewitR6',
                                            cluster_meta,
                                            core_level = 95,
                                            sep = '__',
+                                           sequences,
                                            verbose = TRUE){
 
                        super$initialize(data = data,
@@ -23,6 +24,7 @@ PewitR6 <- R6Class('PewitR6',
                                         cluster_meta,
                                         core_level = core_level,
                                         sep = sep,
+                                        sequences = sequences,
                                         verbose = verbose)
 
                      },
