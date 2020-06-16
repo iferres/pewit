@@ -114,7 +114,7 @@
 #'
 #' }
 #' @importFrom parallel mclapply
-#' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS
+#' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS List
 #' @importFrom Biostrings DNAStringSetList translate
 #' @importFrom reshape2 melt
 #' @importFrom utils capture.output
@@ -177,12 +177,16 @@ pangenome <- function(gffs,
   mcols(fastas) <- mcls
   names(fastas) <- paste(mcls$organism, names(fastas), sep = sep)
   # Translate
+  if (verbose){
+    message("Translating.")
+  }
   faas <- translate(fastas, if.fuzzy.codon = 'solve')
   mcols(faas)$organism <- mcols(fastas)$organism
 
   # Fast clustering of organism's proteome to detect where to activate heuristics
   proteome_clust <- clust_orgs(faas_orgs = split(faas, mcols(fastas)$organism),
-                               n_threads = n_threads)
+                               n_threads = n_threads,
+                               verbose = verbose)
 
 
   # Avoid redundant sequences
@@ -195,10 +199,13 @@ pangenome <- function(gffs,
   rm(tap)
 
   # Apply minhash algorithm to cluster highly similar sequences
-  mclapply(proteome_clust, function(x){
-    fast_clust(faas[which(mcols(faas)$organism %in% x)])
-  }, mc.cores = 1)
-  faas <- fast_clust(faas = faas, verbose = verbose)
+  if (verbose){
+    message("Clustering highly redundant proteins using minhash + LSH filters.")
+  }
+  clus <- mclapply(proteome_clust, function(x){
+    fast_clust(faas[which(mcols(faas)$organism %in% x)], verbose = FALSE)
+  }, mc.cores = n_threads)
+  faas <- unlist(List(clus), use.names = FALSE)
 
   lfs <- length(fastas)
   lfa <- length(faas)
