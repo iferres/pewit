@@ -178,16 +178,26 @@ pangenome <- function(gffs,
   names(fastas) <- paste(mcls$organism, names(fastas), sep = sep)
   # Translate
   faas <- translate(fastas, if.fuzzy.codon = 'solve')
+  mcols(faas)$organism <- mcols(fastas)$organism
+
+  # Fast clustering of organism's proteome to detect where to activate heuristics
+  proteome_clust <- clust_orgs(faas_orgs = split(faas, mcols(fastas)$organism),
+                               n_threads = n_threads)
+
+
   # Avoid redundant sequences
   aa_factor <- as.integer(factor(as.character(faas)))
   mcols(fastas)$aa_factor <- aa_factor
   faas <- unique(faas)
   tap <- tapply(names(fastas), aa_factor, c, simplify = FALSE)[unique(aa_factor)]
   attr(tap, 'dim') <- NULL
-  mcols(faas) <- List(tap)
+  mcols(faas)$X <- List(tap)
   rm(tap)
 
   # Apply minhash algorithm to cluster highly similar sequences
+  mclapply(proteome_clust, function(x){
+    fast_clust(faas[which(mcols(faas)$organism %in% x)])
+  }, mc.cores = 1)
   faas <- fast_clust(faas = faas, verbose = verbose)
 
   lfs <- length(fastas)
