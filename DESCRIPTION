@@ -38,4 +38,4 @@ Description: This package provides a function for reconstructing a bacterial
   orthologue sequences from paraogues.
 License: GPL-3 | file LICENSE
 LazyData: TRUE
-RoxygenNote: 7.0.2.9000
+RoxygenNote: 7.1.0
