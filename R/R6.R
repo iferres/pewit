@@ -110,7 +110,7 @@ PewitR6 <- R6Class('PewitR6',
                        df$Pfam_Arch <- sub("^NOARCH_\\d+", NA_character_, df$Pfam_Arch)
                        df$direction <- ifelse(df$strand == "+", 1, -1)
 
-                       ggplot(df, aes(xmin = from, xmax = to, y = org, fill = df[[fill]], forward = direction)) +
+                       ggplot(df, aes(xmin = from, xmax = to, y = org, fill = .data[[fill]], forward = direction)) +
                          geom_gene_arrow() +
                          theme_genes() +
                          guides(fill = guide_legend(title = fill))
