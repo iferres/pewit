@@ -14,15 +14,13 @@ Imports:
   parallel,
   ape,
   phangorn,
+  digest,
   reshape2,
   BiocGenerics,
   S4Vectors,
   Biostrings,
   textreuse, 
   Rcpp,
-  BiocGenerics,
-  S4Vectors,
-  Biostrings,
   R6,
   ggplot2,
   gggenes
@@ -39,3 +37,4 @@ Description: This package provides a function for reconstructing a bacterial
 License: GPL-3 | file LICENSE
 LazyData: TRUE
 RoxygenNote: 7.1.0
+Roxygen: list(r6 = TRUE)
