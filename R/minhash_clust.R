@@ -25,6 +25,7 @@ fast_clust <- function(faas, verbose = TRUE){
 #' @importFrom digest digest
 #' @importFrom reshape2 melt
 #' @importFrom textreuse minhash_generator
+#' @importFrom stats setNames
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
 
   minhash <- minhash_generator(n = n)
