@@ -22,7 +22,6 @@ fast_clust <- function(faas, verbose = TRUE){
 
 
 #' @importFrom parallel splitIndices
-#' @importFrom digest digest
 #' @importFrom reshape2 melt
 #' @importFrom textreuse minhash_generator
 #' @importFrom stats setNames
@@ -38,12 +37,17 @@ minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TR
   }), hash = TRUE)
 
   bix <- splitIndices(n, 2L)
+  bix1 <- .subset2(bix, 1)
+  bix2 <- .subset2(bix, 2)
 
   bands <- lapply(lp, function(x) {
-    vapply(bix, function(y){
-      digest(.subset(x, y))
-    }, FUN.VALUE = NA_character_)
+    c(
+      paste0(.subset(x, bix1), collapse = ''),
+      paste0(.subset(x, bix2), collapse = '')
+    )
   })
+
+
 
   # bands <- do.call(rbind, bands)
   ml <- melt(do.call(rbind, bands))
