@@ -284,7 +284,7 @@ pangenome <- function(gffs,
 
   if (verbose) {
   message('FINISH!
-Returning an object of class "PgR6MS" (pagoo package, R6 class system)')
+Returning an object of class "PewitR6" (inherit "PgR6MS" class, from pagoo package; R6 class system)')
     message(capture.output(time_en - time_st))
     }
   return(pagoo_object)
