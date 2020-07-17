@@ -57,9 +57,9 @@ clusterOrphans <- function(faas, n_threads, sep = '___', verbose = TRUE) {
                        "--cpu 0 --mx BLOSUM45",
                        temps[x], tmp2))
       file.remove(temps[x])
-      file.remove(tmp2)
       outphmmer(pouti = phmm_tmp)
     }, mc.cores = n_threads)
+    file.remove(tmp2)
 
     abc <- do.call(rbind, abc)
 
