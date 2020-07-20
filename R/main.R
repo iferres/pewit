@@ -215,7 +215,7 @@ pangenome <- function(gffs,
     message(mssg)
   }
 
-  if (!any(sapply(list(hmm_pfam, dat_pfam), missing))){
+  if (! (missing(hmm_pfam) | missing(dat_pfam)) ){
 
     if (verbose) message('Searching Pfam domains, resolving overlap, and clustering.')
     faas <- domainSearch(faas = faas,
