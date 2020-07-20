@@ -140,7 +140,7 @@ clust_orgs <- function(faas_orgs, n_threads = 1, k = 4L, n = 512L, h = 0.3, verb
     ln <- ln[-length(ln)]
     krm <- unlist(lapply(cumsum(ln), function(y) seq(y - (k - 2L) , y, 1)))
     cr <- paste(as.character(x), collapse = '')
-    km <- compute_kmers(cr, k)[-krm]
+    km <- unique(compute_kmers(cr, k)[-krm])
     minhash(km)
   }, mc.preschedule = TRUE, mc.cores = n_threads)
 
