@@ -1,3 +1,7 @@
+  <!-- badges: start -->
+  [![R build status](https://github.com/iferres/pewit/workflows/R-CMD-check/badge.svg)](https://github.com/iferres/pewit/actions)
+  <!-- badges: end -->
+
 # Pewit: Pangenome Estimation - Walks Inside Taxonomy.
 This is a beta version.
 
