@@ -114,7 +114,7 @@
 #'
 #' }
 #' @importFrom parallel mclapply
-#' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS
+#' @importFrom S4Vectors mcols mcols<- DataFrame List elementNROWS List
 #' @importFrom Biostrings DNAStringSetList translate
 #' @importFrom reshape2 melt
 #' @importFrom utils capture.output
@@ -177,18 +177,35 @@ pangenome <- function(gffs,
   mcols(fastas) <- mcls
   names(fastas) <- paste(mcls$organism, names(fastas), sep = sep)
   # Translate
+  if (verbose){
+    message("Translating.")
+  }
   faas <- translate(fastas, if.fuzzy.codon = 'solve')
+  mcols(faas)$organism <- mcols(fastas)$organism
+
+  # Fast clustering of organism's proteome to detect where to activate heuristics
+  proteome_clust <- clust_orgs(faas_orgs = split(faas, mcols(fastas)$organism),
+                               n_threads = n_threads,
+                               verbose = verbose)
+
+
   # Avoid redundant sequences
   aa_factor <- as.integer(factor(as.character(faas)))
   mcols(fastas)$aa_factor <- aa_factor
   faas <- unique(faas)
   tap <- tapply(names(fastas), aa_factor, c, simplify = FALSE)[unique(aa_factor)]
   attr(tap, 'dim') <- NULL
-  mcols(faas) <- List(tap)
+  mcols(faas)$X <- List(tap)
   rm(tap)
 
   # Apply minhash algorithm to cluster highly similar sequences
-  faas <- fast_clust(faas = faas, verbose = verbose)
+  if (verbose){
+    message("Clustering highly redundant proteins using minhash + LSH filters.")
+  }
+  clus <- mclapply(proteome_clust, function(x){
+    fast_clust(faas[which(mcols(faas)$organism %in% x)], verbose = FALSE)
+  }, mc.cores = n_threads)
+  faas <- unlist(List(clus), use.names = FALSE)
 
   lfs <- length(fastas)
   lfa <- length(faas)
@@ -284,7 +301,7 @@ pangenome <- function(gffs,
 
   if (verbose) {
   message('FINISH!
-Returning an object of class "PgR6MS" (pagoo package, R6 class system)')
+Returning an object of class "PewitR6" (inherit "PgR6MS" class, from pagoo package; R6 class system)')
     message(capture.output(time_en - time_st))
     }
   return(pagoo_object)

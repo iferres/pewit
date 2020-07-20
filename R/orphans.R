@@ -56,8 +56,10 @@ clusterOrphans <- function(faas, n_threads, sep = '___', verbose = TRUE) {
                        paste("--tblout", phmm_tmp),
                        "--cpu 0 --mx BLOSUM45",
                        temps[x], tmp2))
+      file.remove(temps[x])
       outphmmer(pouti = phmm_tmp)
     }, mc.cores = n_threads)
+    file.remove(tmp2)
 
     abc <- do.call(rbind, abc)
 
@@ -159,5 +161,6 @@ runMCL <- function(abc, neg.log10 = TRUE, infl = 6) {
   system(paste0("mcl ", abc, " ", arg, " -q x -o ", tmpmcl))
   rl <- readLines(tmpmcl)
   file.remove(tmpmcl)
+  file.remove(abc)
   rl
 }

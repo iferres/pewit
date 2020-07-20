@@ -14,7 +14,7 @@ fast_clust <- function(faas, verbose = TRUE){
   rm(mminclu)
   names(fastclu) <- NULL
   reps <- sapply(fastclu, '[', 1) # Representative
-  mcols(faas[reps])[[1]] <- List(fastclu) #
+  mcols(faas[reps])[["X"]] <- List(fastclu) #
   faas <- faas[reps]
   return(faas)
 }
@@ -22,9 +22,9 @@ fast_clust <- function(faas, verbose = TRUE){
 
 
 #' @importFrom parallel splitIndices
-#' @importFrom digest digest
 #' @importFrom reshape2 melt
 #' @importFrom textreuse minhash_generator
+#' @importFrom stats setNames
 minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TRUE){
 
   minhash <- minhash_generator(n = n)
@@ -37,12 +37,17 @@ minhash_clust_k4 <- function(faas, n = 16L, cutoff = (n-1L)/(n+1L), verbose = TR
   }), hash = TRUE)
 
   bix <- splitIndices(n, 2L)
+  bix1 <- .subset2(bix, 1)
+  bix2 <- .subset2(bix, 2)
 
   bands <- lapply(lp, function(x) {
-    vapply(bix, function(y){
-      digest(.subset(x, y))
-    }, FUN.VALUE = NA_character_)
+    c(
+      paste0(.subset(x, bix1), collapse = ''),
+      paste0(.subset(x, bix2), collapse = '')
+    )
   })
+
+
 
   # bands <- do.call(rbind, bands)
   ml <- melt(do.call(rbind, bands))
@@ -117,3 +122,69 @@ jaccard_similarity <- function(a, b){
 # Vectorizacion
 jaccard_similarity_V <- Vectorize(jaccard_similarity, 'b', SIMPLIFY = TRUE)
 
+
+
+#' @importFrom parallel mclapply
+#' @importFrom textreuse minhash_generator
+#' @importFrom S4Vectors elementNROWS
+#' @importFrom stats hclust cutree
+#' @importFrom utils capture.output
+clust_orgs <- function(faas_orgs, n_threads = 1, k = 4L, n = 512L, h = 0.3, verbose = TRUE){
+
+  minhash <- minhash_generator(n = n)
+
+  if (verbose) message("Computing whole proteome minhashes")
+
+  lp <- mclapply(faas_orgs, function(x){
+    ln <- elementNROWS(x)
+    ln <- ln[-length(ln)]
+    krm <- unlist(lapply(cumsum(ln), function(y) seq(y - (k - 2L) , y, 1)))
+    cr <- paste(as.character(x), collapse = '')
+    km <- compute_kmers(cr, k)[-krm]
+    minhash(km)
+  }, mc.preschedule = TRUE, mc.cores = n_threads)
+
+  if (verbose) message("Computing whole proteome distance estimates")
+  djaccard <- dist_jaccard(lp)
+
+  co <- capture.output(summary(djaccard))
+  if (verbose){
+    message(co[1])
+    message(co[2])
+  }
+
+  hc <- hclust(djaccard, method = "ward.D2")
+  ct <- cutree(hc, h = h)
+  spl <- split(names(ct), ct)
+  if (verbose){
+    lno <- length(faas_orgs)
+    lnc <- length(spl)
+    if (lnc==1){
+      message("Great! All proteomes are closely related (estimated above 70% 4-mer shared)")
+    }else{
+      mssg <- paste("Found", lnc, "clusters (estimated above 70% 4-mer shared) from", lno, "organisms.")
+      message(mssg)
+    }
+  }
+
+  return(spl)
+}
+
+dist_jaccard <- function(x){
+  n <- length(x)
+  d <- vector('integer', length = (n * n/2) - n/2)
+  y <- 1L
+  for (i in 1:(n-1)){
+    for (j in (i+1):n){
+      d[y] <- jaccard_similarity(x[[i]], x[[j]])
+      y <- y + 1L
+    }
+  }
+  d <- 1 - d
+  attr(d, 'class') <- 'dist'
+  attr(d, 'Labels') <- names(x)
+  attr(d, 'Size') <- n
+  attr(d, 'Diag') <- FALSE
+  attr(d, 'Upper') <- FALSE
+  d
+}
