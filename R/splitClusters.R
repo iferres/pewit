@@ -87,7 +87,13 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
         tree <- try(midpoint(bionjs(d)))
         if (class(tree)=='try-error'){
-          tree <- midpoint(bionj(d))
+          tree <- try(midpoint(bionj(d)))
+        }
+
+        # If unable to resolve tree, just split by factors:
+        if (class(tree)=='try-error'){
+          df <- data.frame(Gene = names(x2), NODE = paste0("NODE_", fc), row.names = NULL)
+          return(df)
         }
 
         #Adds duplicated sequences to tips (if any), except recent paralogues
