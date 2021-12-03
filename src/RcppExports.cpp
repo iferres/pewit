@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // compute_kmers
 CharacterVector compute_kmers(const std::string seq, const int k);
 RcppExport SEXP _pewit_compute_kmers(SEXP seqSEXP, SEXP kSEXP) {
