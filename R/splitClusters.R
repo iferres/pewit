@@ -71,7 +71,6 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
       if (anydup){
         xl <- split(names(x), fc)
-        x2 <- x
         x <- x[sapply(xl, '[', 1)]
       }
 
@@ -92,7 +91,7 @@ splitCluster <- function(x, sep, minhash_split= FALSE, verbose = TRUE){
 
         # If unable to resolve tree, just split by factors:
         if (class(tree)=='try-error'){
-          df <- data.frame(Gene = names(x2), NODE = paste0("NODE_", fc), row.names = NULL)
+          df <- data.frame(Gene = names(x), NODE = paste0("NODE_", fc), row.names = NULL)
           return(df)
         }
 
