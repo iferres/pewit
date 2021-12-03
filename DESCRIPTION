@@ -1,7 +1,7 @@
 Package: pewit
 Type: Package
 Title: Microbial Pan-Genomics in R
-Version: 1.3.0.9006
+Version: 1.3.2
 Authors@R: c(
     person("Ignacio", "Ferres", , "iferres@pasteur.edu.uy", role =  c("aut", "cre"), 
       comment = c(ORCID = "0000-0003-0910-6568")
@@ -31,9 +31,8 @@ Imports:
   Rcpp,
   R6,
   ggplot2,
-  gggenes
-Remotes:
-  github::iferres/pagoo
+  gggenes,
+  pagoo
 Suggests:
   testthat,
   covr
@@ -45,5 +44,5 @@ Description: This package provides a function for reconstructing a bacterial
   orthologue sequences from paralogues.
 License: GPL-3 | file LICENSE
 LazyData: TRUE
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Roxygen: list(r6 = TRUE)
