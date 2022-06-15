@@ -1,5 +1,5 @@
   <!-- badges: start -->
-  [![R build status](https://github.com/iferres/pewit/workflows/R-CMD-check/badge.svg)](https://github.com/iferres/pewit/actions)
+  [![R-CMD-check](https://github.com/iferres/pewit/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/iferres/pewit/actions/workflows/R-CMD-check.yaml)
   [![codecov](https://codecov.io/gh/iferres/pewit/branch/master/graph/badge.svg)](https://codecov.io/gh/iferres/pewit)
   <!-- badges: end -->
 
