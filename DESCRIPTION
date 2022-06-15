@@ -31,8 +31,7 @@ Imports:
   Rcpp,
   R6,
   ggplot2,
-  gggenes,
-  pagoo
+  gggenes
 Suggests:
   testthat,
   covr
@@ -44,5 +43,5 @@ Description: This package provides a function for reconstructing a bacterial
   orthologue sequences from paralogues.
 License: GPL-3 | file LICENSE
 LazyData: TRUE
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Roxygen: list(r6 = TRUE)

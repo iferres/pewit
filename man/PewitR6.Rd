@@ -14,39 +14,39 @@ Pewit R6 Class
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{PewitR6$new()}}
-\item \href{#method-gene_context}{\code{PewitR6$gene_context()}}
-\item \href{#method-gg_gene_context}{\code{PewitR6$gg_gene_context()}}
-\item \href{#method-clone}{\code{PewitR6$clone()}}
+\item \href{#method-PewitR6-new}{\code{PewitR6$new()}}
+\item \href{#method-PewitR6-gene_context}{\code{PewitR6$gene_context()}}
+\item \href{#method-PewitR6-gg_gene_context}{\code{PewitR6$gg_gene_context()}}
+\item \href{#method-PewitR6-clone}{\code{PewitR6$clone()}}
 }
 }
-\if{html}{
-\out{<details ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="add_metadata">}\href{../../pagoo/html/PgR6.html#method-add_metadata}{\code{pagoo::PgR6$add_metadata()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="drop">}\href{../../pagoo/html/PgR6.html#method-drop}{\code{pagoo::PgR6$drop()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="recover">}\href{../../pagoo/html/PgR6.html#method-recover}{\code{pagoo::PgR6$recover()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="save_pangenomeRDS">}\href{../../pagoo/html/PgR6.html#method-save_pangenomeRDS}{\code{pagoo::PgR6$save_pangenomeRDS()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="write_pangenome">}\href{../../pagoo/html/PgR6.html#method-write_pangenome}{\code{pagoo::PgR6$write_pangenome()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="cg_exp_decay_fit">}\href{../../pagoo/html/PgR6M.html#method-cg_exp_decay_fit}{\code{pagoo::PgR6M$cg_exp_decay_fit()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="dist">}\href{../../pagoo/html/PgR6M.html#method-dist}{\code{pagoo::PgR6M$dist()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_barplot">}\href{../../pagoo/html/PgR6M.html#method-gg_barplot}{\code{pagoo::PgR6M$gg_barplot()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_binmap">}\href{../../pagoo/html/PgR6M.html#method-gg_binmap}{\code{pagoo::PgR6M$gg_binmap()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_curves">}\href{../../pagoo/html/PgR6M.html#method-gg_curves}{\code{pagoo::PgR6M$gg_curves()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_dist">}\href{../../pagoo/html/PgR6M.html#method-gg_dist}{\code{pagoo::PgR6M$gg_dist()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_pca">}\href{../../pagoo/html/PgR6M.html#method-gg_pca}{\code{pagoo::PgR6M$gg_pca()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_pie">}\href{../../pagoo/html/PgR6M.html#method-gg_pie}{\code{pagoo::PgR6M$gg_pie()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="pan_pca">}\href{../../pagoo/html/PgR6M.html#method-pan_pca}{\code{pagoo::PgR6M$pan_pca()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="pg_power_law_fit">}\href{../../pagoo/html/PgR6M.html#method-pg_power_law_fit}{\code{pagoo::PgR6M$pg_power_law_fit()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="rarefact">}\href{../../pagoo/html/PgR6M.html#method-rarefact}{\code{pagoo::PgR6M$rarefact()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="runShinyApp">}\href{../../pagoo/html/PgR6M.html#method-runShinyApp}{\code{pagoo::PgR6M$runShinyApp()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="pagoo" data-topic="PgR6MS" data-id="core_seqs_4_phylo">}\href{../../pagoo/html/PgR6MS.html#method-core_seqs_4_phylo}{\code{pagoo::PgR6MS$core_seqs_4_phylo()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="add_metadata"><a href='../../pagoo/html/PgR6.html#method-PgR6-add_metadata'><code>pagoo::PgR6$add_metadata()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="drop"><a href='../../pagoo/html/PgR6.html#method-PgR6-drop'><code>pagoo::PgR6$drop()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="recover"><a href='../../pagoo/html/PgR6.html#method-PgR6-recover'><code>pagoo::PgR6$recover()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="save_pangenomeRDS"><a href='../../pagoo/html/PgR6.html#method-PgR6-save_pangenomeRDS'><code>pagoo::PgR6$save_pangenomeRDS()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6" data-id="write_pangenome"><a href='../../pagoo/html/PgR6.html#method-PgR6-write_pangenome'><code>pagoo::PgR6$write_pangenome()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="cg_exp_decay_fit"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-cg_exp_decay_fit'><code>pagoo::PgR6M$cg_exp_decay_fit()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="dist"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-dist'><code>pagoo::PgR6M$dist()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_barplot"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_barplot'><code>pagoo::PgR6M$gg_barplot()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_binmap"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_binmap'><code>pagoo::PgR6M$gg_binmap()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_curves"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_curves'><code>pagoo::PgR6M$gg_curves()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_dist"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_dist'><code>pagoo::PgR6M$gg_dist()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_pca"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_pca'><code>pagoo::PgR6M$gg_pca()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="gg_pie"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-gg_pie'><code>pagoo::PgR6M$gg_pie()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="pan_pca"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-pan_pca'><code>pagoo::PgR6M$pan_pca()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="pg_power_law_fit"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-pg_power_law_fit'><code>pagoo::PgR6M$pg_power_law_fit()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="rarefact"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-rarefact'><code>pagoo::PgR6M$rarefact()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6M" data-id="runShinyApp"><a href='../../pagoo/html/PgR6M.html#method-PgR6M-runShinyApp'><code>pagoo::PgR6M$runShinyApp()</code></a></li>
+<li><span class="pkg-link" data-pkg="pagoo" data-topic="PgR6MS" data-id="core_seqs_4_phylo"><a href='../../pagoo/html/PgR6MS.html#method-PgR6MS-core_seqs_4_phylo'><code>pagoo::PgR6MS$core_seqs_4_phylo()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-PewitR6-new"></a>}}
+\if{latex}{\out{\hypertarget{method-PewitR6-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PewitR6$new(
@@ -62,8 +62,8 @@ Pewit R6 Class
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-gene_context"></a>}}
-\if{latex}{\out{\hypertarget{method-gene_context}{}}}
+\if{html}{\out{<a id="method-PewitR6-gene_context"></a>}}
+\if{latex}{\out{\hypertarget{method-PewitR6-gene_context}{}}}
 \subsection{Method \code{gene_context()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PewitR6$gene_context(cluster, upstream = 2, downstream = 2)}\if{html}{\out{</div>}}
@@ -71,8 +71,8 @@ Pewit R6 Class
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-gg_gene_context"></a>}}
-\if{latex}{\out{\hypertarget{method-gg_gene_context}{}}}
+\if{html}{\out{<a id="method-PewitR6-gg_gene_context"></a>}}
+\if{latex}{\out{\hypertarget{method-PewitR6-gg_gene_context}{}}}
 \subsection{Method \code{gg_gene_context()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PewitR6$gg_gene_context(
@@ -86,8 +86,8 @@ Pewit R6 Class
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-PewitR6-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-PewitR6-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
